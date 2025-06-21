@@ -1,7 +1,19 @@
 #include <iostream>
+#include <cstdlib>
+#include <stdexcept>
+
+#include "Application.h"
 
 int main() {
-    std::cout << "Hello World!" << std::endl;
+    Application app = Application();
+    try {
+        app.Run();
+    }
+    catch (const std::exception& e) {
+        std::cerr << e.what() << "\n";
+        
+        return EXIT_FAILURE;
+    }
     
-    return 0;
+    return EXIT_SUCCESS;
 }

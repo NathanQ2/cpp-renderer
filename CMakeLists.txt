@@ -7,8 +7,10 @@ find_package(Vulkan REQUIRED)
 find_package(glfw3 REQUIRED)
 find_package(glm REQUIRED)
 
-file(GLOB_RECURSE sources src/**.cpp src/**.h)
+add_subdirectory(vendor/imgui)
 
-add_executable(cpp_renderer ${sources})
+file(GLOB SOURCES src/**.cpp src/**.h)
 
-target_link_libraries(${PROJECT_NAME} glfw ${GLFW_LIBRARIES} Vulkan::Vulkan glm::glm)
+add_executable(cpp_renderer ${SOURCES})
+
+target_link_libraries(${PROJECT_NAME} glfw ${GLFW_LIBRARIES} Vulkan::Vulkan glm::glm imgui)
