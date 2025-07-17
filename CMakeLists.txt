@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.31)
-project(cpp_renderer)
+project(PalmTree)
 
 set(CMAKE_CXX_STANDARD 23)
 
@@ -11,6 +11,6 @@ add_subdirectory(vendor/imgui)
 
 file(GLOB SOURCES src/**.cpp src/**.h)
 
-add_executable(cpp_renderer ${SOURCES})
+add_executable(PalmTree ${SOURCES})
 
 target_link_libraries(${PROJECT_NAME} glfw ${GLFW_LIBRARIES} Vulkan::Vulkan glm::glm imgui)

@@ -5,7 +5,7 @@
 #include "Application.h"
 
 int main() {
-    Application app = Application();
+    PalmTree::Application app = PalmTree::Application();
     try {
         app.Run();
     }
