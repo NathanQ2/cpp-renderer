@@ -2,6 +2,10 @@
 
 #include "Pipeline.h"
 #include "Window.h"
+#include "SwapChain.h"
+
+#include <memory>
+#include <vector>
 
 namespace PalmTree {
     class Application {
@@ -9,19 +13,25 @@ namespace PalmTree {
         Application();
         ~Application();
 
+        Application(const Application&) = delete;
+        Application& operator=(const Application) = delete;
+
         void Run();
     private:
+        void CreatePipelineLayout();
+        void CreatePipeline();
+        void CreateCommandBuffers();
+        void DrawFrame();
+        
         const int m_Width = 1280;
         const int m_Height = 720;
         const std::string m_Title = "Test Window";
     
         Window m_Window = Window(m_Width, m_Height, m_Title);
-        PalmTreeDevice m_Device= PalmTreeDevice(m_Window);
-        Pipeline m_Pipeline = Pipeline(
-            m_Device,
-            "../shaders/simpleShader.vert.spv",
-            "../shaders/simpleShader.frag.spv",
-            Pipeline::DefaultPipelineConfig(m_Width, m_Height)
-        );
+        PalmTreeDevice m_Device = PalmTreeDevice(m_Window);
+        SwapChain m_SwapChain = SwapChain(m_Window, m_Device);
+        std::unique_ptr<Pipeline> m_Pipeline;
+        VkPipelineLayout m_PipelineLayout;
+        std::vector<VkCommandBuffer> m_CommandBuffers;
     };
 }

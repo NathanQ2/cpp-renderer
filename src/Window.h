@@ -17,6 +17,10 @@ namespace PalmTree {
         void Run();
 
         void CreateWindowSurface(VkInstance instance, VkSurfaceKHR* surface);
+
+        VkExtent2D GetExtent() { return { static_cast<uint32_t>(m_Width), static_cast<uint32_t>(m_Height) }; }
+        [[nodiscard]] int GetWidth() const { return m_Width; }
+        [[nodiscard]] int GetHeight() const { return m_Height; }
     private:
         bool m_Running = false;
 

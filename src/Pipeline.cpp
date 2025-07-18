@@ -37,11 +37,6 @@ namespace PalmTree {
         config.scissor.offset = {0, 0};
         config.scissor.extent = {width, height};
 
-        config.viewportInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-        config.viewportInfo.viewportCount = 1;
-        config.viewportInfo.pViewports = &config.viewport;
-        config.viewportInfo.scissorCount = 1;
-        config.viewportInfo.pScissors = &config.scissor;
 
         config.rasterizationInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
         config.rasterizationInfo.depthClampEnable = VK_FALSE;
@@ -133,7 +128,7 @@ namespace PalmTree {
         
         shaderStages[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
         shaderStages[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-        shaderStages[1].module = m_VertShaderModule;
+        shaderStages[1].module = m_FragShaderModule;
         shaderStages[1].pName = "main";
         shaderStages[1].flags = 0;
         shaderStages[1].pNext = nullptr;
@@ -146,17 +141,26 @@ namespace PalmTree {
         vertexInputInfo.pVertexAttributeDescriptions = nullptr;
         vertexInputInfo.pVertexBindingDescriptions = nullptr;
 
+        VkPipelineViewportStateCreateInfo viewportInfo{};
+        viewportInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+        viewportInfo.viewportCount = 1;
+        viewportInfo.pViewports = &config.viewport;
+        viewportInfo.scissorCount = 1;
+        viewportInfo.pScissors = &config.scissor;
+
         VkGraphicsPipelineCreateInfo pipelineInfo{};
         pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
         pipelineInfo.stageCount = 2;
         pipelineInfo.pStages = shaderStages;
         pipelineInfo.pVertexInputState = &vertexInputInfo;
         pipelineInfo.pInputAssemblyState = &config.inputAssemblyInfo;
-        pipelineInfo.pViewportState = &config.viewportInfo;
+        pipelineInfo.pViewportState = &viewportInfo;
         pipelineInfo.pRasterizationState = &config.rasterizationInfo;
         pipelineInfo.pMultisampleState = &config.multisampleInfo;
         pipelineInfo.pColorBlendState = &config.colorBlendInfo;
         pipelineInfo.pDynamicState = nullptr;
+        pipelineInfo.pDepthStencilState = &config.depthStencilInfo;
+
 
         pipelineInfo.layout = config.pipelineLayout;
         pipelineInfo.renderPass = config.renderPass;
