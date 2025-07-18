@@ -6,7 +6,20 @@
 #include "Device.h"
 
 namespace PalmTree {
-    struct PipelineConfig {};
+    struct PipelineConfig {
+        VkViewport viewport;
+        VkRect2D scissor;
+        VkPipelineViewportStateCreateInfo viewportInfo;
+        VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo;
+        VkPipelineRasterizationStateCreateInfo rasterizationInfo;
+        VkPipelineMultisampleStateCreateInfo multisampleInfo;
+        VkPipelineColorBlendAttachmentState colorBlendAttachment;
+        VkPipelineColorBlendStateCreateInfo colorBlendInfo;
+        VkPipelineDepthStencilStateCreateInfo depthStencilInfo;
+        VkPipelineLayout pipelineLayout = nullptr;
+        VkRenderPass renderPass = nullptr;
+        uint32_t subpass = 0;
+    };
     
     class Pipeline {
     public:
@@ -17,7 +30,7 @@ namespace PalmTree {
             const PipelineConfig& info
         );
 
-        ~Pipeline() = default;
+        ~Pipeline();
 
         Pipeline(const Pipeline&) = delete;
         void operator=(const Pipeline) = delete;
