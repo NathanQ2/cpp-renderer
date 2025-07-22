@@ -106,7 +106,11 @@ void SwapChain::createSwapChain() {
   VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
   VkExtent2D extent = chooseSwapExtent(swapChainSupport.capabilities);
 
-  uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
+  std::cout << "Min Image Count: " << swapChainSupport.capabilities.minImageCount << std::endl;
+  std::cout << "Max Image Count: " << swapChainSupport.capabilities.maxImageCount << std::endl;
+  //uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
+  // Not sure if this is really 100% correct but it works so
+  uint32_t imageCount = MAX_FRAMES_IN_FLIGHT;
   if (swapChainSupport.capabilities.maxImageCount > 0 &&
       imageCount > swapChainSupport.capabilities.maxImageCount) {
     imageCount = swapChainSupport.capabilities.maxImageCount;

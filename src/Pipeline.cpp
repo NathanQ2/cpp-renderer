@@ -91,6 +91,10 @@ namespace PalmTree {
         return config;
     }
 
+    void Pipeline::Bind(VkCommandBuffer commandBuffer) {
+        vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_GraphicsPipeline);
+    }
+
     std::vector<char> Pipeline::ReadFile(const std::string& path) {
         std::ifstream file(path, std::ios::ate | std::ios::binary);
 

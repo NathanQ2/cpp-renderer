@@ -60,14 +60,14 @@ namespace PalmTree {
     
     }
 
-    void Window::Run()
-    {
-        m_Running = true;
-    
-        while (!glfwWindowShouldClose(m_WindowHandle)) {
-            glfwPollEvents();
-        }
-    }
+    // void Window::Run()
+    // {
+    //     m_Running = true;
+    // 
+    //     while (!glfwWindowShouldClose(m_WindowHandle)) {
+    //         glfwPollEvents();
+    //     }
+    // }
 
     void Window::CreateWindowSurface(VkInstance instance, VkSurfaceKHR* surface) {
         if (glfwCreateWindowSurface(instance, m_WindowHandle, nullptr, surface) != VK_SUCCESS) {

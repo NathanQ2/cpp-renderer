@@ -14,11 +14,15 @@ namespace PalmTree {
         Window &operator=(const Window&) = delete;
 
         void Init();
-        void Run();
+        //void Run();
+
+        [[nodiscard]] bool ShouldClose() const { return glfwWindowShouldClose(m_WindowHandle); }
 
         void CreateWindowSurface(VkInstance instance, VkSurfaceKHR* surface);
 
-        VkExtent2D GetExtent() { return { static_cast<uint32_t>(m_Width), static_cast<uint32_t>(m_Height) }; }
+        [[nodiscard]] VkExtent2D GetExtent() const {
+            return { static_cast<uint32_t>(m_Width), static_cast<uint32_t>(m_Height) };
+        }
         [[nodiscard]] int GetWidth() const { return m_Width; }
         [[nodiscard]] int GetHeight() const { return m_Height; }
     private:

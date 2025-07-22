@@ -35,6 +35,8 @@ namespace PalmTree {
         void operator=(const Pipeline) = delete;
 
         static PipelineConfig DefaultPipelineConfig(uint32_t width, uint32_t height);
+
+        void Bind(VkCommandBuffer commandBuffer);
     private:
         static std::vector<char> ReadFile(const std::string& path);
 
