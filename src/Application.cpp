@@ -29,9 +29,9 @@ namespace PalmTree {
 
     void Application::LoadModels() {
         std::vector<Model::Vertex> vertices {
-            {{0.0f, -0.5f}},
-            {{0.5, 0.5f}},
-            {{-0.5f, 0.5f}}
+            { { 0.0f, -0.5f }, { 1.0f, 0.0f, 0.0f } },
+            { { 0.5, 0.5f }, { 0.0f, 1.0f, 0.0f } },
+            { { -0.5f, 0.5f }, { 0.0f, 0.0f, 1.0f } }
         };
 
         m_Model = std::make_unique<Model>(m_Device, vertices);

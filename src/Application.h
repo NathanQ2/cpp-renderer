@@ -25,8 +25,8 @@ namespace PalmTree {
         void CreateCommandBuffers();
         void DrawFrame();
         
-        const int m_Width = 1280;
-        const int m_Height = 720;
+        const int m_Width = 800;
+        const int m_Height = 600;
         const std::string m_Title = "Test Window";
     
         Window m_Window = Window(m_Width, m_Height, m_Title);
