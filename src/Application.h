@@ -3,6 +3,7 @@
 #include "Pipeline.h"
 #include "Window.h"
 #include "SwapChain.h"
+#include "Model.h"
 
 #include <memory>
 #include <vector>
@@ -18,6 +19,7 @@ namespace PalmTree {
 
         void Run();
     private:
+        void LoadModels();
         void CreatePipelineLayout();
         void CreatePipeline();
         void CreateCommandBuffers();
@@ -33,5 +35,7 @@ namespace PalmTree {
         std::unique_ptr<Pipeline> m_Pipeline;
         VkPipelineLayout m_PipelineLayout;
         std::vector<VkCommandBuffer> m_CommandBuffers;
+
+        std::unique_ptr<Model> m_Model;
     };
 }
