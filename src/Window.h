@@ -25,11 +25,16 @@ namespace PalmTree {
         }
         [[nodiscard]] int GetWidth() const { return m_Width; }
         [[nodiscard]] int GetHeight() const { return m_Height; }
+        [[nodiscard]] bool WasWindowResized() const { return m_FrameBufferResized; }
+        void ResetWindowResizedFlag() { m_FrameBufferResized = false; }
     private:
+        static void FrameBufferResizeCallback(GLFWwindow* windowHandle, int width, int height);
+        
         bool m_Running = false;
 
-        const int m_Width; 
-        const int m_Height;
+        int m_Width; 
+        int m_Height;
+        bool m_FrameBufferResized = false;
         const std::string m_Title;
 
         GLFWwindow* m_WindowHandle = nullptr;

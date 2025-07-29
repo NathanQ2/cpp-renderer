@@ -40,8 +40,10 @@ namespace PalmTree {
         }
 
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+        glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
         m_WindowHandle = glfwCreateWindow(m_Width, m_Height, m_Title.c_str(), nullptr, nullptr);
+        glfwSetWindowUserPointer(m_WindowHandle, this);
+        glfwSetFramebufferSizeCallback(m_WindowHandle, FrameBufferResizeCallback);
 
         uint32_t extensionCount = 0;
         vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
@@ -73,5 +75,13 @@ namespace PalmTree {
         if (glfwCreateWindowSurface(instance, m_WindowHandle, nullptr, surface) != VK_SUCCESS) {
             throw std::runtime_error("Failed to create window surface!");
         }
+    }
+
+    void Window::FrameBufferResizeCallback(GLFWwindow* windowHandle, int width, int height) {
+        auto* window = reinterpret_cast<Window*>(glfwGetWindowUserPointer(windowHandle));
+        
+        window->m_FrameBufferResized = true;
+        window->m_Width = width,
+        window->m_Height = height;
     }
 }

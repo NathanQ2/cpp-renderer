@@ -3,6 +3,7 @@
 #include "Device.h"
 #include "Window.h"
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -18,8 +19,8 @@ public:
     cleanupSyncObjects();
   }
 
-  SwapChain(const SwapChain &) = delete;
-  void operator=(const SwapChain &) = delete;
+  SwapChain(const SwapChain&) = delete;
+  SwapChain& operator=(const SwapChain&) = delete;
 
   VkFramebuffer getFrameBuffer(int index) { return swapChainFramebuffers[index]; }
   VkRenderPass getRenderPass() { return renderPass; }
@@ -72,7 +73,7 @@ public:
   Window &window_;
   PalmTreeDevice &device_;
 
-  VkSwapchainKHR swapChain;
+  VkSwapchainKHR swapChain = VK_NULL_HANDLE;
 
   std::vector<VkSemaphore> imageAvailableSemaphores;
   std::vector<VkSemaphore> renderFinishedSemaphores;

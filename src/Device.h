@@ -37,9 +37,9 @@ namespace PalmTree {
 
       // Not copyable or movable
       PalmTreeDevice(const PalmTreeDevice &) = delete;
-      void operator=(const PalmTreeDevice &) = delete;
+      PalmTreeDevice& operator=(const PalmTreeDevice &) = delete;
       PalmTreeDevice(PalmTreeDevice &&) = delete;
-      PalmTreeDevice &operator=(PalmTreeDevice &&) = delete;
+      PalmTreeDevice& operator=(PalmTreeDevice &&) = delete;
 
       VkCommandPool getCommandPool() { return commandPool; }
       VkDevice device() { return device_; }
