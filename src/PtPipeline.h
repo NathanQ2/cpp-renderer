@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-#include "Device.h"
+#include "PtDevice.h"
 
 namespace PalmTree {
     struct PipelineConfig {
@@ -25,19 +25,19 @@ namespace PalmTree {
         uint32_t subpass = 0;
     };
     
-    class Pipeline {
+    class PtPipeline {
     public:
-        Pipeline(
-            PalmTreeDevice& device,
+        PtPipeline(
+            PtDevice& device,
             const std::string& vertPath,
             const std::string& fragPath,
             const PipelineConfig& info
         );
 
-        ~Pipeline();
+        ~PtPipeline();
 
-        Pipeline(const Pipeline&) = delete;
-        Pipeline& operator=(const Pipeline) = delete;
+        PtPipeline(const PtPipeline&) = delete;
+        PtPipeline& operator=(const PtPipeline) = delete;
 
         static void DefaultPipelineConfig(PipelineConfig& config);
 
@@ -49,7 +49,7 @@ namespace PalmTree {
 
         void CreateShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule);
 
-        PalmTreeDevice& m_Device;
+        PtDevice& m_Device;
         VkPipeline m_GraphicsPipeline;
         VkShaderModule m_VertShaderModule;
         VkShaderModule m_FragShaderModule;

@@ -1,6 +1,6 @@
-#include "Pipeline.h"
+#include "PtPipeline.h"
 
-#include "Model.h"
+#include "PtModel.h"
 
 #include <fstream>
 #include <iostream>
@@ -8,8 +8,8 @@
 #include <cassert>
 
 namespace PalmTree {
-    Pipeline::Pipeline(
-        PalmTreeDevice& device,
+    PtPipeline::PtPipeline(
+        PtDevice& device,
         const std::string& vertPath,
         const std::string& fragPath,
         const PipelineConfig& config
@@ -17,13 +17,13 @@ namespace PalmTree {
         CreateGraphicsPipeline(vertPath, fragPath, config);
     }
 
-    Pipeline::~Pipeline() {
+    PtPipeline::~PtPipeline() {
         vkDestroyShaderModule(m_Device.device(), m_VertShaderModule, nullptr);
         vkDestroyShaderModule(m_Device.device(), m_FragShaderModule, nullptr);
         vkDestroyPipeline(m_Device.device(), m_GraphicsPipeline, nullptr);
     }
 
-    void Pipeline::DefaultPipelineConfig(PipelineConfig& config) {
+    void PtPipeline::DefaultPipelineConfig(PipelineConfig& config) {
         config.inputAssemblyInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
         config.inputAssemblyInfo.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
         config.inputAssemblyInfo.primitiveRestartEnable = VK_FALSE;
@@ -91,11 +91,11 @@ namespace PalmTree {
         config.dynamicStateInfo.flags = 0;
     }
 
-    void Pipeline::Bind(VkCommandBuffer commandBuffer) {
+    void PtPipeline::Bind(VkCommandBuffer commandBuffer) {
         vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_GraphicsPipeline);
     }
 
-    std::vector<char> Pipeline::ReadFile(const std::string& path) {
+    std::vector<char> PtPipeline::ReadFile(const std::string& path) {
         std::ifstream file(path, std::ios::ate | std::ios::binary);
 
         if (!file.is_open()) {
@@ -111,7 +111,7 @@ namespace PalmTree {
         return buffer;
     }
 
-    void Pipeline::CreateGraphicsPipeline(const std::string& vertPath, const std::string& fragPath, const PipelineConfig& config) {
+    void PtPipeline::CreateGraphicsPipeline(const std::string& vertPath, const std::string& fragPath, const PipelineConfig& config) {
         assert(config.pipelineLayout != VK_NULL_HANDLE && "Cannot create graphics pipeline:: no pipelinelayout provided in config");
         assert(config.renderPass != VK_NULL_HANDLE && "Cannot create graphics pipeline:: no renderPass provided in config");
         
@@ -138,8 +138,8 @@ namespace PalmTree {
         shaderStages[1].pNext = nullptr;
         shaderStages[1].pSpecializationInfo = nullptr;
 
-        auto bindingDescriptions = Model::Vertex::getBindingDescriptions();
-        auto attributeDescriptions = Model::Vertex::getAttributeDescriptions();
+        auto bindingDescriptions = PtModel::Vertex::getBindingDescriptions();
+        auto attributeDescriptions = PtModel::Vertex::getAttributeDescriptions();
         VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
         vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
         vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
@@ -173,7 +173,7 @@ namespace PalmTree {
         }
     }
 
-    void Pipeline::CreateShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule) {
+    void PtPipeline::CreateShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule) {
         VkShaderModuleCreateInfo createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
         createInfo.codeSize = code.size();

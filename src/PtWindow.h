@@ -5,13 +5,13 @@
 #include <GLFW/glfw3.h>
 
 namespace PalmTree {
-    class Window {
+    class PtWindow {
     public:
-        Window(int width, int height, const std::string& title);
-        ~Window();
+        PtWindow(int width, int height, const std::string& title);
+        ~PtWindow();
 
-        Window(const Window&) = delete;
-        Window &operator=(const Window&) = delete;
+        PtWindow(const PtWindow&) = delete;
+        PtWindow &operator=(const PtWindow&) = delete;
 
         void Init();
         //void Run();

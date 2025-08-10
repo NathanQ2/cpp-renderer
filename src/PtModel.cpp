@@ -1,9 +1,9 @@
-#include "Model.h"
+#include "PtModel.h"
 
 #include <cassert>
 
 namespace PalmTree {
-    std::vector<VkVertexInputBindingDescription> Model::Vertex::getBindingDescriptions() {
+    std::vector<VkVertexInputBindingDescription> PtModel::Vertex::getBindingDescriptions() {
         std::vector<VkVertexInputBindingDescription> bindingDescriptions(1);
         bindingDescriptions[0].binding = 0;
         bindingDescriptions[0].stride = sizeof(Vertex);
@@ -12,7 +12,7 @@ namespace PalmTree {
         return bindingDescriptions;
     }
 
-    std::vector<VkVertexInputAttributeDescription> Model::Vertex::getAttributeDescriptions() {
+    std::vector<VkVertexInputAttributeDescription> PtModel::Vertex::getAttributeDescriptions() {
         std::vector<VkVertexInputAttributeDescription> attributeDescriptions(2);
         attributeDescriptions[0].binding = 0;
         attributeDescriptions[0].location = 0;
@@ -27,26 +27,26 @@ namespace PalmTree {
         return attributeDescriptions;
     }
 
-    Model::Model(PalmTreeDevice& device, const std::vector<Vertex>& vertices) : m_Device(device) {
+    PtModel::PtModel(PtDevice& device, const std::vector<Vertex>& vertices) : m_Device(device) {
         CreateVertexBuffers(vertices);
     }
 
-    Model::~Model() {
+    PtModel::~PtModel() {
         vkDestroyBuffer(m_Device.device(), m_VertexBuffer, nullptr);
         vkFreeMemory(m_Device.device(), m_VertexBufferMemory, nullptr);
     }
 
-    void Model::Bind(VkCommandBuffer commandBuffer) {
+    void PtModel::Bind(VkCommandBuffer commandBuffer) {
         VkBuffer buffers[] = { m_VertexBuffer };
         VkDeviceSize offsets[] = { 0 };
         vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers, offsets);
     }
 
-    void Model::Draw(VkCommandBuffer commandBuffer) {
+    void PtModel::Draw(VkCommandBuffer commandBuffer) {
         vkCmdDraw(commandBuffer, m_VertexCount, 1, 0, 0);
     }
 
-    void Model::CreateVertexBuffers(const std::vector<Vertex>& vertices) {
+    void PtModel::CreateVertexBuffers(const std::vector<Vertex>& vertices) {
         m_VertexCount = static_cast<uint32_t>(vertices.size());
         assert(m_VertexCount >= 3 && "Vertex count must be at least 3");
         

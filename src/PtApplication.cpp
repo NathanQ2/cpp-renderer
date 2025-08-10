@@ -1,4 +1,4 @@
-#include "Application.h"
+#include "PtApplication.h"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -13,20 +13,18 @@ namespace PalmTree {
         alignas(16) glm::vec3 color;
     };
     
-    Application::Application()  {
+    PtApplication::PtApplication()  {
         LoadModels();
         CreatePipelineLayout();
         RecreateSwapChain();
         CreateCommandBuffers();
     }
 
-    Application::~Application() {
+    PtApplication::~PtApplication() {
         vkDestroyPipelineLayout(m_Device.device(), m_PipelineLayout, nullptr);
     }
 
-    void Application::Run() {
-        //m_Window.Run();
-
+    void PtApplication::Run() {
         while (!m_Window.ShouldClose()) {
             glfwPollEvents();
             
@@ -36,17 +34,17 @@ namespace PalmTree {
         vkDeviceWaitIdle(m_Device.device());
     }
 
-    void Application::LoadModels() {
-        std::vector<Model::Vertex> vertices {
-                    { { 0.0f, -0.5f }, { 1.0f, 0.0f, 0.0f } },
-                    { { 0.5, 0.5f }, { 0.0f, 1.0f, 0.0f } },
-                    { { -0.5f, 0.5f }, { 0.0f, 0.0f, 1.0f } }
+    void PtApplication::LoadModels() {
+        std::vector<PtModel::Vertex> vertices {
+            { { 0.0f, -0.5f }, { 1.0f, 0.0f, 0.0f } },
+            { { 0.5, 0.5f }, { 0.0f, 1.0f, 0.0f } },
+            { { -0.5f, 0.5f }, { 0.0f, 0.0f, 1.0f } }
         };
 
-        m_Model = std::make_unique<Model>(m_Device, vertices);
+        m_Model = std::make_unique<PtModel>(m_Device, vertices);
     }
 
-    void Application::CreatePipelineLayout() {
+    void PtApplication::CreatePipelineLayout() {
         VkPushConstantRange pushConstantRange{};
         pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
         pushConstantRange.offset = 0;
@@ -64,15 +62,15 @@ namespace PalmTree {
         }
     }
 
-    void Application::CreatePipeline() {
+    void PtApplication::CreatePipeline() {
         assert(m_SwapChain != nullptr && "Cannot create pipeline before swap chain!");
         assert(m_PipelineLayout != nullptr && "Cannot create pipeline before pipeline layout!");
         PipelineConfig pipelineConfig{};
-        Pipeline::DefaultPipelineConfig(pipelineConfig);
+        PtPipeline::DefaultPipelineConfig(pipelineConfig);
 
         pipelineConfig.renderPass = m_SwapChain->getRenderPass();
         pipelineConfig.pipelineLayout = m_PipelineLayout;
-        m_Pipeline = std::make_unique<Pipeline>(
+        m_Pipeline = std::make_unique<PtPipeline>(
             m_Device,
             "simpleShader.vert.spv",
             "simpleShader.frag.spv",
@@ -80,7 +78,7 @@ namespace PalmTree {
         );
     }
 
-    void Application::CreateCommandBuffers() {
+    void PtApplication::CreateCommandBuffers() {
         m_CommandBuffers.resize(m_SwapChain->imageCount());
 
         VkCommandBufferAllocateInfo allocInfo{};
@@ -94,8 +92,7 @@ namespace PalmTree {
         }
     }
 
-    void Application::FreeCommandBuffers() {
-        
+    void PtApplication::FreeCommandBuffers() {
         vkFreeCommandBuffers(
             m_Device.device(),
             m_Device.getCommandPool(),
@@ -106,7 +103,7 @@ namespace PalmTree {
         m_CommandBuffers.clear();
     }
 
-    void Application::DrawFrame() {
+    void PtApplication::DrawFrame() {
         uint32_t imageIndex;
         auto result = m_SwapChain->acquireNextImage(&imageIndex);
 
@@ -135,7 +132,7 @@ namespace PalmTree {
         }
     }
 
-    void Application::RecreateSwapChain() {
+    void PtApplication::RecreateSwapChain() {
         // auto extent = m_Window.GetExtent();
         // while (extent.width == 0 || extent.height == 0) {
         //     extent = m_Window.GetExtent();
@@ -155,7 +152,7 @@ namespace PalmTree {
         CreatePipeline();
     }
 
-    void Application::RecordCommandBuffer(int imageIndex) {
+    void PtApplication::RecordCommandBuffer(int imageIndex) {
         static int s_Frame = 0;
         s_Frame = (s_Frame + 1) % 500;
         

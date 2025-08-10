@@ -2,10 +2,12 @@
 #include <cstdlib>
 #include <stdexcept>
 
-#include "Application.h"
+#include "PtApplication.h"
+
+using namespace PalmTree;
 
 int main() {
-    PalmTree::Application app = PalmTree::Application();
+    PtApplication app = PtApplication();
     try {
         app.Run();
     }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Device.h"
+#include "PtDevice.h"
 
 #include <vector>
 
@@ -9,7 +9,7 @@
 #include <glm/glm.hpp>
 
 namespace PalmTree {
-    class Model {
+    class PtModel {
     public:
         struct Vertex {
             glm::vec2 position;
@@ -19,11 +19,11 @@ namespace PalmTree {
             static std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions();
         };
         
-        Model(PalmTreeDevice& device, const std::vector<Vertex>& vertices);
-        ~Model();
+        PtModel(PtDevice& device, const std::vector<Vertex>& vertices);
+        ~PtModel();
 
-        Model(const Model&) = delete;
-        Model &operator=(const Model&) = delete;
+        PtModel(const PtModel&) = delete;
+        PtModel &operator=(const PtModel&) = delete;
 
         void Bind(VkCommandBuffer commandBuffer);
         void Draw(VkCommandBuffer commandBuffer);
@@ -31,7 +31,7 @@ namespace PalmTree {
     private:
         void CreateVertexBuffers(const std::vector<Vertex>& vertices);
         
-        PalmTreeDevice& m_Device;
+        PtDevice& m_Device;
 
         VkBuffer m_VertexBuffer;
         VkDeviceMemory m_VertexBufferMemory;

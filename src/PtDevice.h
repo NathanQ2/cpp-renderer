@@ -3,7 +3,7 @@
 // For portability extension
 #define VK_ENABLE_BETA_EXTENSIONS
 
-#include "Window.h"
+#include "PtWindow.h"
 
 // std lib headers
 #include <string>
@@ -24,7 +24,7 @@ namespace PalmTree {
       bool isComplete() { return graphicsFamilyHasValue && presentFamilyHasValue; }
     };
 
-    class PalmTreeDevice {
+    class PtDevice {
      public:
     #ifdef NDEBUG
       const bool enableValidationLayers = false;
@@ -32,14 +32,14 @@ namespace PalmTree {
       const bool enableValidationLayers = true;
     #endif
 
-      PalmTreeDevice(Window &window);
-      ~PalmTreeDevice();
+      PtDevice(PtWindow &window);
+      ~PtDevice();
 
       // Not copyable or movable
-      PalmTreeDevice(const PalmTreeDevice &) = delete;
-      PalmTreeDevice& operator=(const PalmTreeDevice &) = delete;
-      PalmTreeDevice(PalmTreeDevice &&) = delete;
-      PalmTreeDevice& operator=(PalmTreeDevice &&) = delete;
+      PtDevice(const PtDevice &) = delete;
+      PtDevice& operator=(const PtDevice &) = delete;
+      PtDevice(PtDevice &&) = delete;
+      PtDevice& operator=(PtDevice &&) = delete;
 
       VkCommandPool getCommandPool() { return commandPool; }
       VkDevice device() { return device_; }
@@ -95,7 +95,7 @@ namespace PalmTree {
       VkInstance instance;
       VkDebugUtilsMessengerEXT debugMessenger;
       VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
-      Window &window;
+      PtWindow &window;
       VkCommandPool commandPool;
 
       VkDevice device_;
