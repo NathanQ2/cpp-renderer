@@ -1,9 +1,18 @@
 #include "Application.h"
 
+#define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#include <glm/glm.hpp>
+
 #include <stdexcept>
 #include <array>
 
 namespace PalmTree {
+    struct SimplePushConstantData {
+        glm::vec2 offset;
+        alignas(16) glm::vec3 color;
+    };
+    
     Application::Application()  {
         LoadModels();
         CreatePipelineLayout();
@@ -38,12 +47,17 @@ namespace PalmTree {
     }
 
     void Application::CreatePipelineLayout() {
+        VkPushConstantRange pushConstantRange{};
+        pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+        pushConstantRange.offset = 0;
+        pushConstantRange.size = sizeof(SimplePushConstantData);
+        
         VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
         pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
         pipelineLayoutInfo.setLayoutCount = 0;
         pipelineLayoutInfo.pSetLayouts = nullptr;
-        pipelineLayoutInfo.pushConstantRangeCount = 0;
-        pipelineLayoutInfo.pPushConstantRanges = nullptr;
+        pipelineLayoutInfo.pushConstantRangeCount = 1;
+        pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
 
         if (vkCreatePipelineLayout(m_Device.device(), &pipelineLayoutInfo, nullptr, &m_PipelineLayout) != VK_SUCCESS) {
             throw std::runtime_error("Failed to create pipeline layout!");
@@ -60,8 +74,8 @@ namespace PalmTree {
         pipelineConfig.pipelineLayout = m_PipelineLayout;
         m_Pipeline = std::make_unique<Pipeline>(
             m_Device,
-            "../shaders/simpleShader.vert.spv",
-            "../shaders/simpleShader.frag.spv",
+            "simpleShader.vert.spv",
+            "simpleShader.frag.spv",
             pipelineConfig
         );
     }
@@ -142,6 +156,9 @@ namespace PalmTree {
     }
 
     void Application::RecordCommandBuffer(int imageIndex) {
+        static int s_Frame = 0;
+        s_Frame = (s_Frame + 1) % 500;
+        
         VkCommandBufferBeginInfo beginInfo{};
         beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
@@ -158,7 +175,7 @@ namespace PalmTree {
         renderPassInfo.renderArea.extent = m_SwapChain->getSwapChainExtent();
 
         std::array<VkClearValue, 2> clearValues{};
-        clearValues[0].color =  { 0.1f, 0.1, 0.1f, 1.0f };
+        clearValues[0].color =  { 0.01f, 0.01f, 0.01f, 1.0f };
         clearValues[1].depthStencil = { 1.0f, 0 };
 
         renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
@@ -179,7 +196,21 @@ namespace PalmTree {
 
         m_Pipeline->Bind(m_CommandBuffers[imageIndex]);
         m_Model->Bind(m_CommandBuffers[imageIndex]);
-        m_Model->Draw(m_CommandBuffers[imageIndex]);
+        for (int j = 0; j < 4; j++) {
+            SimplePushConstantData push;
+            push.offset = glm::vec2(-0.5f + s_Frame * 0.004f, -0.4f + j * 0.25f);
+            push.color = glm::vec3(0.0f, 0.0f, 0.2f + 0.2f * j);
+
+            vkCmdPushConstants(
+                m_CommandBuffers[imageIndex],
+                m_PipelineLayout,
+                VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+                0,
+                sizeof(SimplePushConstantData),
+                &push
+            );
+            m_Model->Draw(m_CommandBuffers[imageIndex]);
+        }
 
         vkCmdEndRenderPass(m_CommandBuffers[imageIndex]);
         if (vkEndCommandBuffer(m_CommandBuffers[imageIndex]) != VK_SUCCESS) {
