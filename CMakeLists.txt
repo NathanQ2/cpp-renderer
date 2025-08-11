@@ -11,9 +11,7 @@ add_subdirectory(vendor/imgui)
 
 file(GLOB SOURCES src/**.cpp src/**.h)
 
-add_executable(PalmTree ${SOURCES}
-        src/PtGameObject.cpp
-        src/PtGameObject.h)
+add_executable(PalmTree ${SOURCES})
 
 target_link_libraries(${PROJECT_NAME} glfw ${GLFW_LIBRARIES} Vulkan::Vulkan glm::glm imgui)
 

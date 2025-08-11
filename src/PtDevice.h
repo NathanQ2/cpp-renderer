@@ -1,8 +1,5 @@
 #pragma once
 
-// For portability extension
-#define VK_ENABLE_BETA_EXTENSIONS
-
 #include "PtWindow.h"
 
 // std lib headers

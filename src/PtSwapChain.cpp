@@ -168,6 +168,8 @@ void PtSwapChain::recreateSwapChain() {
   while (window_.GetWidth() == 0 || window_.GetHeight() == 0) {
     glfwWaitEvents();
   }
+   VkFormat oldDepthFormat = swapChainDepthFormat;
+   VkFormat oldImageFormat = swapChainImageFormat;
   vkDeviceWaitIdle(device_.device());
   cleanupSwapChain();
   createSwapChain();
@@ -175,6 +177,10 @@ void PtSwapChain::recreateSwapChain() {
   createRenderPass();
   createDepthResources();
   createFramebuffers();
+
+   if (!compareSwapFormats(oldDepthFormat, oldImageFormat)) {
+     throw std::runtime_error("Swap chain image or depth format has changed!");
+   }
 }
 
 void PtSwapChain::createImageViews() {
@@ -261,15 +267,15 @@ void PtSwapChain::createRenderPass() {
 
   dependency.dstSubpass = 0;  // For our current render pass
   dependency.dstAccessMask =
-      VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;  // we write access our color attachment
+      VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;  // we write access our color attachment
   dependency.dstStageMask =
-      VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;  // at color attachment output stage
+      VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;  // at color attachment output stage
 
   // only after
   dependency.srcSubpass = VK_SUBPASS_EXTERNAL;  // the previous subpass
   dependency.srcAccessMask = 0;                 // does whatever
   dependency.srcStageMask =
-      VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;  // at its color attachment output stage
+      VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;  // at its color attachment output stage
 
   // i.e this means we can't write to our color attachment until after the previous render pass has
   // finished with its color attachment stage
@@ -316,6 +322,7 @@ void PtSwapChain::createFramebuffers() {
 
 void PtSwapChain::createDepthResources() {
   VkFormat depthFormat = findDepthFormat();
+   swapChainImageFormat = depthFormat;
   VkExtent2D swapChainExtent = getSwapChainExtent();
 
   depthImages.resize(imageCount());
