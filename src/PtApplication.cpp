@@ -3,18 +3,20 @@
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
+#include <glm/gtc/constants.hpp>
 
 #include <stdexcept>
 #include <array>
 
 namespace PalmTree {
     struct SimplePushConstantData {
+        glm::mat2 transform{1.0f};
         glm::vec2 offset;
         alignas(16) glm::vec3 color;
     };
     
     PtApplication::PtApplication()  {
-        LoadModels();
+        LoadGameObjects();
         CreatePipelineLayout();
         RecreateSwapChain();
         CreateCommandBuffers();
@@ -34,14 +36,24 @@ namespace PalmTree {
         vkDeviceWaitIdle(m_Device.device());
     }
 
-    void PtApplication::LoadModels() {
+    void PtApplication::LoadGameObjects() {
         std::vector<PtModel::Vertex> vertices {
             { { 0.0f, -0.5f }, { 1.0f, 0.0f, 0.0f } },
             { { 0.5, 0.5f }, { 0.0f, 1.0f, 0.0f } },
             { { -0.5f, 0.5f }, { 0.0f, 0.0f, 1.0f } }
         };
 
-        m_Model = std::make_unique<PtModel>(m_Device, vertices);
+        auto model = std::make_shared<PtModel>(m_Device, vertices);
+
+        auto triangle = PtGameObject::CreateGameObject();
+        triangle.model = model;
+        triangle.color = glm::vec3(0.1f, 0.8f, 0.1f);
+        triangle.transform.translation.x = 0.2f;
+        triangle.transform.scale.x = 2.0f;
+        triangle.transform.scale.y = 0.5f;
+        triangle.transform.rotation = 0.25f * glm::two_pi<float>();
+
+        m_GameObjects.push_back(std::move(triangle));
     }
 
     void PtApplication::CreatePipelineLayout() {
@@ -153,9 +165,6 @@ namespace PalmTree {
     }
 
     void PtApplication::RecordCommandBuffer(int imageIndex) {
-        static int s_Frame = 0;
-        s_Frame = (s_Frame + 1) % 500;
-        
         VkCommandBufferBeginInfo beginInfo{};
         beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
@@ -191,27 +200,36 @@ namespace PalmTree {
         vkCmdSetViewport(m_CommandBuffers[imageIndex], 0, 1, &viewport);
         vkCmdSetScissor(m_CommandBuffers[imageIndex], 0, 1, &scissor);
 
-        m_Pipeline->Bind(m_CommandBuffers[imageIndex]);
-        m_Model->Bind(m_CommandBuffers[imageIndex]);
-        for (int j = 0; j < 4; j++) {
+        RenderGameObjects(m_CommandBuffers[imageIndex]);
+
+        vkCmdEndRenderPass(m_CommandBuffers[imageIndex]);
+        if (vkEndCommandBuffer(m_CommandBuffers[imageIndex]) != VK_SUCCESS) {
+            throw std::runtime_error("Failed to create command buffer!");
+        }
+    }
+
+    void PtApplication::RenderGameObjects(VkCommandBuffer commandBuffer) {
+        m_Pipeline->Bind(commandBuffer);
+
+        for (auto& object : m_GameObjects) {
+            object.transform.rotation = glm::mod(object.transform.rotation + 0.01f, glm::two_pi<float>());
+            
             SimplePushConstantData push;
-            push.offset = glm::vec2(-0.5f + s_Frame * 0.004f, -0.4f + j * 0.25f);
-            push.color = glm::vec3(0.0f, 0.0f, 0.2f + 0.2f * j);
+            push.offset = object.transform.translation;
+            push.color = object.color;
+            push.transform = object.transform.getMat();
 
             vkCmdPushConstants(
-                m_CommandBuffers[imageIndex],
+                commandBuffer,
                 m_PipelineLayout,
                 VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
                 0,
                 sizeof(SimplePushConstantData),
                 &push
             );
-            m_Model->Draw(m_CommandBuffers[imageIndex]);
-        }
 
-        vkCmdEndRenderPass(m_CommandBuffers[imageIndex]);
-        if (vkEndCommandBuffer(m_CommandBuffers[imageIndex]) != VK_SUCCESS) {
-            throw std::runtime_error("Failed to create command buffer!");
+            object.model->Bind(commandBuffer);
+            object.model->Draw(commandBuffer);
         }
     }
 }

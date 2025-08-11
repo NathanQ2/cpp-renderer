@@ -4,6 +4,7 @@
 #include "PtWindow.h"
 #include "PtSwapChain.h"
 #include "PtModel.h"
+#include "PtGameObject.h"
 
 #include <memory>
 #include <vector>
@@ -19,7 +20,7 @@ namespace PalmTree {
 
         void Run();
     private:
-        void LoadModels();
+        void LoadGameObjects();
         void CreatePipelineLayout();
         void CreatePipeline();
         void CreateCommandBuffers();
@@ -27,6 +28,7 @@ namespace PalmTree {
         void DrawFrame();
         void RecreateSwapChain();
         void RecordCommandBuffer(int imageIndex);
+        void RenderGameObjects(VkCommandBuffer commandBuffer);
         
         const int m_Width = 800;
         const int m_Height = 600;
@@ -39,6 +41,6 @@ namespace PalmTree {
         VkPipelineLayout m_PipelineLayout;
         std::vector<VkCommandBuffer> m_CommandBuffers;
 
-        std::unique_ptr<PtModel> m_Model;
+        std::vector<PtGameObject> m_GameObjects;
     };
 }
