@@ -10,8 +10,7 @@
 
 namespace PalmTree {
     struct SimplePushConstantData {
-        glm::mat2 transform{1.0f};
-        glm::vec2 offset;
+        glm::mat4 transform{1.0f};
         alignas(16) glm::vec3 color;
     };
     
@@ -62,12 +61,12 @@ namespace PalmTree {
         m_Pipeline->Bind(commandBuffer);
 
         for (auto& object : gameObjects) {
-            object.transform.rotation = glm::mod(object.transform.rotation + 0.01f, glm::two_pi<float>());
+            object.transform.rotation.y = glm::mod(object.transform.rotation.y + 0.01f, glm::two_pi<float>());
+            object.transform.rotation.x = glm::mod(object.transform.rotation.x + 0.005f, glm::two_pi<float>());
             
             SimplePushConstantData push;
-            push.offset = object.transform.translation;
             push.color = object.color;
-            push.transform = object.transform.getMat();
+            push.transform = object.transform.mat4();
 
             vkCmdPushConstants(
                 commandBuffer,

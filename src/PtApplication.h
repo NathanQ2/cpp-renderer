@@ -12,7 +12,7 @@ namespace PalmTree {
     class PtApplication {
     public:
         PtApplication();
-        ~PtApplication();
+        ~PtApplication() = default;
 
         PtApplication(const PtApplication&) = delete;
         PtApplication& operator=(const PtApplication&) = delete;
