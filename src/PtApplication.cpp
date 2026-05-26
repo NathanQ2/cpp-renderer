@@ -2,6 +2,7 @@
 
 #include "PtSimpleRenderSystem.h"
 #include "PtCamera.h"
+#include "KeyboardMovementController.h"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -9,6 +10,7 @@
 #include <glm/gtc/constants.hpp>
 
 #include <stdexcept>
+#include <chrono>
 #include <array>
 
 namespace PalmTree {
@@ -21,11 +23,22 @@ namespace PalmTree {
         PtCamera camera{};
         camera.setViewDirection(glm::vec3(0), glm::vec3(0.0, 0.0f, 1.0f));
         
+        auto viewerObject = PtGameObject::CreateGameObject();
+        KeyboardMovementController cameraController = KeyboardMovementController();
+        
+        auto currentTime = std::chrono::high_resolution_clock::now();
+        
         while (!m_Window.ShouldClose()) {
             glfwPollEvents();
             
+            auto newTime = std::chrono::high_resolution_clock::now();
+            float frameTime = std::chrono::duration<float>(newTime - currentTime).count();
+            currentTime = newTime;
+            
+            cameraController.moveInPlaneXZ(m_Window.getGLFWWindow(), frameTime, viewerObject);
+            camera.setViewYXZ(viewerObject.transform.translation, viewerObject.transform.rotation);
+            
             float aspect = m_Renderer.getAspectRatio();
-            // camera.setOrthographicProjection(-aspect, aspect, -1.0f, 1.0f, -1.0f, 1.0f);
             camera.setPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 10.0f);
 
             if (VkCommandBuffer commandBuffer = m_Renderer.BeginFrame()) {
