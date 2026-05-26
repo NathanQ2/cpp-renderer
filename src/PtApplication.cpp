@@ -12,13 +12,14 @@
 #include <array>
 
 namespace PalmTree {
-    PtApplication::PtApplication()  {
+    PtApplication::PtApplication() {
         LoadGameObjects();
     }
 
     void PtApplication::Run() {
         PtSimpleRenderSystem simpleRenderSystem(m_Device, m_Renderer.GetSwapChainRenderPass());
         PtCamera camera{};
+        camera.setViewDirection(glm::vec3(0), glm::vec3(0.0, 0.0f, 1.0f));
         
         while (!m_Window.ShouldClose()) {
             glfwPollEvents();
