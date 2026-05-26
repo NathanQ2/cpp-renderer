@@ -18,6 +18,7 @@ namespace PalmTree {
         PtRenderer& operator=(const PtRenderer&) = delete;
 
         [[nodiscard]] VkRenderPass GetSwapChainRenderPass() const { return m_SwapChain->getRenderPass(); }
+        [[nodiscard]] float getAspectRatio() const { return m_SwapChain->extentAspectRatio(); }
         [[nodiscard]] bool IsFrameInProgress() const { return m_IsFrameStarted; }
         [[nodiscard]] VkCommandBuffer GetCurrentCommandBuffer() const {
             assert(m_IsFrameStarted && "Cannot get command buffer when frame not in progress");

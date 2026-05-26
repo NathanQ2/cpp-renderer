@@ -57,7 +57,7 @@ namespace PalmTree {
         );
     }
 
-    void PtSimpleRenderSystem::RenderGameObjects(VkCommandBuffer commandBuffer, std::vector<PtGameObject>& gameObjects) {
+    void PtSimpleRenderSystem::RenderGameObjects(VkCommandBuffer commandBuffer, std::vector<PtGameObject>& gameObjects, const PtCamera& camera) {
         m_Pipeline->Bind(commandBuffer);
 
         for (auto& object : gameObjects) {
@@ -66,7 +66,7 @@ namespace PalmTree {
             
             SimplePushConstantData push;
             push.color = object.color;
-            push.transform = object.transform.mat4();
+            push.transform = camera.getProjection() * object.transform.mat4();
 
             vkCmdPushConstants(
                 commandBuffer,

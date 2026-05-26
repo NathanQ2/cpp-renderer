@@ -1,6 +1,7 @@
 #include "PtApplication.h"
 
 #include "PtSimpleRenderSystem.h"
+#include "PtCamera.h"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -17,13 +18,18 @@ namespace PalmTree {
 
     void PtApplication::Run() {
         PtSimpleRenderSystem simpleRenderSystem(m_Device, m_Renderer.GetSwapChainRenderPass());
+        PtCamera camera{};
         
         while (!m_Window.ShouldClose()) {
             glfwPollEvents();
+            
+            float aspect = m_Renderer.getAspectRatio();
+            // camera.setOrthographicProjection(-aspect, aspect, -1.0f, 1.0f, -1.0f, 1.0f);
+            camera.setPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 10.0f);
 
             if (VkCommandBuffer commandBuffer = m_Renderer.BeginFrame()) {
                 m_Renderer.BeginSwapChainRenderPass(commandBuffer);
-                simpleRenderSystem.RenderGameObjects(commandBuffer, m_GameObjects);
+                simpleRenderSystem.RenderGameObjects(commandBuffer, m_GameObjects, camera);
                 m_Renderer.EndSwapChainRenderPass(commandBuffer);
                 m_Renderer.EndFrame();
             }
@@ -96,7 +102,7 @@ namespace PalmTree {
         
         PtGameObject cube = PtGameObject::CreateGameObject();
         cube.model = model;
-        cube.transform.translation = {0.0f, 0.0f, 0.5f };
+        cube.transform.translation = {0.0f, 0.0f, 2.5f };
         cube.transform.scale = { 0.5, 0.5f, 0.5f };
         
         m_GameObjects.push_back(std::move(cube));
