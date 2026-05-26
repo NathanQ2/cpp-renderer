@@ -19,12 +19,16 @@ namespace PalmTree {
             int lookDown = GLFW_KEY_DOWN;
         };
         
+        KeyboardMovementController(glm::f64vec2 initialCursorPos) : m_PreviousCursorPosition(initialCursorPos) {}
+        
         void moveInPlaneXZ(GLFWwindow* window, float dt, PtGameObject& gameObject);
         
     private:
         KeyMappings m_Keys{};
         float m_MoveSpeed = 3.0f;
-        float m_LookSpeed = 1.5f;
+        float m_KeyboardLookSpeed = 1.5f;
+        float m_MouseLookSpeed = 0.015f;
         
+        glm::f64vec2 m_PreviousCursorPosition;
     };
 }

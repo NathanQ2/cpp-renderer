@@ -2,17 +2,32 @@
 
 namespace PalmTree {
     void KeyboardMovementController::moveInPlaneXZ(GLFWwindow* window, float dt, PtGameObject& gameObject) {
-        glm::vec3 rotate = glm::vec3(0);
+        glm::vec3 keybaordRotate = glm::vec3(0);
         
-        if (glfwGetKey(window, m_Keys.lookRight) == GLFW_PRESS) rotate.y += 1.0f;
-        if (glfwGetKey(window, m_Keys.lookLeft) == GLFW_PRESS) rotate.y -= 1.0f;
+        if (glfwGetKey(window, m_Keys.lookRight) == GLFW_PRESS) keybaordRotate.y += 1.0f;
+        if (glfwGetKey(window, m_Keys.lookLeft) == GLFW_PRESS) keybaordRotate.y -= 1.0f;
         
-        if (glfwGetKey(window, m_Keys.lookUp) == GLFW_PRESS) rotate.x += 1.0f;
-        if (glfwGetKey(window, m_Keys.lookDown) == GLFW_PRESS) rotate.x -= 1.0f;
+        if (glfwGetKey(window, m_Keys.lookUp) == GLFW_PRESS) keybaordRotate.x += 1.0f;
+        if (glfwGetKey(window, m_Keys.lookDown) == GLFW_PRESS) keybaordRotate.x -= 1.0f;
         
         // Make sure rotate is nonzero 
-        if (glm::dot(rotate, rotate) > std::numeric_limits<float>::epsilon()) {
-            gameObject.transform.rotation += m_LookSpeed * dt * glm::normalize(rotate);
+        if (glm::dot(keybaordRotate, keybaordRotate) > std::numeric_limits<float>::epsilon()) {
+            gameObject.transform.rotation += m_KeyboardLookSpeed * dt * glm::normalize(keybaordRotate);
+        }
+        
+        glm::vec3 mouseRotate = glm::vec3(0);
+        
+        glm::f64vec2 cursorPos = glm::f64vec2(0);
+        glfwGetCursorPos(window, &cursorPos.x, &cursorPos.y);
+        glm::f64vec2 cursorDelta = m_PreviousCursorPosition - cursorPos;
+        m_PreviousCursorPosition = cursorPos;
+        
+        mouseRotate.x += static_cast<float>(cursorDelta.y);
+        mouseRotate.y -= static_cast<float>(cursorDelta.x);
+        
+        // Make sure rotate is nonzero 
+        if (glm::dot(mouseRotate, mouseRotate) > std::numeric_limits<float>::epsilon()) {
+            gameObject.transform.rotation += m_MouseLookSpeed * dt * mouseRotate;
         }
         
         gameObject.transform.rotation.x = glm::clamp(gameObject.transform.rotation.x, -1.5f, 1.5f);

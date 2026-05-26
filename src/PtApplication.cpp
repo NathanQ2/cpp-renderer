@@ -24,7 +24,11 @@ namespace PalmTree {
         camera.setViewDirection(glm::vec3(0), glm::vec3(0.0, 0.0f, 1.0f));
         
         auto viewerObject = PtGameObject::CreateGameObject();
-        KeyboardMovementController cameraController = KeyboardMovementController();
+        glfwSetInputMode(m_Window.getGLFWWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        glfwSetInputMode(m_Window.getGLFWWindow(), GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+        glm::f64vec2 cursorPos = glm::f64vec2(0);
+        glfwGetCursorPos(m_Window.getGLFWWindow(), &cursorPos.x, &cursorPos.y);
+        KeyboardMovementController cameraController = KeyboardMovementController(cursorPos);
         
         auto currentTime = std::chrono::high_resolution_clock::now();
         
