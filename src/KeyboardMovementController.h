@@ -19,7 +19,7 @@ namespace PalmTree {
             int lookDown = GLFW_KEY_DOWN;
         };
         
-        KeyboardMovementController(glm::f64vec2 initialCursorPos) : m_PreviousCursorPosition(initialCursorPos) {}
+        KeyboardMovementController(const glm::f64vec2 initialCursorPos) : m_PreviousCursorPosition(initialCursorPos) {}
         
         void moveInPlaneXZ(GLFWwindow* window, float dt, PtGameObject& gameObject);
         
