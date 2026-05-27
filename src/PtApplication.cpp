@@ -2,6 +2,7 @@
 
 #include "PtSimpleRenderSystem.h"
 #include "PtCamera.h"
+#include "PtBuffer.h"
 #include "KeyboardMovementController.h"
 
 #define GLM_FORCE_RADIANS
@@ -14,11 +15,30 @@
 #include <array>
 
 namespace PalmTree {
+    struct GlobalUBO {
+        glm::mat4 projectionView = glm::mat4(1.0f);
+        glm::vec3 lightDirection = glm::normalize(glm::vec3(1.0f, -3.0f, -1.0f));
+    };
+    
+    
     PtApplication::PtApplication() {
         LoadGameObjects();
     }
 
     void PtApplication::Run() {
+        std::vector<std::unique_ptr<PtBuffer>> uboBuffers(PtSwapChain::MAX_FRAMES_IN_FLIGHT);
+        for (int i = 0; i < uboBuffers.size(); i++) {
+            uboBuffers[i] = std::make_unique<PtBuffer>(
+                m_Device,
+                sizeof(GlobalUBO),
+                PtSwapChain::MAX_FRAMES_IN_FLIGHT,
+                VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
+                m_Device.properties.limits.minUniformBufferOffsetAlignment
+            );
+            uboBuffers[i]->map();
+        }
+        
         PtSimpleRenderSystem simpleRenderSystem(m_Device, m_Renderer.GetSwapChainRenderPass());
         PtCamera camera{};
         camera.setViewDirection(glm::vec3(0), glm::vec3(0.0, 0.0f, 1.0f));
@@ -47,8 +67,23 @@ namespace PalmTree {
             camera.setPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 10.0f);
 
             if (VkCommandBuffer commandBuffer = m_Renderer.BeginFrame()) {
+                int frameIndex = m_Renderer.GetFrameIndex();
+                FrameInfo frameInfo {
+                    frameIndex,
+                    frameTime,
+                    commandBuffer,
+                    camera
+                };
+                
+                // Update
+                GlobalUBO ubo{};
+                ubo.projectionView = camera.getProjection() * camera.getView();
+                uboBuffers[frameIndex]->writeToBuffer(&ubo);
+                uboBuffers[frameIndex]->flush();
+                
+                // Render
                 m_Renderer.BeginSwapChainRenderPass(commandBuffer);
-                simpleRenderSystem.RenderGameObjects(commandBuffer, m_GameObjects, camera);
+                simpleRenderSystem.RenderGameObjects(frameInfo, m_GameObjects);
                 m_Renderer.EndSwapChainRenderPass(commandBuffer);
                 m_Renderer.EndFrame();
             }
@@ -62,8 +97,6 @@ namespace PalmTree {
         
         PtGameObject obj = PtGameObject::CreateGameObject();
         obj.model = model;
-        // obj.transform.translation = {-0.5f, 0.5f, 2.5f };
-        //obj.transform.scale = glm::vec3(3, 1.5f, 3.0f);
         obj.transform.translation = glm::vec3(0.0, 0.0, 2.0f);
         obj.transform.scale = glm::vec3(1);
         

@@ -57,10 +57,10 @@ namespace PalmTree {
         );
     }
 
-    void PtSimpleRenderSystem::RenderGameObjects(VkCommandBuffer commandBuffer, std::vector<PtGameObject>& gameObjects, const PtCamera& camera) {
-        m_Pipeline->Bind(commandBuffer);
+    void PtSimpleRenderSystem::RenderGameObjects(FrameInfo& frameInfo, std::vector<PtGameObject>& gameObjects) {
+        m_Pipeline->Bind(frameInfo.commandBuffer);
         
-        auto projectionView = camera.getProjection() * camera.getView();
+        auto projectionView = frameInfo.camera.getProjection() * frameInfo.camera.getView();
 
         for (auto& obj : gameObjects) {
             SimplePushConstantData push{};
@@ -69,7 +69,7 @@ namespace PalmTree {
             push.normalMatrix = obj.transform.normalMatrix();
 
             vkCmdPushConstants(
-                commandBuffer,
+                frameInfo.commandBuffer,
                 m_PipelineLayout,
                 VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
                 0,
@@ -77,8 +77,8 @@ namespace PalmTree {
                 &push
             );
 
-            obj.model->Bind(commandBuffer);
-            obj.model->Draw(commandBuffer);
+            obj.model->Bind(frameInfo.commandBuffer);
+            obj.model->Draw(frameInfo.commandBuffer);
         }
     }
 }

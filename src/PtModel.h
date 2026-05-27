@@ -1,6 +1,7 @@
 #pragma once
 
 #include "PtDevice.h"
+#include "PtBuffer.h"
 
 #include <vector>
 #include <memory>
@@ -50,13 +51,11 @@ namespace PalmTree {
         
         PtDevice& m_Device;
 
-        VkBuffer m_VertexBuffer;
-        VkDeviceMemory m_VertexBufferMemory;
+        std::unique_ptr<PtBuffer> m_VertexBuffer;
         uint32_t m_VertexCount;
         
         bool m_HasIndexBuffer = false;
-        VkBuffer m_IndexBuffer;
-        VkDeviceMemory m_IndexBufferMemory;
+        std::unique_ptr<PtBuffer> m_IndexBuffer;
         uint32_t m_IndexCount;
     };
 }

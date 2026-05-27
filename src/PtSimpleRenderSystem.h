@@ -4,6 +4,7 @@
 #include "PtModel.h"
 #include "PtGameObject.h"
 #include "PtCamera.h"
+#include "PtFrameInfo.h"
 
 #include <memory>
 #include <vector>
@@ -18,7 +19,7 @@ namespace PalmTree {
         PtSimpleRenderSystem& operator=(const PtSimpleRenderSystem&) = delete;
 
         void Run();
-        void RenderGameObjects(VkCommandBuffer commandBuffer, std::vector<PtGameObject>& gameObjects, const PtCamera& camera);
+        void RenderGameObjects(FrameInfo& fameInfo, std::vector<PtGameObject>& gameObjects);
     private:
         void LoadGameObjects();
         void CreatePipelineLayout();
