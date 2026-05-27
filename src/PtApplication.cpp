@@ -58,12 +58,14 @@ namespace PalmTree {
     }
 
     void PtApplication::LoadGameObjects() {
-        std::shared_ptr model = PtModel::CreateModelFromFile(m_Device, "assets/models/smooth_vase.obj");
+        std::shared_ptr model = PtModel::CreateModelFromFile(m_Device, "../assets/models/flat_vase.obj");
         
         PtGameObject obj = PtGameObject::CreateGameObject();
         obj.model = model;
-        obj.transform.translation = {0.0f, 0.0f, 2.5f };
-        obj.transform.scale = glm::vec3(3);
+        // obj.transform.translation = {-0.5f, 0.5f, 2.5f };
+        //obj.transform.scale = glm::vec3(3, 1.5f, 3.0f);
+        obj.transform.translation = glm::vec3(0.0, 0.0, 2.0f);
+        obj.transform.scale = glm::vec3(1);
         
         m_GameObjects.push_back(std::move(obj));
     }

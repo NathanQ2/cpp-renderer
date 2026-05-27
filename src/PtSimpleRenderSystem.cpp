@@ -11,7 +11,7 @@
 namespace PalmTree {
     struct SimplePushConstantData {
         glm::mat4 transform{1.0f};
-        alignas(16) glm::vec3 color;
+        glm::mat4 normalMatrix{1.0f};
     };
     
     PtSimpleRenderSystem::PtSimpleRenderSystem(PtDevice& device, VkRenderPass renderPass) : m_Device(device) {
@@ -62,10 +62,11 @@ namespace PalmTree {
         
         auto projectionView = camera.getProjection() * camera.getView();
 
-        for (auto& object : gameObjects) {
-            SimplePushConstantData push;
-            push.color = object.color;
-            push.transform = projectionView * object.transform.mat4();
+        for (auto& obj : gameObjects) {
+            SimplePushConstantData push{};
+            glm::mat4 modelMatrix = obj.transform.mat4();
+            push.transform = projectionView * modelMatrix;
+            push.normalMatrix = obj.transform.normalMatrix();
 
             vkCmdPushConstants(
                 commandBuffer,
@@ -76,8 +77,8 @@ namespace PalmTree {
                 &push
             );
 
-            object.model->Bind(commandBuffer);
-            object.model->Draw(commandBuffer);
+            obj.model->Bind(commandBuffer);
+            obj.model->Draw(commandBuffer);
         }
     }
 }
