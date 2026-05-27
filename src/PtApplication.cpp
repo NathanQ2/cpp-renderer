@@ -16,8 +16,10 @@
 
 namespace PalmTree {
     struct GlobalUBO {
-        alignas(16) glm::mat4 projectionView = glm::mat4(1.0f);
-        alignas(16) glm::vec3 lightDirection = glm::normalize(glm::vec3(1.0f, -3.0f, -1.0f));
+        glm::mat4 projectionView = glm::mat4(1.0f);
+        glm::vec4 ambientLightColor = glm::vec4(1.0f, 1.0f, 1.0f, 0.02f);
+        glm::vec3 lightPosition = glm::vec3(-1);
+        alignas(16) glm::vec4 lightColor = glm::vec4(1); // w is light intensity
     };
     
     
@@ -60,6 +62,8 @@ namespace PalmTree {
         camera.setViewDirection(glm::vec3(0), glm::vec3(0.0, 0.0f, 1.0f));
         
         auto viewerObject = PtGameObject::CreateGameObject();
+        viewerObject.transform.translation.z = -2.5f;
+        
         glfwSetInputMode(m_Window.getGLFWWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         if (glfwRawMouseMotionSupported())
             glfwSetInputMode(m_Window.getGLFWWindow(), GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
@@ -80,7 +84,7 @@ namespace PalmTree {
             camera.setViewYXZ(viewerObject.transform.translation, viewerObject.transform.rotation);
             
             float aspect = m_Renderer.getAspectRatio();
-            camera.setPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 10.0f);
+            camera.setPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 100.0f);
 
             if (VkCommandBuffer commandBuffer = m_Renderer.BeginFrame()) {
                 int frameIndex = m_Renderer.GetFrameIndex();
@@ -110,13 +114,31 @@ namespace PalmTree {
     }
 
     void PtApplication::LoadGameObjects() {
-        std::shared_ptr model = PtModel::CreateModelFromFile(m_Device, "../assets/models/flat_vase.obj");
+        std::shared_ptr model1 = PtModel::CreateModelFromFile(m_Device, "../assets/models/flat_vase.obj");
         
-        PtGameObject obj = PtGameObject::CreateGameObject();
-        obj.model = model;
-        obj.transform.translation = glm::vec3(0.0, 0.0, 2.0f);
-        obj.transform.scale = glm::vec3(1);
+        PtGameObject obj1 = PtGameObject::CreateGameObject();
+        obj1.model = model1;
+        obj1.transform.translation = glm::vec3(0.0, 0.0, 0.0f);
+        obj1.transform.scale = glm::vec3(3);
         
-        m_GameObjects.push_back(std::move(obj));
+        m_GameObjects.push_back(std::move(obj1));
+        
+        std::shared_ptr model2 = PtModel::CreateModelFromFile(m_Device, "../assets/models/smooth_vase.obj");
+        
+        PtGameObject obj2 = PtGameObject::CreateGameObject();
+        obj2.model = model2;
+        obj2.transform.translation = glm::vec3(1.0, 0.0, 0.0f);
+        obj2.transform.scale = glm::vec3(3);
+        
+        m_GameObjects.push_back(std::move(obj2));
+        
+        std::shared_ptr model3 = PtModel::CreateModelFromFile(m_Device, "../assets/models/quad.obj");
+        
+        PtGameObject obj3 = PtGameObject::CreateGameObject();
+        obj3.model = model3;
+        obj3.transform.translation = glm::vec3(0.0f, 0.0f, 0.0f);
+        obj3.transform.scale = glm::vec3(5);
+        
+        m_GameObjects.push_back(std::move(obj3));
     }
 }
