@@ -59,7 +59,7 @@ namespace PalmTree {
         );
     }
 
-    void PtSimpleRenderSystem::RenderGameObjects(FrameInfo& frameInfo, std::vector<PtGameObject>& gameObjects) {
+    void PtSimpleRenderSystem::RenderGameObjects(FrameInfo& frameInfo) {
         m_Pipeline->Bind(frameInfo.commandBuffer);
 
         vkCmdBindDescriptorSets(
@@ -73,7 +73,11 @@ namespace PalmTree {
             nullptr
         );
         
-        for (auto& obj : gameObjects) {
+        for (auto& kv : frameInfo.gameObjects) {
+            auto& obj = kv.second;
+            
+            if (obj.model == nullptr) continue;
+            
             SimplePushConstantData push{};
             push.modelMatrix = obj.transform.mat4();
             push.normalMatrix = obj.transform.normalMatrix();

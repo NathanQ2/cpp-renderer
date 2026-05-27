@@ -19,7 +19,7 @@ namespace PalmTree {
         PtSimpleRenderSystem& operator=(const PtSimpleRenderSystem&) = delete;
 
         void Run();
-        void RenderGameObjects(FrameInfo& fameInfo, std::vector<PtGameObject>& gameObjects);
+        void RenderGameObjects(FrameInfo& fameInfo);
     private:
         void LoadGameObjects();
         void CreatePipelineLayout(VkDescriptorSetLayout globalSetLayout);

@@ -46,7 +46,7 @@ namespace PalmTree {
         }
         
         auto globalSetLayout = PtDescriptorSetLayout::Builder(m_Device)
-            .addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT)
+            .addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
             .build();
         
         std::vector<VkDescriptorSet> globalDescriptorSets(PtSwapChain::MAX_FRAMES_IN_FLIGHT);
@@ -93,7 +93,8 @@ namespace PalmTree {
                     frameTime,
                     commandBuffer,
                     camera,
-                    globalDescriptorSets[frameIndex]
+                    globalDescriptorSets[frameIndex],
+                    m_GameObjects
                 };
                 
                 // Update
@@ -104,7 +105,7 @@ namespace PalmTree {
                 
                 // Render
                 m_Renderer.BeginSwapChainRenderPass(commandBuffer);
-                simpleRenderSystem.RenderGameObjects(frameInfo, m_GameObjects);
+                simpleRenderSystem.RenderGameObjects(frameInfo);
                 m_Renderer.EndSwapChainRenderPass(commandBuffer);
                 m_Renderer.EndFrame();
             }
@@ -121,7 +122,7 @@ namespace PalmTree {
         obj1.transform.translation = glm::vec3(0.0, 0.0, 0.0f);
         obj1.transform.scale = glm::vec3(3);
         
-        m_GameObjects.push_back(std::move(obj1));
+        m_GameObjects.emplace(obj1.getId(), std::move(obj1));
         
         std::shared_ptr model2 = PtModel::CreateModelFromFile(m_Device, "../assets/models/smooth_vase.obj");
         
@@ -130,7 +131,7 @@ namespace PalmTree {
         obj2.transform.translation = glm::vec3(1.0, 0.0, 0.0f);
         obj2.transform.scale = glm::vec3(3);
         
-        m_GameObjects.push_back(std::move(obj2));
+        m_GameObjects.emplace(obj2.getId(), std::move(obj2));
         
         std::shared_ptr model3 = PtModel::CreateModelFromFile(m_Device, "../assets/models/quad.obj");
         
@@ -139,6 +140,6 @@ namespace PalmTree {
         obj3.transform.translation = glm::vec3(0.0f, 0.0f, 0.0f);
         obj3.transform.scale = glm::vec3(5);
         
-        m_GameObjects.push_back(std::move(obj3));
+        m_GameObjects.emplace(obj3.getId(), std::move(obj3));
     }
 }

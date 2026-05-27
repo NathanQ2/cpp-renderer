@@ -32,6 +32,6 @@ namespace PalmTree {
 
         // NOTE: Must be declared after PtDevice
         std::unique_ptr<PtDescriptorPool> m_GlobalPool{};
-        std::vector<PtGameObject> m_GameObjects;
+        PtGameObject::Map m_GameObjects;
     };
 }

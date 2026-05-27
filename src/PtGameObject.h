@@ -2,8 +2,9 @@
 
 #include "PtModel.h"
 
-#include<glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include <memory>
+#include <unordered_map>
 
 namespace PalmTree {
     struct TransformComponent {
@@ -17,12 +18,14 @@ namespace PalmTree {
     
     class PtGameObject {
     public:
+        using id_t = unsigned int;
+        using Map = std::unordered_map<id_t, PtGameObject>;
+        
         PtGameObject(const PtGameObject&) = delete;
         PtGameObject& operator=(const PtGameObject&) = delete;
         PtGameObject(PtGameObject&&) = default;
         PtGameObject& operator=(PtGameObject&&) = default;
         
-        using id_t = unsigned int;
 
         static PtGameObject CreateGameObject() {
             static id_t currentId = 0;
