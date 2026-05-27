@@ -12,7 +12,7 @@
 namespace PalmTree {
     class PtSimpleRenderSystem {
     public:
-        PtSimpleRenderSystem(PtDevice& device, VkRenderPass renderPass);
+        PtSimpleRenderSystem(PtDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout);
         ~PtSimpleRenderSystem();
 
         PtSimpleRenderSystem(const PtSimpleRenderSystem&) = delete;
@@ -22,7 +22,7 @@ namespace PalmTree {
         void RenderGameObjects(FrameInfo& fameInfo, std::vector<PtGameObject>& gameObjects);
     private:
         void LoadGameObjects();
-        void CreatePipelineLayout();
+        void CreatePipelineLayout(VkDescriptorSetLayout globalSetLayout);
         void CreatePipeline(VkRenderPass renderPass);
     
         PtDevice& m_Device;

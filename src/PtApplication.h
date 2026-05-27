@@ -4,6 +4,7 @@
 #include "PtModel.h"
 #include "PtGameObject.h"
 #include "PtRenderer.h"
+#include "PtDescriptors.h"
 
 #include <memory>
 #include <vector>
@@ -29,6 +30,8 @@ namespace PalmTree {
         PtDevice m_Device = PtDevice(m_Window);
         PtRenderer m_Renderer = PtRenderer(m_Window, m_Device);
 
+        // NOTE: Must be declared after PtDevice
+        std::unique_ptr<PtDescriptorPool> m_GlobalPool{};
         std::vector<PtGameObject> m_GameObjects;
     };
 }

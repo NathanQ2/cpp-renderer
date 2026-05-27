@@ -16,12 +16,16 @@
 
 namespace PalmTree {
     struct GlobalUBO {
-        glm::mat4 projectionView = glm::mat4(1.0f);
-        glm::vec3 lightDirection = glm::normalize(glm::vec3(1.0f, -3.0f, -1.0f));
+        alignas(16) glm::mat4 projectionView = glm::mat4(1.0f);
+        alignas(16) glm::vec3 lightDirection = glm::normalize(glm::vec3(1.0f, -3.0f, -1.0f));
     };
     
     
     PtApplication::PtApplication() {
+        m_GlobalPool = PtDescriptorPool::Builder(m_Device)
+            .setMaxSets(PtSwapChain::MAX_FRAMES_IN_FLIGHT)
+            .addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, PtSwapChain::MAX_FRAMES_IN_FLIGHT)
+            .build();
         LoadGameObjects();
     }
 
@@ -39,7 +43,19 @@ namespace PalmTree {
             uboBuffers[i]->map();
         }
         
-        PtSimpleRenderSystem simpleRenderSystem(m_Device, m_Renderer.GetSwapChainRenderPass());
+        auto globalSetLayout = PtDescriptorSetLayout::Builder(m_Device)
+            .addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT)
+            .build();
+        
+        std::vector<VkDescriptorSet> globalDescriptorSets(PtSwapChain::MAX_FRAMES_IN_FLIGHT);
+        for (int i = 0; i < globalDescriptorSets.size(); i++) {
+            auto bufferInfo = uboBuffers[i]->descriptorInfo();
+            PtDescriptorWriter(*globalSetLayout, *m_GlobalPool)
+                .writeBuffer(0, &bufferInfo)
+                .build(globalDescriptorSets[i]);
+        }
+        
+        PtSimpleRenderSystem simpleRenderSystem(m_Device, m_Renderer.GetSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout());
         PtCamera camera{};
         camera.setViewDirection(glm::vec3(0), glm::vec3(0.0, 0.0f, 1.0f));
         
@@ -72,7 +88,8 @@ namespace PalmTree {
                     frameIndex,
                     frameTime,
                     commandBuffer,
-                    camera
+                    camera,
+                    globalDescriptorSets[frameIndex]
                 };
                 
                 // Update

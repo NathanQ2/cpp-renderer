@@ -10,5 +10,6 @@ namespace PalmTree {
         float frameTime;
         VkCommandBuffer commandBuffer;
         PtCamera& camera;
+        VkDescriptorSet globalDescriptorSet;
     };
 }
