@@ -14,6 +14,7 @@ file(GLOB SOURCES src/**.cpp src/**.h)
 add_executable(PalmTree ${SOURCES})
 
 target_link_libraries(${PROJECT_NAME} glfw ${GLFW_LIBRARIES} Vulkan::Vulkan glm::glm imgui)
+target_include_directories(${PROJECT_NAME} PUBLIC vendor/tinyobjloader)
 
 file(GLOB SHADERS ${CMAKE_CURRENT_SOURCE_DIR}/shaders/*.vert ${CMAKE_CURRENT_SOURCE_DIR}/shaders/*.frag)
 
@@ -29,4 +30,5 @@ foreach (SHADER IN LISTS SHADERS)
 endforeach ()
 
 add_custom_target(CompileShaders ALL DEPENDS ${SPV_SHADERS})
-add_dependencies(PalmTree CompileShaders)
+add_dependencies(${PROJECT_NAME} CompileShaders)
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/assets ${CMAKE_CURRENT_BINARY_DIR}/assets)
