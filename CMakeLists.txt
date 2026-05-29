@@ -7,13 +7,11 @@ find_package(Vulkan REQUIRED)
 find_package(glfw3 REQUIRED)
 find_package(glm REQUIRED)
 
-add_subdirectory(vendor/imgui)
-
 file(GLOB_RECURSE SOURCES src/**.cpp src/**.h)
 
 add_executable(PalmTree ${SOURCES})
 
-target_link_libraries(${PROJECT_NAME} glfw ${GLFW_LIBRARIES} Vulkan::Vulkan glm::glm imgui)
+target_link_libraries(${PROJECT_NAME} glfw ${GLFW_LIBRARIES} Vulkan::Vulkan glm::glm)
 target_include_directories(${PROJECT_NAME} PUBLIC vendor/tinyobjloader)
 
 file(GLOB SHADERS ${CMAKE_CURRENT_SOURCE_DIR}/shaders/*.vert ${CMAKE_CURRENT_SOURCE_DIR}/shaders/*.frag)

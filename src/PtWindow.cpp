@@ -4,8 +4,6 @@
 #include <iostream>
 
 #include <vulkan/vulkan.h>
-#include <imgui.h>
-#include <imgui_impl_glfw.h>
 
 // static VkAllocationCallbacks* g_Allocator = nullptr;
 // static VkInstance g_Instance = VK_NULL_HANDLE;

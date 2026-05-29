@@ -74,7 +74,7 @@ namespace PalmTree {
             
             assert(lightIndex < MAX_LIGHTS && "Point lights exceed maximum specified");
             
-            // obj.transform.translation = glm::vec3(rotateLight * glm::vec4(obj.transform.translation, 1.0f));
+            obj.transform.translation = glm::vec3(rotateLight * glm::vec4(obj.transform.translation, 1.0f));
             
             ubo.pointLights[lightIndex].position = glm::vec4(obj.transform.translation, 1.0f);
             ubo.pointLights[lightIndex].color = glm::vec4(obj.color, obj.pointLight->lightIntensity);
