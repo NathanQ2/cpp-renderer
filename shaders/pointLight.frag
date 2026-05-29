@@ -30,6 +30,6 @@ void main() {
     if (dist > 1.0) {
         discard;
     }
-    
+
     outColor = vec4(push.color.xyz, 0.5 * cos(dist * M_PI) + 0.5);
 }

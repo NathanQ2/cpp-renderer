@@ -26,7 +26,7 @@ namespace PalmTree {
         VkRenderPass renderPass = nullptr;
         uint32_t subpass = 0;
     };
-    
+
     class PtPipeline {
     public:
         PtPipeline(
@@ -41,20 +41,25 @@ namespace PalmTree {
         PtPipeline(const PtPipeline&) = delete;
         PtPipeline& operator=(const PtPipeline) = delete;
 
-        static void DefaultPipelineConfig(PipelineConfig& config);
-        static void EnableAlphaBlending(PipelineConfig& config);
+        static void defaultPipelineConfig(PipelineConfig& config);
+        static void enableAlphaBlending(PipelineConfig& config);
 
-        void Bind(VkCommandBuffer commandBuffer);
+        void bind(VkCommandBuffer commandBuffer);
+
     private:
-        static std::vector<char> ReadFile(const std::string& path);
+        static std::vector<char> readFile(const std::string& path);
 
-        void CreateGraphicsPipeline(const std::string& vertPath, const std::string& fragPath, const PipelineConfig& config);
+        void createGraphicsPipeline(
+            const std::string& vertPath,
+            const std::string& fragPath,
+            const PipelineConfig& config
+        );
 
-        void CreateShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule);
+        void createShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule);
 
-        PtDevice& m_Device;
-        VkPipeline m_GraphicsPipeline;
-        VkShaderModule m_VertShaderModule;
-        VkShaderModule m_FragShaderModule;
+        PtDevice& m_device;
+        VkPipeline m_graphicsPipeline;
+        VkShaderModule m_vertShaderModule;
+        VkShaderModule m_fragShaderModule;
     };
 }

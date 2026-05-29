@@ -1,35 +1,26 @@
 #include "PtWindow.h"
 
-#include <stdio.h>
 #include <iostream>
+#include <stdio.h>
 
 #include <vulkan/vulkan.h>
-
-// static VkAllocationCallbacks* g_Allocator = nullptr;
-// static VkInstance g_Instance = VK_NULL_HANDLE;
-// static VkPhysicalDevice g_PhysicalDevice = VK_NULL_HANDLE;
-// static VkDevice g_Device = VK_NULL_HANDLE;
-// static uint32_t g_QueueFamily = (uint32_t)-1;
-// static VkQueue g_Queue = VK_NULL_HANDLE;
-// static VkDebugReportCallbackEXT g_DebugReport = VK_NULL_HANDLE;
-// static VkPipelineCache g_PipelineCache = VK_NULL_HANDLE;
-// static VkDescriptorPool g_DescriptorPool = VK_NULL_HANDLE
 
 namespace PalmTree {
     static void glfw_error_callback(int error, const char* description) {
         fprintf(stderr, "GLFW error %d: %s", error, description);
     }
 
-    PtWindow::PtWindow(const int width, const int height, const std::string& title) : m_Width(width), m_Height(height), m_Title(title) {
-        Init();
+    PtWindow::PtWindow(const int width, const int height, const std::string& title) : m_width(width), m_height(height),
+        m_title(title) {
+        init();
     }
 
     PtWindow::~PtWindow() {
-        glfwDestroyWindow(m_WindowHandle);
+        glfwDestroyWindow(m_windowHandle);
         glfwTerminate();
     }
 
-    void PtWindow::Init() {
+    void PtWindow::init() {
         glfwSetErrorCallback(glfw_error_callback);
         if (glfwInit() == GLFW_FALSE) {
             std::cerr << "Could not initialize GLFW!" << std::endl;
@@ -39,47 +30,27 @@ namespace PalmTree {
 
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
-        m_WindowHandle = glfwCreateWindow(m_Width, m_Height, m_Title.c_str(), nullptr, nullptr);
-        glfwSetWindowUserPointer(m_WindowHandle, this);
-        glfwSetFramebufferSizeCallback(m_WindowHandle, FrameBufferResizeCallback);
+        m_windowHandle = glfwCreateWindow(m_width, m_height, m_title.c_str(), nullptr, nullptr);
+        glfwSetWindowUserPointer(m_windowHandle, this);
+        glfwSetFramebufferSizeCallback(m_windowHandle, frameBufferResizeCallback);
 
         uint32_t extensionCount = 0;
         vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
 
         std::cout << extensionCount << " extensions supported" << std::endl;
-
-        // ImGuiIO& io = ImGui::GetIO();
-        // io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
-        // //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-        // io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
-        // io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows}
-        //
-        // ImGui::StyleColorsDark();
-        //
-        // ImGui_ImplGlfw_InitForVulkan(m_WindowHandle, true);
-    
     }
 
-    // void Window::Run()
-    // {
-    //     m_Running = true;
-    // 
-    //     while (!glfwWindowShouldClose(m_WindowHandle)) {
-    //         glfwPollEvents();
-    //     }
-    // }
-
-    void PtWindow::CreateWindowSurface(VkInstance instance, VkSurfaceKHR* surface) {
-        if (glfwCreateWindowSurface(instance, m_WindowHandle, nullptr, surface) != VK_SUCCESS) {
+    void PtWindow::createWindowSurface(VkInstance instance, VkSurfaceKHR* surface) {
+        if (glfwCreateWindowSurface(instance, m_windowHandle, nullptr, surface) != VK_SUCCESS) {
             throw std::runtime_error("Failed to create window surface!");
         }
     }
 
-    void PtWindow::FrameBufferResizeCallback(GLFWwindow* windowHandle, int width, int height) {
+    void PtWindow::frameBufferResizeCallback(GLFWwindow* windowHandle, int width, int height) {
         auto* window = reinterpret_cast<PtWindow*>(glfwGetWindowUserPointer(windowHandle));
-        
-        window->m_FrameBufferResized = true;
-        window->m_Width = width,
-        window->m_Height = height;
+
+        window->m_frameBufferResized = true;
+        window->m_width = width,
+            window->m_height = height;
     }
 }

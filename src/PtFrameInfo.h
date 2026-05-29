@@ -12,7 +12,7 @@ namespace PalmTree {
         glm::vec4 position{};
         glm::vec4 color{};
     };
-    
+
     struct GlobalUBO {
         glm::mat4 projection = glm::mat4(1.0f);
         glm::mat4 view = glm::mat4(1.0f);
@@ -21,7 +21,7 @@ namespace PalmTree {
         PointLight pointLights[MAX_LIGHTS];
         int numLights;
     };
-    
+
     struct FrameInfo {
         int frameIndex;
         float frameTime;

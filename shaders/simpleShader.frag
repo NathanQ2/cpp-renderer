@@ -29,10 +29,10 @@ void main() {
     vec3 diffuseLight = ubo.ambientLightColor.xyz * ubo.ambientLightColor.w;
     vec3 specularLight = vec3(0.0);
     vec3 surfaceNormal = normalize(fragNormalWorld);
-    
+
     vec3 cameraPosWorld = ubo.inverseView[3].xyz;
     vec3 viewDirection = normalize(cameraPosWorld - fragPosWorld);
-    
+
     for (int i = 0; i < ubo.numLights; i++) {
         PointLight light = ubo.pointLights[i];
         vec3 directionToLight = light.position.xyz - fragPosWorld.xyz;
@@ -41,7 +41,7 @@ void main() {
         float cosAngleIncidence = max(dot(surfaceNormal, directionToLight), 0);
         vec3 intensity = light.color.xyz * light.color.w * attenuation;
         diffuseLight += intensity * cosAngleIncidence;
-        
+
         vec3 halfAngle = normalize(directionToLight + viewDirection);
         float blinnTerm = dot(surfaceNormal, halfAngle);
         blinnTerm = clamp(blinnTerm, 0, 1);

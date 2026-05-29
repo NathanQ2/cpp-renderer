@@ -2,10 +2,10 @@
 
 #include "PtModel.h"
 
+#include <cassert>
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
-#include <cassert>
 
 namespace PalmTree {
     PtPipeline::PtPipeline(
@@ -13,17 +13,17 @@ namespace PalmTree {
         const std::string& vertPath,
         const std::string& fragPath,
         const PipelineConfig& config
-    ) : m_Device {device} {
-        CreateGraphicsPipeline(vertPath, fragPath, config);
+    ) : m_device{device} {
+        createGraphicsPipeline(vertPath, fragPath, config);
     }
 
     PtPipeline::~PtPipeline() {
-        vkDestroyShaderModule(m_Device.device(), m_VertShaderModule, nullptr);
-        vkDestroyShaderModule(m_Device.device(), m_FragShaderModule, nullptr);
-        vkDestroyPipeline(m_Device.device(), m_GraphicsPipeline, nullptr);
+        vkDestroyShaderModule(m_device.device(), m_vertShaderModule, nullptr);
+        vkDestroyShaderModule(m_device.device(), m_fragShaderModule, nullptr);
+        vkDestroyPipeline(m_device.device(), m_graphicsPipeline, nullptr);
     }
 
-    void PtPipeline::DefaultPipelineConfig(PipelineConfig& config) {
+    void PtPipeline::defaultPipelineConfig(PipelineConfig& config) {
         config.inputAssemblyInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
         config.inputAssemblyInfo.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
         config.inputAssemblyInfo.primitiveRestartEnable = VK_FALSE;
@@ -42,61 +42,63 @@ namespace PalmTree {
         config.rasterizationInfo.cullMode = VK_CULL_MODE_NONE;
         config.rasterizationInfo.frontFace = VK_FRONT_FACE_CLOCKWISE;
         config.rasterizationInfo.depthBiasEnable = VK_FALSE;
-        config.rasterizationInfo.depthBiasConstantFactor = 0.0f;  // Optional
-        config.rasterizationInfo.depthBiasClamp = 0.0f;           // Optional
-        config.rasterizationInfo.depthBiasSlopeFactor = 0.0f;     // Optional
+        config.rasterizationInfo.depthBiasConstantFactor = 0.0f; // Optional
+        config.rasterizationInfo.depthBiasClamp = 0.0f; // Optional
+        config.rasterizationInfo.depthBiasSlopeFactor = 0.0f; // Optional
 
         config.multisampleInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
         config.multisampleInfo.sampleShadingEnable = VK_FALSE;
         config.multisampleInfo.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
-        config.multisampleInfo.minSampleShading = 1.0f;           // Optional
-        config.multisampleInfo.pSampleMask = nullptr;             // Optional
-        config.multisampleInfo.alphaToCoverageEnable = VK_FALSE;  // Optional
-        config.multisampleInfo.alphaToOneEnable = VK_FALSE;       // Optional
+        config.multisampleInfo.minSampleShading = 1.0f; // Optional
+        config.multisampleInfo.pSampleMask = nullptr; // Optional
+        config.multisampleInfo.alphaToCoverageEnable = VK_FALSE; // Optional
+        config.multisampleInfo.alphaToOneEnable = VK_FALSE; // Optional
 
-        config.colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT |VK_COLOR_COMPONENT_A_BIT;
+        config.colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |
+            VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
         config.colorBlendAttachment.blendEnable = VK_FALSE;
-        config.colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;   // Optional
-        config.colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;  // Optional
-        config.colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;              // Optional
-        config.colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;   // Optional
-        config.colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;  // Optional
-        config.colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;              // Optional
+        config.colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE; // Optional
+        config.colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO; // Optional
+        config.colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD; // Optional
+        config.colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE; // Optional
+        config.colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO; // Optional
+        config.colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD; // Optional
 
         config.colorBlendInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
         config.colorBlendInfo.logicOpEnable = VK_FALSE;
-        config.colorBlendInfo.logicOp = VK_LOGIC_OP_COPY;  // Optional
+        config.colorBlendInfo.logicOp = VK_LOGIC_OP_COPY; // Optional
         config.colorBlendInfo.attachmentCount = 1;
         config.colorBlendInfo.pAttachments = &config.colorBlendAttachment;
-        config.colorBlendInfo.blendConstants[0] = 0.0f;  // Optional
-        config.colorBlendInfo.blendConstants[1] = 0.0f;  // Optional
-        config.colorBlendInfo.blendConstants[2] = 0.0f;  // Optional
-        config.colorBlendInfo.blendConstants[3] = 0.0f;  // Optional
+        config.colorBlendInfo.blendConstants[0] = 0.0f; // Optional
+        config.colorBlendInfo.blendConstants[1] = 0.0f; // Optional
+        config.colorBlendInfo.blendConstants[2] = 0.0f; // Optional
+        config.colorBlendInfo.blendConstants[3] = 0.0f; // Optional
 
         config.depthStencilInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
         config.depthStencilInfo.depthTestEnable = VK_TRUE;
         config.depthStencilInfo.depthWriteEnable = VK_TRUE;
         config.depthStencilInfo.depthCompareOp = VK_COMPARE_OP_LESS;
         config.depthStencilInfo.depthBoundsTestEnable = VK_FALSE;
-        config.depthStencilInfo.minDepthBounds = 0.0f;  // Optional
-        config.depthStencilInfo.maxDepthBounds = 1.0f;  // Optional
+        config.depthStencilInfo.minDepthBounds = 0.0f; // Optional
+        config.depthStencilInfo.maxDepthBounds = 1.0f; // Optional
         config.depthStencilInfo.stencilTestEnable = VK_FALSE;
-        config.depthStencilInfo.front = {};  // Optional
-        config.depthStencilInfo.back = {};   // Optional
+        config.depthStencilInfo.front = {}; // Optional
+        config.depthStencilInfo.back = {}; // Optional
 
-        config.dynamicStateEnables = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR };
+        config.dynamicStateEnables = {VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR};
         config.dynamicStateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
         config.dynamicStateInfo.pDynamicStates = config.dynamicStateEnables.data();
         config.dynamicStateInfo.dynamicStateCount = static_cast<uint32_t>(config.dynamicStateEnables.size());
         config.dynamicStateInfo.flags = 0;
-        
+
         config.bindingDescriptions = PtModel::Vertex::getBindingDescriptions();
         config.attributeDescriptions = PtModel::Vertex::getAttributeDescriptions();
     }
 
-    void PtPipeline::EnableAlphaBlending(PipelineConfig& config) {
+    void PtPipeline::enableAlphaBlending(PipelineConfig& config) {
         config.colorBlendAttachment.blendEnable = VK_TRUE;
-        config.colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT |VK_COLOR_COMPONENT_A_BIT;
+        config.colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |
+            VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
         config.colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
         config.colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
         config.colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
@@ -105,11 +107,11 @@ namespace PalmTree {
         config.colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
     }
 
-    void PtPipeline::Bind(VkCommandBuffer commandBuffer) {
-        vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_GraphicsPipeline);
+    void PtPipeline::bind(VkCommandBuffer commandBuffer) {
+        vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_graphicsPipeline);
     }
 
-    std::vector<char> PtPipeline::ReadFile(const std::string& path) {
+    std::vector<char> PtPipeline::readFile(const std::string& path) {
         std::ifstream file(path, std::ios::ate | std::ios::binary);
 
         if (!file.is_open()) {
@@ -125,28 +127,38 @@ namespace PalmTree {
         return buffer;
     }
 
-    void PtPipeline::CreateGraphicsPipeline(const std::string& vertPath, const std::string& fragPath, const PipelineConfig& config) {
-        assert(config.pipelineLayout != VK_NULL_HANDLE && "Cannot create graphics pipeline:: no pipelinelayout provided in config");
-        assert(config.renderPass != VK_NULL_HANDLE && "Cannot create graphics pipeline:: no renderPass provided in config");
-        
-        auto vertCode = ReadFile(vertPath);
-        auto fragCode = ReadFile(fragPath);
+    void PtPipeline::createGraphicsPipeline(
+        const std::string& vertPath,
+        const std::string& fragPath,
+        const PipelineConfig& config
+    ) {
+        assert(
+            config.pipelineLayout != VK_NULL_HANDLE &&
+            "Cannot create graphics pipeline:: no pipelinelayout provided in config"
+        );
+        assert(
+            config.renderPass != VK_NULL_HANDLE &&
+            "Cannot create graphics pipeline:: no renderPass provided in config"
+        );
 
-        CreateShaderModule(vertCode, &m_VertShaderModule);
-        CreateShaderModule(fragCode, &m_FragShaderModule);
+        auto vertCode = readFile(vertPath);
+        auto fragCode = readFile(fragPath);
+
+        createShaderModule(vertCode, &m_vertShaderModule);
+        createShaderModule(fragCode, &m_fragShaderModule);
 
         VkPipelineShaderStageCreateInfo shaderStages[2];
         shaderStages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
         shaderStages[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
-        shaderStages[0].module = m_VertShaderModule;
+        shaderStages[0].module = m_vertShaderModule;
         shaderStages[0].pName = "main";
         shaderStages[0].flags = 0;
         shaderStages[0].pNext = nullptr;
         shaderStages[0].pSpecializationInfo = nullptr;
-        
+
         shaderStages[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
         shaderStages[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-        shaderStages[1].module = m_FragShaderModule;
+        shaderStages[1].module = m_fragShaderModule;
         shaderStages[1].pName = "main";
         shaderStages[1].flags = 0;
         shaderStages[1].pNext = nullptr;
@@ -182,18 +194,19 @@ namespace PalmTree {
         pipelineInfo.basePipelineIndex = -1;
         pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 
-        if (vkCreateGraphicsPipelines(m_Device.device(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_GraphicsPipeline) != VK_SUCCESS) {
+        if (vkCreateGraphicsPipelines(m_device.device(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_graphicsPipeline)
+            != VK_SUCCESS) {
             throw std::runtime_error("Failed to create graphics pipeline!");
         }
     }
 
-    void PtPipeline::CreateShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule) {
+    void PtPipeline::createShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule) {
         VkShaderModuleCreateInfo createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
         createInfo.codeSize = code.size();
         createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
 
-        if (vkCreateShaderModule(m_Device.device(), &createInfo, nullptr, shaderModule) != VK_SUCCESS) {
+        if (vkCreateShaderModule(m_device.device(), &createInfo, nullptr, shaderModule) != VK_SUCCESS) {
             throw std::runtime_error("Failed to create shader module!");
         }
     }

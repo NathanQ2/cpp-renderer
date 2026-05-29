@@ -44,31 +44,31 @@ namespace PalmTree {
         const glm::vec3 invScale = 1.0f / scale;
 
         return glm::mat3{
-          {
-              invScale.x * (c1 * c3 + s1 * s2 * s3),
-              invScale.x * (c2 * s3),
-              invScale.x * (c1 * s2 * s3 - c3 * s1),
-          },
-          {
-              invScale.y * (c3 * s1 * s2 - c1 * s3),
-              invScale.y * (c2 * c3),
-              invScale.y * (c1 * c3 * s2 + s1 * s3),
-          },
-          {
-              invScale.z * (c2 * s1),
-              invScale.z * (-s2),
-              invScale.z * (c1 * c2),
-          },
-      }; 
+            {
+                invScale.x * (c1 * c3 + s1 * s2 * s3),
+                invScale.x * (c2 * s3),
+                invScale.x * (c1 * s2 * s3 - c3 * s1),
+            },
+            {
+                invScale.y * (c3 * s1 * s2 - c1 * s3),
+                invScale.y * (c2 * c3),
+                invScale.y * (c1 * c3 * s2 + s1 * s3),
+            },
+            {
+                invScale.z * (c2 * s1),
+                invScale.z * (-s2),
+                invScale.z * (c1 * c2),
+            },
+        };
     }
 
-    PtGameObject PtGameObject::CreatePointLight(float intensity, float radius, glm::vec3 color) {
-        PtGameObject obj =  PtGameObject::CreateGameObject();
+    PtGameObject PtGameObject::createPointLight(float intensity, float radius, glm::vec3 color) {
+        PtGameObject obj = createGameObject();
         obj.color = color;
         obj.transform.scale.x = radius;
         obj.pointLight = std::make_unique<PointLightComponent>();
         obj.pointLight->lightIntensity = intensity;
-        
+
         return obj;
     }
 }

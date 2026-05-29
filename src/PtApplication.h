@@ -1,10 +1,10 @@
 #pragma once
 
-#include "PtWindow.h"
-#include "PtModel.h"
-#include "PtGameObject.h"
-#include "PtRenderer.h"
 #include "PtDescriptors.h"
+#include "PtGameObject.h"
+#include "PtModel.h"
+#include "PtRenderer.h"
+#include "PtWindow.h"
 
 #include <memory>
 #include <vector>
@@ -18,20 +18,20 @@ namespace PalmTree {
         PtApplication(const PtApplication&) = delete;
         PtApplication& operator=(const PtApplication&) = delete;
 
-        void Run();
+        void run();
     private:
-        void LoadGameObjects();
-        
-        const int m_Width = 800;
-        const int m_Height = 600;
-        const std::string m_Title = "PalmTree Window";
-    
-        PtWindow m_Window = PtWindow(m_Width, m_Height, m_Title);
-        PtDevice m_Device = PtDevice(m_Window);
-        PtRenderer m_Renderer = PtRenderer(m_Window, m_Device);
+        void loadGameObjects();
+
+        const int m_width = 800;
+        const int m_height = 600;
+        const std::string m_title = "PalmTree Window";
+
+        PtWindow m_window = PtWindow(m_width, m_height, m_title);
+        PtDevice m_device = PtDevice(m_window);
+        PtRenderer m_renderer = PtRenderer(m_window, m_device);
 
         // NOTE: Must be declared after PtDevice
-        std::unique_ptr<PtDescriptorPool> m_GlobalPool{};
-        PtGameObject::Map m_GameObjects;
+        std::unique_ptr<PtDescriptorPool> m_globalPool{};
+        PtGameObject::Map m_gameObjects;
     };
 }

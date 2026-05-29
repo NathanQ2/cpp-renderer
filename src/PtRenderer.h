@@ -1,12 +1,12 @@
 #pragma once
 
-#include "PtWindow.h"
-#include "PtSwapChain.h"
 #include "PtModel.h"
+#include "PtSwapChain.h"
+#include "PtWindow.h"
 
+#include <cassert>
 #include <memory>
 #include <vector>
-#include <cassert>
 
 namespace PalmTree {
     class PtRenderer {
@@ -17,35 +17,38 @@ namespace PalmTree {
         PtRenderer(const PtRenderer&) = delete;
         PtRenderer& operator=(const PtRenderer&) = delete;
 
-        [[nodiscard]] VkRenderPass GetSwapChainRenderPass() const { return m_SwapChain->getRenderPass(); }
-        [[nodiscard]] float getAspectRatio() const { return m_SwapChain->extentAspectRatio(); }
-        [[nodiscard]] bool IsFrameInProgress() const { return m_IsFrameStarted; }
-        [[nodiscard]] VkCommandBuffer GetCurrentCommandBuffer() const {
-            assert(m_IsFrameStarted && "Cannot get command buffer when frame not in progress");
-            return m_CommandBuffers[m_CurrentFrameIndex];
-        }
-        
-        VkCommandBuffer BeginFrame();
-        void EndFrame();
-        void BeginSwapChainRenderPass(VkCommandBuffer commandBuffer);
-        void EndSwapChainRenderPass(VkCommandBuffer commandBuffer);
-        [[nodiscard]] int GetFrameIndex() const {
-            assert(m_IsFrameStarted && "Cannot get command buffer when frame not in progress");
+        [[nodiscard]] VkRenderPass getSwapChainRenderPass() const { return m_swapChain->getRenderPass(); }
+        [[nodiscard]] float getAspectRatio() const { return m_swapChain->extentAspectRatio(); }
+        [[nodiscard]] bool isFrameInProgress() const { return m_isFrameStarted; }
 
-            return m_CurrentFrameIndex;
+        [[nodiscard]] VkCommandBuffer getCurrentCommandBuffer() const {
+            assert(m_isFrameStarted && "Cannot get command buffer when frame not in progress");
+            return m_commandBuffers[m_currentFrameIndex];
         }
+
+        VkCommandBuffer beginFrame();
+        void endFrame();
+        void beginSwapChainRenderPass(VkCommandBuffer commandBuffer);
+        void endSwapChainRenderPass(VkCommandBuffer commandBuffer);
+
+        [[nodiscard]] int getFrameIndex() const {
+            assert(m_isFrameStarted && "Cannot get command buffer when frame not in progress");
+
+            return m_currentFrameIndex;
+        }
+
     private:
-        void CreateCommandBuffers();
-        void FreeCommandBuffers();
-        void RecreateSwapChain();
-    
-        PtWindow& m_Window;
-        PtDevice& m_Device;
-        std::unique_ptr<PtSwapChain> m_SwapChain = std::make_unique<PtSwapChain>(m_Window, m_Device);
-        std::vector<VkCommandBuffer> m_CommandBuffers;
+        void createCommandBuffers();
+        void freeCommandBuffers();
+        void recreateSwapChain();
 
-        uint32_t m_CurrentImageIndex;
-        int m_CurrentFrameIndex;
-        bool m_IsFrameStarted = false;
+        PtWindow& m_window;
+        PtDevice& m_device;
+        std::unique_ptr<PtSwapChain> m_swapChain = std::make_unique<PtSwapChain>(m_window, m_device);
+        std::vector<VkCommandBuffer> m_commandBuffers;
+
+        uint32_t m_currentImageIndex;
+        int m_currentFrameIndex;
+        bool m_isFrameStarted = false;
     };
 }

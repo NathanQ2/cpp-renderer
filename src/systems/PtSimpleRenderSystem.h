@@ -1,13 +1,10 @@
 #pragma once
 
-#include "../PtPipeline.h"
-#include "../PtModel.h"
-#include "../PtGameObject.h"
-#include "../PtCamera.h"
 #include "../PtFrameInfo.h"
+#include "../PtModel.h"
+#include "../PtPipeline.h"
 
 #include <memory>
-#include <vector>
 
 namespace PalmTree {
     class PtSimpleRenderSystem {
@@ -18,13 +15,14 @@ namespace PalmTree {
         PtSimpleRenderSystem(const PtSimpleRenderSystem&) = delete;
         PtSimpleRenderSystem& operator=(const PtSimpleRenderSystem&) = delete;
 
-        void RenderGameObjects(FrameInfo& fameInfo);
+        void renderGameObjects(FrameInfo& fameInfo);
+
     private:
-        void CreatePipelineLayout(VkDescriptorSetLayout globalSetLayout);
-        void CreatePipeline(VkRenderPass renderPass);
-    
-        PtDevice& m_Device;
-        std::unique_ptr<PtPipeline> m_Pipeline;
-        VkPipelineLayout m_PipelineLayout;
+        void createPipelineLayout(VkDescriptorSetLayout globalSetLayout);
+        void createPipeline(VkRenderPass renderPass);
+
+        PtDevice& m_device;
+        std::unique_ptr<PtPipeline> m_pipeline;
+        VkPipelineLayout m_pipelineLayout;
     };
 }
