@@ -89,6 +89,9 @@ namespace PalmTree {
         config.dynamicStateInfo.pDynamicStates = config.dynamicStateEnables.data();
         config.dynamicStateInfo.dynamicStateCount = static_cast<uint32_t>(config.dynamicStateEnables.size());
         config.dynamicStateInfo.flags = 0;
+        
+        config.bindingDescriptions = PtModel::Vertex::getBindingDescriptions();
+        config.attributeDescriptions = PtModel::Vertex::getAttributeDescriptions();
     }
 
     void PtPipeline::Bind(VkCommandBuffer commandBuffer) {
@@ -138,8 +141,8 @@ namespace PalmTree {
         shaderStages[1].pNext = nullptr;
         shaderStages[1].pSpecializationInfo = nullptr;
 
-        auto bindingDescriptions = PtModel::Vertex::getBindingDescriptions();
-        auto attributeDescriptions = PtModel::Vertex::getAttributeDescriptions();
+        auto& bindingDescriptions = config.bindingDescriptions;
+        auto& attributeDescriptions = config.attributeDescriptions;
         VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
         vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
         vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());

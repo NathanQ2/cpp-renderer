@@ -1,6 +1,7 @@
 #include "PtApplication.h"
 
-#include "PtSimpleRenderSystem.h"
+#include "systems/PtSimpleRenderSystem.h"
+#include "systems/PtPointLightSystem.h"
 #include "PtCamera.h"
 #include "PtBuffer.h"
 #include "KeyboardMovementController.h"
@@ -13,10 +14,12 @@
 #include <stdexcept>
 #include <chrono>
 #include <array>
+#include <ostream>
 
 namespace PalmTree {
     struct GlobalUBO {
-        glm::mat4 projectionView = glm::mat4(1.0f);
+        glm::mat4 projection = glm::mat4(1.0f);
+        glm::mat4 view = glm::mat4(1.0f);
         glm::vec4 ambientLightColor = glm::vec4(1.0f, 1.0f, 1.0f, 0.02f);
         glm::vec3 lightPosition = glm::vec3(-1);
         alignas(16) glm::vec4 lightColor = glm::vec4(1); // w is light intensity
@@ -58,6 +61,7 @@ namespace PalmTree {
         }
         
         PtSimpleRenderSystem simpleRenderSystem(m_Device, m_Renderer.GetSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout());
+        PtPointLightSystem pointLightSystem(m_Device, m_Renderer.GetSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout());
         PtCamera camera{};
         camera.setViewDirection(glm::vec3(0), glm::vec3(0.0, 0.0f, 1.0f));
         
@@ -99,13 +103,15 @@ namespace PalmTree {
                 
                 // Update
                 GlobalUBO ubo{};
-                ubo.projectionView = camera.getProjection() * camera.getView();
+                ubo.projection = camera.getProjection();
+                ubo.view = camera.getView();
                 uboBuffers[frameIndex]->writeToBuffer(&ubo);
                 uboBuffers[frameIndex]->flush();
                 
                 // Render
                 m_Renderer.BeginSwapChainRenderPass(commandBuffer);
                 simpleRenderSystem.RenderGameObjects(frameInfo);
+                pointLightSystem.Render(frameInfo);
                 m_Renderer.EndSwapChainRenderPass(commandBuffer);
                 m_Renderer.EndFrame();
             }

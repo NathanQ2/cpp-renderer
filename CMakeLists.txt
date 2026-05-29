@@ -9,7 +9,7 @@ find_package(glm REQUIRED)
 
 add_subdirectory(vendor/imgui)
 
-file(GLOB SOURCES src/**.cpp src/**.h)
+file(GLOB_RECURSE SOURCES src/**.cpp src/**.h)
 
 add_executable(PalmTree ${SOURCES})
 

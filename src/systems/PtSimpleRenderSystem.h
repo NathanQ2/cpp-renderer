@@ -1,10 +1,10 @@
 #pragma once
 
-#include "PtPipeline.h"
-#include "PtModel.h"
-#include "PtGameObject.h"
-#include "PtCamera.h"
-#include "PtFrameInfo.h"
+#include "../PtPipeline.h"
+#include "../PtModel.h"
+#include "../PtGameObject.h"
+#include "../PtCamera.h"
+#include "../PtFrameInfo.h"
 
 #include <memory>
 #include <vector>
@@ -18,10 +18,8 @@ namespace PalmTree {
         PtSimpleRenderSystem(const PtSimpleRenderSystem&) = delete;
         PtSimpleRenderSystem& operator=(const PtSimpleRenderSystem&) = delete;
 
-        void Run();
         void RenderGameObjects(FrameInfo& fameInfo);
     private:
-        void LoadGameObjects();
         void CreatePipelineLayout(VkDescriptorSetLayout globalSetLayout);
         void CreatePipeline(VkRenderPass renderPass);
     
