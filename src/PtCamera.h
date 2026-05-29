@@ -17,6 +17,7 @@ namespace PalmTree {
         const glm::mat4& getProjection() const { return m_ProjectionMatrix; }
         const glm::mat4& getView() const { return m_ViewMatrix; }
         const glm::mat4 getInverseView() const { return m_InverseViewMatrix; }
+        const glm::vec3 getPosition() const { return glm::vec3(m_InverseViewMatrix[3]); }
     private:
         glm::mat4 m_ProjectionMatrix{ 1.0f };
         glm::mat4 m_ViewMatrix{ 1.0f };

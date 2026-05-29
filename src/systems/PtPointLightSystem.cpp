@@ -7,6 +7,7 @@
 
 #include <stdexcept>
 #include <array>
+#include <map>
 
 namespace PalmTree {
     struct PointLightPushConstants {
@@ -49,6 +50,7 @@ namespace PalmTree {
         
         PipelineConfig pipelineConfig{};
         PtPipeline::DefaultPipelineConfig(pipelineConfig);
+        PtPipeline::EnableAlphaBlending(pipelineConfig);
         pipelineConfig.bindingDescriptions.clear();
         pipelineConfig.attributeDescriptions.clear();
 
@@ -72,7 +74,7 @@ namespace PalmTree {
             
             assert(lightIndex < MAX_LIGHTS && "Point lights exceed maximum specified");
             
-            obj.transform.translation = glm::vec3(rotateLight * glm::vec4(obj.transform.translation, 1.0f));
+            // obj.transform.translation = glm::vec3(rotateLight * glm::vec4(obj.transform.translation, 1.0f));
             
             ubo.pointLights[lightIndex].position = glm::vec4(obj.transform.translation, 1.0f);
             ubo.pointLights[lightIndex].color = glm::vec4(obj.color, obj.pointLight->lightIntensity);
@@ -84,6 +86,16 @@ namespace PalmTree {
     }
 
     void PtPointLightSystem::Render(FrameInfo& frameInfo) {
+        std::map<float, PtGameObject::id_t> sorted;
+        for (auto& kv : frameInfo.gameObjects) {
+            auto& obj = kv.second;
+            if (obj.pointLight == nullptr) continue;
+            
+            auto offset = frameInfo.camera.getPosition() - obj.transform.translation;
+            float distSquared = glm::dot(offset, offset);
+            sorted[distSquared] = obj.getId();
+        }
+        
         m_Pipeline->Bind(frameInfo.commandBuffer);
 
         vkCmdBindDescriptorSets(
@@ -98,9 +110,8 @@ namespace PalmTree {
         );
         
         
-        for (auto& kv : frameInfo.gameObjects) {
-            auto& obj = kv.second;
-            if (obj.pointLight == nullptr) continue;
+        for (auto it = sorted.rbegin(); it != sorted.rend(); ++it) {
+            auto& obj = frameInfo.gameObjects.at(it->second);
             
             PointLightPushConstants push{};
             push.position = glm::vec4(obj.transform.translation, 1.0f);

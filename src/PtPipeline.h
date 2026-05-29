@@ -42,6 +42,7 @@ namespace PalmTree {
         PtPipeline& operator=(const PtPipeline) = delete;
 
         static void DefaultPipelineConfig(PipelineConfig& config);
+        static void EnableAlphaBlending(PipelineConfig& config);
 
         void Bind(VkCommandBuffer commandBuffer);
     private:
