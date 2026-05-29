@@ -17,15 +17,6 @@
 #include <ostream>
 
 namespace PalmTree {
-    struct GlobalUBO {
-        glm::mat4 projection = glm::mat4(1.0f);
-        glm::mat4 view = glm::mat4(1.0f);
-        glm::vec4 ambientLightColor = glm::vec4(1.0f, 1.0f, 1.0f, 0.02f);
-        glm::vec3 lightPosition = glm::vec3(-1);
-        alignas(16) glm::vec4 lightColor = glm::vec4(1); // w is light intensity
-    };
-    
-    
     PtApplication::PtApplication() {
         m_GlobalPool = PtDescriptorPool::Builder(m_Device)
             .setMaxSets(PtSwapChain::MAX_FRAMES_IN_FLIGHT)
@@ -105,6 +96,7 @@ namespace PalmTree {
                 GlobalUBO ubo{};
                 ubo.projection = camera.getProjection();
                 ubo.view = camera.getView();
+                pointLightSystem.Update(frameInfo, ubo);
                 uboBuffers[frameIndex]->writeToBuffer(&ubo);
                 uboBuffers[frameIndex]->flush();
                 
@@ -121,31 +113,55 @@ namespace PalmTree {
     }
 
     void PtApplication::LoadGameObjects() {
-        std::shared_ptr model1 = PtModel::CreateModelFromFile(m_Device, "../assets/models/flat_vase.obj");
+        {
+            std::shared_ptr model1 = PtModel::CreateModelFromFile(m_Device, "../assets/models/flat_vase.obj");
         
-        PtGameObject obj1 = PtGameObject::CreateGameObject();
-        obj1.model = model1;
-        obj1.transform.translation = glm::vec3(0.0, 0.0, 0.0f);
-        obj1.transform.scale = glm::vec3(3);
+            PtGameObject obj1 = PtGameObject::CreateGameObject();
+            obj1.model = model1;
+            obj1.transform.translation = glm::vec3(-0.5, 0.0, 0.0f);
+            obj1.transform.scale = glm::vec3(3);
         
-        m_GameObjects.emplace(obj1.getId(), std::move(obj1));
+            m_GameObjects.emplace(obj1.getId(), std::move(obj1));
+        }
         
-        std::shared_ptr model2 = PtModel::CreateModelFromFile(m_Device, "../assets/models/smooth_vase.obj");
+        {
+            std::shared_ptr model2 = PtModel::CreateModelFromFile(m_Device, "../assets/models/smooth_vase.obj");
         
-        PtGameObject obj2 = PtGameObject::CreateGameObject();
-        obj2.model = model2;
-        obj2.transform.translation = glm::vec3(1.0, 0.0, 0.0f);
-        obj2.transform.scale = glm::vec3(3);
+            PtGameObject obj2 = PtGameObject::CreateGameObject();
+            obj2.model = model2;
+            obj2.transform.translation = glm::vec3(0.5, 0.0, 0.0f);
+            obj2.transform.scale = glm::vec3(3);
         
-        m_GameObjects.emplace(obj2.getId(), std::move(obj2));
+            m_GameObjects.emplace(obj2.getId(), std::move(obj2));
+        }
         
-        std::shared_ptr model3 = PtModel::CreateModelFromFile(m_Device, "../assets/models/quad.obj");
+        {
+            std::shared_ptr model3 = PtModel::CreateModelFromFile(m_Device, "../assets/models/quad.obj");
+            
+            PtGameObject obj3 = PtGameObject::CreateGameObject();
+            obj3.model = model3;
+            obj3.transform.translation = glm::vec3(0.0f, 0.0f, 0.0f);
+            obj3.transform.scale = glm::vec3(5);
+            
+            m_GameObjects.emplace(obj3.getId(), std::move(obj3));
+        }
         
-        PtGameObject obj3 = PtGameObject::CreateGameObject();
-        obj3.model = model3;
-        obj3.transform.translation = glm::vec3(0.0f, 0.0f, 0.0f);
-        obj3.transform.scale = glm::vec3(5);
+        std::vector<glm::vec3> lightColors{
+          {1.f, .1f, .1f},
+          {.1f, .1f, 1.f},
+          {.1f, 1.f, .1f},
+          {1.f, 1.f, .1f},
+          {.1f, 1.f, 1.f},
+          {1.f, 1.f, 1.f}
+        }; 
         
-        m_GameObjects.emplace(obj3.getId(), std::move(obj3));
+        for (int i = 0; i < lightColors.size(); i++) {
+            auto light = PtGameObject::CreatePointLight(0.2f);
+            light.color = lightColors[i];
+            auto rotateLight = glm::rotate(glm::mat4(1.0f), (i * glm::two_pi<float>()) / lightColors.size(), {0.0f, -1.0f, 0.0f});
+            
+            light.transform.translation = glm::vec3( rotateLight * glm::vec4(-1.0f, -1.0f, -1.0f, 1.0f));
+            m_GameObjects.emplace(light.getId(), std::move(light));
+        }
     }
 }

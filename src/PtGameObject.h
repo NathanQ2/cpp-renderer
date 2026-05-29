@@ -16,6 +16,10 @@ namespace PalmTree {
         glm::mat3 normalMatrix();
     };
     
+    struct PointLightComponent {
+        float lightIntensity = 1.0f;
+    };
+    
     class PtGameObject {
     public:
         using id_t = unsigned int;
@@ -32,12 +36,16 @@ namespace PalmTree {
             
             return PtGameObject(currentId++);
         }
+        
+        static PtGameObject CreatePointLight(float intensity = 10.0f, float radius = 0.1f, glm::vec3 color = glm::vec3(1.0f));
 
         id_t getId() { return m_Id; }
 
-        std::shared_ptr<PtModel> model{};
         glm::vec3 color{};
         TransformComponent transform{};
+        
+        std::shared_ptr<PtModel> model{};
+        std::unique_ptr<PointLightComponent> pointLight = nullptr;
 
     private:
         PtGameObject(id_t objectId) : m_Id(objectId) {}

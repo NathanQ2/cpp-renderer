@@ -17,7 +17,8 @@ namespace PalmTree {
 
         PtPointLightSystem(const PtPointLightSystem&) = delete;
         PtPointLightSystem& operator=(const PtPointLightSystem&) = delete;
-
+    
+        void Update(FrameInfo& frameInfo, GlobalUBO& ubo);
         void Render(FrameInfo& fameInfo);
     private:
         void CreatePipelineLayout(VkDescriptorSetLayout globalSetLayout);

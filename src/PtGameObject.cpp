@@ -61,4 +61,14 @@ namespace PalmTree {
           },
       }; 
     }
+
+    PtGameObject PtGameObject::CreatePointLight(float intensity, float radius, glm::vec3 color) {
+        PtGameObject obj =  PtGameObject::CreateGameObject();
+        obj.color = color;
+        obj.transform.scale.x = radius;
+        obj.pointLight = std::make_unique<PointLightComponent>();
+        obj.pointLight->lightIntensity = intensity;
+        
+        return obj;
+    }
 }
