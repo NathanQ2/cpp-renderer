@@ -96,6 +96,7 @@ namespace PalmTree {
                 GlobalUBO ubo{};
                 ubo.projection = camera.getProjection();
                 ubo.view = camera.getView();
+                ubo.inverseView = camera.getInverseView();
                 pointLightSystem.Update(frameInfo, ubo);
                 uboBuffers[frameIndex]->writeToBuffer(&ubo);
                 uboBuffers[frameIndex]->flush();
@@ -119,7 +120,7 @@ namespace PalmTree {
             PtGameObject obj1 = PtGameObject::CreateGameObject();
             obj1.model = model1;
             obj1.transform.translation = glm::vec3(-0.5, 0.0, 0.0f);
-            obj1.transform.scale = glm::vec3(3);
+            obj1.transform.scale = glm::vec3(3, 1.5, 3);
         
             m_GameObjects.emplace(obj1.getId(), std::move(obj1));
         }
@@ -130,7 +131,7 @@ namespace PalmTree {
             PtGameObject obj2 = PtGameObject::CreateGameObject();
             obj2.model = model2;
             obj2.transform.translation = glm::vec3(0.5, 0.0, 0.0f);
-            obj2.transform.scale = glm::vec3(3);
+            obj2.transform.scale = glm::vec3(3, 1.5, 3);
         
             m_GameObjects.emplace(obj2.getId(), std::move(obj2));
         }
