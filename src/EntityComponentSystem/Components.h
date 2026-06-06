@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../PtModel.h"
+#include "../Model.h"
 
 #include <glm/glm.hpp>
 
@@ -21,6 +21,6 @@ namespace PalmTree {
 
     struct ModelComponent {
         glm::vec3 color{};
-        std::shared_ptr<PtModel> model{};
+        std::shared_ptr<Model> model{};
     };
 }

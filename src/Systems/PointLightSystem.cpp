@@ -1,4 +1,4 @@
-#include "PtPointLightSystem.h"
+#include "PointLightSystem.h"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -15,8 +15,8 @@ namespace PalmTree {
         float radius;
     };
 
-    PtPointLightSystem::PtPointLightSystem(
-        PtDevice& device,
+    PointLightSystem::PointLightSystem(
+        Device& device,
         VkRenderPass renderPass,
         VkDescriptorSetLayout globalSetLayout
     ) : m_device(device) {
@@ -24,11 +24,11 @@ namespace PalmTree {
         createPipeline(renderPass);
     }
 
-    PtPointLightSystem::~PtPointLightSystem() {
+    PointLightSystem::~PointLightSystem() {
         vkDestroyPipelineLayout(m_device.device(), m_pipelineLayout, nullptr);
     }
 
-    void PtPointLightSystem::update(FrameInfo& frameInfo, GlobalUBO& ubo) {
+    void PointLightSystem::update(FrameInfo& frameInfo, GlobalUBO& ubo) {
         auto rotateLight = glm::rotate(glm::mat4(1.0f), frameInfo.frameTime, {0.0f, -1.0f, 0.0f});
 
         int lightIndex = 0;
@@ -49,7 +49,7 @@ namespace PalmTree {
         ubo.numLights = lightIndex;
     }
 
-    void PtPointLightSystem::render(FrameInfo& frameInfo) {
+    void PointLightSystem::render(FrameInfo& frameInfo) {
         std::map<float, Id> sorted;
         for (Id id : m_ids) {
             GameObject& obj = m_ecs->getObject(id);
@@ -95,7 +95,7 @@ namespace PalmTree {
         }
     }
 
-    void PtPointLightSystem::createPipelineLayout(VkDescriptorSetLayout globalSetLayout) {
+    void PointLightSystem::createPipelineLayout(VkDescriptorSetLayout globalSetLayout) {
         VkPushConstantRange pushConstantRange{};
         pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
         pushConstantRange.offset = 0;
@@ -115,18 +115,18 @@ namespace PalmTree {
         }
     }
 
-    void PtPointLightSystem::createPipeline(VkRenderPass renderPass) {
+    void PointLightSystem::createPipeline(VkRenderPass renderPass) {
         assert(m_pipelineLayout != nullptr && "Cannot create pipeline before pipeline layout!");
 
         PipelineConfig pipelineConfig{};
-        PtPipeline::defaultPipelineConfig(pipelineConfig);
-        PtPipeline::enableAlphaBlending(pipelineConfig);
+        Pipeline::defaultPipelineConfig(pipelineConfig);
+        Pipeline::enableAlphaBlending(pipelineConfig);
         pipelineConfig.bindingDescriptions.clear();
         pipelineConfig.attributeDescriptions.clear();
 
         pipelineConfig.renderPass = renderPass;
         pipelineConfig.pipelineLayout = m_pipelineLayout;
-        m_pipeline = std::make_unique<PtPipeline>(
+        m_pipeline = std::make_unique<Pipeline>(
             m_device,
             "pointLight.vert.spv",
             "pointLight.frag.spv",

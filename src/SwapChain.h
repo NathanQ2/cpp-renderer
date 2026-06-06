@@ -1,24 +1,24 @@
 #pragma once
 
-#include "PtDevice.h"
-#include "PtWindow.h"
+#include "Device.h"
+#include "Window.h"
 
 #include <vector>
 
 namespace PalmTree {
-    class PtSwapChain {
+    class SwapChain {
     public:
         static constexpr int MAX_FRAMES_IN_FLIGHT = 2;
 
-        PtSwapChain(PtWindow& window, PtDevice& device) : m_window{window}, m_device{device} { init(); }
+        SwapChain(Window& window, Device& device) : m_window{window}, m_device{device} { init(); }
 
-        ~PtSwapChain() {
+        ~SwapChain() {
             cleanupSwapChain();
             cleanupSyncObjects();
         }
 
-        PtSwapChain(const PtSwapChain&) = delete;
-        PtSwapChain& operator=(const PtSwapChain&) = delete;
+        SwapChain(const SwapChain&) = delete;
+        SwapChain& operator=(const SwapChain&) = delete;
 
         VkFramebuffer getFrameBuffer(int index) { return m_swapChainFramebuffers[index]; }
         VkRenderPass getRenderPass() { return m_renderPass; }
@@ -76,8 +76,8 @@ namespace PalmTree {
         std::vector<VkImage> m_swapChainImages;
         std::vector<VkImageView> m_swapChainImageViews;
 
-        PtWindow& m_window;
-        PtDevice& m_device;
+        Window& m_window;
+        Device& m_device;
 
         VkSwapchainKHR m_swapChain = VK_NULL_HANDLE;
 

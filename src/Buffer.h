@@ -2,23 +2,23 @@
 
 // TODO: Change formatting
 
-#include "PtDevice.h"
+#include "Device.h"
 
 namespace PalmTree {
-    class PtBuffer {
+    class Buffer {
     public:
-        PtBuffer(
-            PtDevice& device,
+        Buffer(
+            Device& device,
             VkDeviceSize instanceSize,
             uint32_t instanceCount,
             VkBufferUsageFlags usageFlags,
             VkMemoryPropertyFlags memoryPropertyFlags,
             VkDeviceSize minOffsetAlignment = 1
         );
-        ~PtBuffer();
+        ~Buffer();
 
-        PtBuffer(const PtBuffer&) = delete;
-        PtBuffer& operator=(const PtBuffer&) = delete;
+        Buffer(const Buffer&) = delete;
+        Buffer& operator=(const Buffer&) = delete;
 
         VkResult map(VkDeviceSize size = VK_WHOLE_SIZE, VkDeviceSize offset = 0);
         void unmap();
@@ -45,7 +45,7 @@ namespace PalmTree {
     private:
         static VkDeviceSize getAlignment(VkDeviceSize instanceSize, VkDeviceSize minOffsetAlignment);
 
-        PtDevice& m_device;
+        Device& m_device;
         void* m_mapped = nullptr;
         VkBuffer m_buffer = VK_NULL_HANDLE;
         VkDeviceMemory m_memory = VK_NULL_HANDLE;

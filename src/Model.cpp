@@ -1,6 +1,6 @@
-#include "PtModel.h"
+#include "Model.h"
 
-#include "PtUtils.h"
+#include "Utils.h"
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/hash.hpp>
 
@@ -12,8 +12,8 @@
 
 namespace std {
     template <>
-    struct hash<PalmTree::PtModel::Vertex> {
-        size_t operator()(PalmTree::PtModel::Vertex const& vertex) const {
+    struct hash<PalmTree::Model::Vertex> {
+        size_t operator()(PalmTree::Model::Vertex const& vertex) const {
             size_t seed = 0;
             PalmTree::hashCombine(seed, vertex.position, vertex.color, vertex.normal, vertex.uv);
 
@@ -23,7 +23,7 @@ namespace std {
 }
 
 namespace PalmTree {
-    std::vector<VkVertexInputBindingDescription> PtModel::Vertex::getBindingDescriptions() {
+    std::vector<VkVertexInputBindingDescription> Model::Vertex::getBindingDescriptions() {
         std::vector<VkVertexInputBindingDescription> bindingDescriptions(1);
         bindingDescriptions[0].binding = 0;
         bindingDescriptions[0].stride = sizeof(Vertex);
@@ -32,7 +32,7 @@ namespace PalmTree {
         return bindingDescriptions;
     }
 
-    std::vector<VkVertexInputAttributeDescription> PtModel::Vertex::getAttributeDescriptions() {
+    std::vector<VkVertexInputAttributeDescription> Model::Vertex::getAttributeDescriptions() {
         std::vector<VkVertexInputAttributeDescription> attributeDescriptions{};
 
         attributeDescriptions.push_back({0, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, position)});
@@ -43,7 +43,7 @@ namespace PalmTree {
         return attributeDescriptions;
     }
 
-    void PtModel::Builder::loadModel(const std::string& path) {
+    void Model::Builder::loadModel(const std::string& path) {
         tinyobj::attrib_t attrib;
         std::vector<tinyobj::shape_t> shapes;
         std::vector<tinyobj::material_t> materials;
@@ -100,22 +100,22 @@ namespace PalmTree {
         }
     }
 
-    PtModel::PtModel(PtDevice& device, const PtModel::Builder& builder) : m_device(device) {
+    Model::Model(Device& device, const Model::Builder& builder) : m_device(device) {
         createVertexBuffers(builder.vertices);
         createIndexBuffers(builder.indices);
     }
 
-    PtModel::~PtModel() {}
+    Model::~Model() {}
 
-    std::unique_ptr<PtModel> PtModel::createModelFromFile(PtDevice& device, const std::string& path) {
+    std::unique_ptr<Model> Model::createModelFromFile(Device& device, const std::string& path) {
         Builder builder{};
 
         builder.loadModel(path);
 
-        return std::make_unique<PtModel>(device, builder);
+        return std::make_unique<Model>(device, builder);
     }
 
-    void PtModel::bind(VkCommandBuffer commandBuffer) {
+    void Model::bind(VkCommandBuffer commandBuffer) {
         VkBuffer buffers[] = {m_vertexBuffer->getBuffer()};
         VkDeviceSize offsets[] = {0};
         vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers, offsets);
@@ -126,7 +126,7 @@ namespace PalmTree {
         }
     }
 
-    void PtModel::draw(VkCommandBuffer commandBuffer) {
+    void Model::draw(VkCommandBuffer commandBuffer) {
         if (m_hasIndexBuffer) {
             vkCmdDrawIndexed(commandBuffer, m_indexCount, 1, 0, 0, 0);
         }
@@ -135,14 +135,14 @@ namespace PalmTree {
         }
     }
 
-    void PtModel::createVertexBuffers(const std::vector<Vertex>& vertices) {
+    void Model::createVertexBuffers(const std::vector<Vertex>& vertices) {
         m_vertexCount = static_cast<uint32_t>(vertices.size());
         assert(m_vertexCount >= 3 && "Vertex count must be at least 3");
 
         VkDeviceSize bufferSize = sizeof(vertices[0]) * m_vertexCount;
         uint32_t vertexSize = sizeof(vertices[0]);
 
-        PtBuffer stagingBuffer = PtBuffer(
+        Buffer stagingBuffer = Buffer(
             m_device,
             vertexSize,
             m_vertexCount,
@@ -153,7 +153,7 @@ namespace PalmTree {
         stagingBuffer.map();
         stagingBuffer.writeToBuffer((void*)vertices.data());
 
-        m_vertexBuffer = std::make_unique<PtBuffer>(
+        m_vertexBuffer = std::make_unique<Buffer>(
             m_device,
             vertexSize,
             m_vertexCount,
@@ -164,7 +164,7 @@ namespace PalmTree {
         m_device.copyBuffer(stagingBuffer.getBuffer(), m_vertexBuffer->getBuffer(), bufferSize);
     }
 
-    void PtModel::createIndexBuffers(const std::vector<uint32_t>& indices) {
+    void Model::createIndexBuffers(const std::vector<uint32_t>& indices) {
         m_indexCount = static_cast<uint32_t>(indices.size());
         m_hasIndexBuffer = m_indexCount > 0;
 
@@ -173,7 +173,7 @@ namespace PalmTree {
         VkDeviceSize bufferSize = sizeof(indices[0]) * m_indexCount;
         uint32_t indexSize = sizeof(indices[0]);
 
-        PtBuffer stagingBuffer = PtBuffer(
+        Buffer stagingBuffer = Buffer(
             m_device,
             indexSize,
             m_indexCount,
@@ -184,7 +184,7 @@ namespace PalmTree {
         stagingBuffer.map();
         stagingBuffer.writeToBuffer((void*)indices.data());
 
-        m_indexBuffer = std::make_unique<PtBuffer>(
+        m_indexBuffer = std::make_unique<Buffer>(
             m_device,
             indexSize,
             m_indexCount,

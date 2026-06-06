@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-#include "PtDevice.h"
+#include "Device.h"
 
 namespace PalmTree {
     struct PipelineConfig {
@@ -27,19 +27,19 @@ namespace PalmTree {
         uint32_t subpass = 0;
     };
 
-    class PtPipeline {
+    class Pipeline {
     public:
-        PtPipeline(
-            PtDevice& device,
+        Pipeline(
+            Device& device,
             const std::string& vertPath,
             const std::string& fragPath,
             const PipelineConfig& info
         );
 
-        ~PtPipeline();
+        ~Pipeline();
 
-        PtPipeline(const PtPipeline&) = delete;
-        PtPipeline& operator=(const PtPipeline) = delete;
+        Pipeline(const Pipeline&) = delete;
+        Pipeline& operator=(const Pipeline) = delete;
 
         static void defaultPipelineConfig(PipelineConfig& config);
         static void enableAlphaBlending(PipelineConfig& config);
@@ -57,7 +57,7 @@ namespace PalmTree {
 
         void createShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule);
 
-        PtDevice& m_device;
+        Device& m_device;
         VkPipeline m_graphicsPipeline;
         VkShaderModule m_vertShaderModule;
         VkShaderModule m_fragShaderModule;

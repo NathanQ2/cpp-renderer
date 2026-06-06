@@ -1,7 +1,7 @@
 #pragma once
 
-#include "PtBuffer.h"
-#include "PtDevice.h"
+#include "Buffer.h"
+#include "Device.h"
 
 #include <memory>
 #include <vector>
@@ -11,7 +11,7 @@
 #include <glm/glm.hpp>
 
 namespace PalmTree {
-    class PtModel {
+    class Model {
     public:
         struct Vertex {
             glm::vec3 position{};
@@ -34,13 +34,13 @@ namespace PalmTree {
             void loadModel(const std::string& path);
         };
 
-        PtModel(PtDevice& device, const PtModel::Builder& builder);
-        ~PtModel();
+        Model(Device& device, const Model::Builder& builder);
+        ~Model();
 
-        PtModel(const PtModel&) = delete;
-        PtModel& operator=(const PtModel&) = delete;
+        Model(const Model&) = delete;
+        Model& operator=(const Model&) = delete;
 
-        static std::unique_ptr<PtModel> createModelFromFile(PtDevice& device, const std::string& path);
+        static std::unique_ptr<Model> createModelFromFile(Device& device, const std::string& path);
 
         void bind(VkCommandBuffer commandBuffer);
         void draw(VkCommandBuffer commandBuffer);
@@ -49,13 +49,13 @@ namespace PalmTree {
         void createVertexBuffers(const std::vector<Vertex>& vertices);
         void createIndexBuffers(const std::vector<uint32_t>& indices);
 
-        PtDevice& m_device;
+        Device& m_device;
 
-        std::unique_ptr<PtBuffer> m_vertexBuffer;
+        std::unique_ptr<Buffer> m_vertexBuffer;
         uint32_t m_vertexCount;
 
         bool m_hasIndexBuffer = false;
-        std::unique_ptr<PtBuffer> m_indexBuffer;
+        std::unique_ptr<Buffer> m_indexBuffer;
         uint32_t m_indexCount;
     };
 }

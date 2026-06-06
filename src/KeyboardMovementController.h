@@ -1,7 +1,7 @@
 #pragma once
 
 #include "EntityComponentSystem/GameObject.h"
-#include "PtWindow.h"
+#include "Window.h"
 
 namespace PalmTree {
     class KeyboardMovementController {

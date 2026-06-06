@@ -1,4 +1,4 @@
-#include "PtSimpleRenderSystem.h"
+#include "SimpleRenderSystem.h"
 
 #include "../EntityComponentSystem/EntityComponentSystem.h"
 
@@ -14,8 +14,8 @@ namespace PalmTree {
         glm::mat4 normalMatrix{1.0f};
     };
 
-    PtSimpleRenderSystem::PtSimpleRenderSystem(
-        PtDevice& device,
+    SimpleRenderSystem::SimpleRenderSystem(
+        Device& device,
         VkRenderPass renderPass,
         VkDescriptorSetLayout globalSetLayout
     ) : m_device(device) {
@@ -23,11 +23,11 @@ namespace PalmTree {
         createPipeline(renderPass);
     }
 
-    PtSimpleRenderSystem::~PtSimpleRenderSystem() {
+    SimpleRenderSystem::~SimpleRenderSystem() {
         vkDestroyPipelineLayout(m_device.device(), m_pipelineLayout, nullptr);
     }
 
-    void PtSimpleRenderSystem::renderGameObjects(FrameInfo& frameInfo) {
+    void SimpleRenderSystem::renderGameObjects(FrameInfo& frameInfo) {
         m_pipeline->bind(frameInfo.commandBuffer);
 
         vkCmdBindDescriptorSets(
@@ -63,7 +63,7 @@ namespace PalmTree {
         }
     }
 
-    void PtSimpleRenderSystem::createPipelineLayout(VkDescriptorSetLayout globalSetLayout) {
+    void SimpleRenderSystem::createPipelineLayout(VkDescriptorSetLayout globalSetLayout) {
         VkPushConstantRange pushConstantRange{};
         pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
         pushConstantRange.offset = 0;
@@ -83,15 +83,15 @@ namespace PalmTree {
         }
     }
 
-    void PtSimpleRenderSystem::createPipeline(VkRenderPass renderPass) {
+    void SimpleRenderSystem::createPipeline(VkRenderPass renderPass) {
         assert(m_pipelineLayout != nullptr && "Cannot create pipeline before pipeline layout!");
 
         PipelineConfig pipelineConfig{};
-        PtPipeline::defaultPipelineConfig(pipelineConfig);
+        Pipeline::defaultPipelineConfig(pipelineConfig);
 
         pipelineConfig.renderPass = renderPass;
         pipelineConfig.pipelineLayout = m_pipelineLayout;
-        m_pipeline = std::make_unique<PtPipeline>(
+        m_pipeline = std::make_unique<Pipeline>(
             m_device,
             "simpleShader.vert.spv",
             "simpleShader.frag.spv",

@@ -1,19 +1,19 @@
-#include "PtRenderer.h"
+#include "Renderer.h"
 
 #include <array>
 #include <stdexcept>
 
 namespace PalmTree {
-    PtRenderer::PtRenderer(PtWindow& window, PtDevice& device) : m_window(window), m_device(device) {
+    Renderer::Renderer(Window& window, Device& device) : m_window(window), m_device(device) {
         recreateSwapChain();
         createCommandBuffers();
     }
 
-    PtRenderer::~PtRenderer() {
+    Renderer::~Renderer() {
         freeCommandBuffers();
     }
 
-    VkCommandBuffer PtRenderer::beginFrame() {
+    VkCommandBuffer Renderer::beginFrame() {
         assert(!m_isFrameStarted && "Can't call begin frame while already in progress!");
 
         auto result = m_swapChain->acquireNextImage(&m_currentImageIndex);
@@ -42,7 +42,7 @@ namespace PalmTree {
         return commandBuffer;
     }
 
-    void PtRenderer::endFrame() {
+    void Renderer::endFrame() {
         assert(m_isFrameStarted && "Can't call end frame while frame is not in progress");
 
         VkCommandBuffer commandBuffer = getCurrentCommandBuffer();
@@ -62,10 +62,10 @@ namespace PalmTree {
         }
 
         m_isFrameStarted = false;
-        m_currentFrameIndex = (m_currentFrameIndex + 1) % PtSwapChain::MAX_FRAMES_IN_FLIGHT;
+        m_currentFrameIndex = (m_currentFrameIndex + 1) % SwapChain::MAX_FRAMES_IN_FLIGHT;
     }
 
-    void PtRenderer::beginSwapChainRenderPass(VkCommandBuffer commandBuffer) {
+    void Renderer::beginSwapChainRenderPass(VkCommandBuffer commandBuffer) {
         assert(m_isFrameStarted && "Can't call BeginSwapChainRenderPass if frame is not in progress!");
         assert(
             commandBuffer == getCurrentCommandBuffer() &&
@@ -101,7 +101,7 @@ namespace PalmTree {
         vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
     }
 
-    void PtRenderer::endSwapChainRenderPass(VkCommandBuffer commandBuffer) {
+    void Renderer::endSwapChainRenderPass(VkCommandBuffer commandBuffer) {
         assert(m_isFrameStarted && "Can't call EndSwapChainRenderPass if frame is not in progress!");
         assert(
             commandBuffer == getCurrentCommandBuffer() &&
@@ -111,8 +111,8 @@ namespace PalmTree {
         vkCmdEndRenderPass(commandBuffer);
     }
 
-    void PtRenderer::createCommandBuffers() {
-        m_commandBuffers.resize(PtSwapChain::MAX_FRAMES_IN_FLIGHT);
+    void Renderer::createCommandBuffers() {
+        m_commandBuffers.resize(SwapChain::MAX_FRAMES_IN_FLIGHT);
 
         VkCommandBufferAllocateInfo allocInfo{};
         allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -125,7 +125,7 @@ namespace PalmTree {
         }
     }
 
-    void PtRenderer::freeCommandBuffers() {
+    void Renderer::freeCommandBuffers() {
         vkFreeCommandBuffers(
             m_device.device(),
             m_device.getCommandPool(),
@@ -136,7 +136,7 @@ namespace PalmTree {
         m_commandBuffers.clear();
     }
 
-    void PtRenderer::recreateSwapChain() {
+    void Renderer::recreateSwapChain() {
         // auto extent = m_Window.GetExtent();
         // while (extent.width == 0 || extent.height == 0) {
         //     extent = m_Window.GetExtent();

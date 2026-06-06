@@ -1,4 +1,4 @@
-#include "PtWindow.h"
+#include "Window.h"
 
 #include <iostream>
 #include <stdio.h>
@@ -10,17 +10,17 @@ namespace PalmTree {
         fprintf(stderr, "GLFW error %d: %s", error, description);
     }
 
-    PtWindow::PtWindow(const int width, const int height, const std::string& title) : m_width(width), m_height(height),
+    Window::Window(const int width, const int height, const std::string& title) : m_width(width), m_height(height),
         m_title(title) {
         init();
     }
 
-    PtWindow::~PtWindow() {
+    Window::~Window() {
         glfwDestroyWindow(m_windowHandle);
         glfwTerminate();
     }
 
-    void PtWindow::init() {
+    void Window::init() {
         glfwSetErrorCallback(glfw_error_callback);
         if (glfwInit() == GLFW_FALSE) {
             std::cerr << "Could not initialize GLFW!" << std::endl;
@@ -40,14 +40,14 @@ namespace PalmTree {
         std::cout << extensionCount << " extensions supported" << std::endl;
     }
 
-    void PtWindow::createWindowSurface(VkInstance instance, VkSurfaceKHR* surface) {
+    void Window::createWindowSurface(VkInstance instance, VkSurfaceKHR* surface) {
         if (glfwCreateWindowSurface(instance, m_windowHandle, nullptr, surface) != VK_SUCCESS) {
             throw std::runtime_error("Failed to create window surface!");
         }
     }
 
-    void PtWindow::frameBufferResizeCallback(GLFWwindow* windowHandle, int width, int height) {
-        auto* window = reinterpret_cast<PtWindow*>(glfwGetWindowUserPointer(windowHandle));
+    void Window::frameBufferResizeCallback(GLFWwindow* windowHandle, int width, int height) {
+        auto* window = reinterpret_cast<Window*>(glfwGetWindowUserPointer(windowHandle));
 
         window->m_frameBufferResized = true;
         window->m_width = width,

@@ -1,11 +1,11 @@
-#include "PtApplication.h"
+#include "Application.h"
 
 #include "KeyboardMovementController.h"
-#include "PtBuffer.h"
-#include "PtCamera.h"
+#include "Buffer.h"
+#include "Camera.h"
 #include "EntityComponentSystem/EntityComponentSystem.h"
-#include "Systems/PtPointLightSystem.h"
-#include "Systems/PtSimpleRenderSystem.h"
+#include "Systems/PointLightSystem.h"
+#include "Systems/SimpleRenderSystem.h"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -17,21 +17,21 @@
 #include <glm/ext/matrix_transform.hpp>
 
 namespace PalmTree {
-    PtApplication::PtApplication() {
-        m_globalPool = PtDescriptorPool::Builder(m_device)
-            .setMaxSets(PtSwapChain::MAX_FRAMES_IN_FLIGHT)
-            .addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, PtSwapChain::MAX_FRAMES_IN_FLIGHT)
+    Application::Application() {
+        m_globalPool = DescriptorPool::Builder(m_device)
+            .setMaxSets(SwapChain::MAX_FRAMES_IN_FLIGHT)
+            .addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, SwapChain::MAX_FRAMES_IN_FLIGHT)
             .build();
         loadGameObjects();
     }
 
-    void PtApplication::run() {
-        std::vector<std::unique_ptr<PtBuffer>> uboBuffers(PtSwapChain::MAX_FRAMES_IN_FLIGHT);
+    void Application::run() {
+        std::vector<std::unique_ptr<Buffer>> uboBuffers(SwapChain::MAX_FRAMES_IN_FLIGHT);
         for (int i = 0; i < uboBuffers.size(); i++) {
-            uboBuffers[i] = std::make_unique<PtBuffer>(
+            uboBuffers[i] = std::make_unique<Buffer>(
                 m_device,
                 sizeof(GlobalUBO),
-                PtSwapChain::MAX_FRAMES_IN_FLIGHT,
+                SwapChain::MAX_FRAMES_IN_FLIGHT,
                 VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
                 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
                 m_device.properties.limits.minUniformBufferOffsetAlignment
@@ -39,39 +39,39 @@ namespace PalmTree {
             uboBuffers[i]->map();
         }
 
-        auto globalSetLayout = PtDescriptorSetLayout::Builder(m_device)
+        auto globalSetLayout = DescriptorSetLayout::Builder(m_device)
             .addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
             .build();
 
-        std::vector<VkDescriptorSet> globalDescriptorSets(PtSwapChain::MAX_FRAMES_IN_FLIGHT);
+        std::vector<VkDescriptorSet> globalDescriptorSets(SwapChain::MAX_FRAMES_IN_FLIGHT);
         for (int i = 0; i < globalDescriptorSets.size(); i++) {
             auto bufferInfo = uboBuffers[i]->descriptorInfo();
-            PtDescriptorWriter(*globalSetLayout, *m_globalPool)
+            DescriptorWriter(*globalSetLayout, *m_globalPool)
                 .writeBuffer(0, &bufferInfo)
                 .build(globalDescriptorSets[i]);
         }
 
-        std::shared_ptr<PtSimpleRenderSystem> simpleRenderSystem = std::make_shared<PtSimpleRenderSystem>(
+        std::shared_ptr<SimpleRenderSystem> simpleRenderSystem = std::make_shared<SimpleRenderSystem>(
             m_device,
             m_renderer.getSwapChainRenderPass(),
             globalSetLayout->getDescriptorSetLayout()
         );
-        m_ecs.registerSystem<PtSimpleRenderSystem>(
+        m_ecs.registerSystem<SimpleRenderSystem>(
             simpleRenderSystem,
             SignatureBuilder<TransformComponent, ModelComponent>(m_ecs.getComponentManager()).build()
         );
 
-        std::shared_ptr<PtPointLightSystem> pointLightSystem = std::make_shared<PtPointLightSystem>(
+        std::shared_ptr<PointLightSystem> pointLightSystem = std::make_shared<PointLightSystem>(
             m_device,
             m_renderer.getSwapChainRenderPass(),
             globalSetLayout->getDescriptorSetLayout()
         );
-        m_ecs.registerSystem<PtPointLightSystem>(
+        m_ecs.registerSystem<PointLightSystem>(
             pointLightSystem,
             SignatureBuilder<TransformComponent, PointLightComponent>(m_ecs.getComponentManager()).build()
         );
 
-        PtCamera camera{};
+        Camera camera{};
         camera.setViewDirection(glm::vec3(0), glm::vec3(0.0, 0.0f, 1.0f));
 
         GameObject& viewerObject = m_ecs.createGameObject();
@@ -130,10 +130,10 @@ namespace PalmTree {
         vkDeviceWaitIdle(m_device.device());
     }
 
-    void PtApplication::loadGameObjects() {
+    void Application::loadGameObjects() {
         // Flat Vase
         {
-            std::shared_ptr model = PtModel::createModelFromFile(m_device, "../assets/models/flat_vase.obj");
+            std::shared_ptr model = Model::createModelFromFile(m_device, "../assets/models/flat_vase.obj");
 
             GameObject& obj = m_ecs.createGameObject();
 
@@ -145,7 +145,7 @@ namespace PalmTree {
 
         // Smooth Vase
         {
-            std::shared_ptr model = PtModel::createModelFromFile(m_device, "../assets/models/smooth_vase.obj");
+            std::shared_ptr model = Model::createModelFromFile(m_device, "../assets/models/smooth_vase.obj");
 
             GameObject& obj = m_ecs.createGameObject();
             obj.addComponent(ModelComponent{glm::vec3(1), model});
@@ -155,7 +155,7 @@ namespace PalmTree {
 
         // Floor
         {
-            std::shared_ptr model = PtModel::createModelFromFile(m_device, "../assets/models/quad.obj");
+            std::shared_ptr model = Model::createModelFromFile(m_device, "../assets/models/quad.obj");
 
             GameObject& obj = m_ecs.createGameObject();
             obj.addComponent<ModelComponent>(ModelComponent{glm::vec3(1), model});

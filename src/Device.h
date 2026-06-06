@@ -1,6 +1,6 @@
 #pragma once
 
-#include "PtWindow.h"
+#include "Window.h"
 
 // std lib headers
 #include <string>
@@ -21,7 +21,7 @@ namespace PalmTree {
         bool isComplete() { return graphicsFamilyHasValue && presentFamilyHasValue; }
     };
 
-    class PtDevice {
+    class Device {
     public:
 #ifdef NDEBUG
         const bool enableValidationLayers = false;
@@ -29,14 +29,14 @@ namespace PalmTree {
         const bool enableValidationLayers = true;
 #endif
 
-        PtDevice(PtWindow& window);
-        ~PtDevice();
+        Device(Window& window);
+        ~Device();
 
         // Not copyable or movable
-        PtDevice(const PtDevice&) = delete;
-        PtDevice& operator=(const PtDevice&) = delete;
-        PtDevice(PtDevice&&) = delete;
-        PtDevice& operator=(PtDevice&&) = delete;
+        Device(const Device&) = delete;
+        Device& operator=(const Device&) = delete;
+        Device(Device&&) = delete;
+        Device& operator=(Device&&) = delete;
 
         VkCommandPool getCommandPool() { return m_commandPool; }
         VkDevice device() { return m_device; }
@@ -102,7 +102,7 @@ namespace PalmTree {
         VkInstance m_instance;
         VkDebugUtilsMessengerEXT m_debugMessenger;
         VkPhysicalDevice m_physicalDevice = VK_NULL_HANDLE;
-        PtWindow& m_window;
+        Window& m_window;
         VkCommandPool m_commandPool;
 
         VkDevice m_device;

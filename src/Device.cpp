@@ -1,4 +1,4 @@
-#include "PtDevice.h"
+#include "Device.h"
 
 // std headers
 #include <algorithm>
@@ -53,7 +53,7 @@ namespace PalmTree {
     }
 
     // class member functions
-    PtDevice::PtDevice(PtWindow& window) : m_window{window} {
+    Device::Device(Window& window) : m_window{window} {
         createInstance();
         setupDebugMessenger();
         createSurface();
@@ -62,7 +62,7 @@ namespace PalmTree {
         createCommandPool();
     }
 
-    PtDevice::~PtDevice() {
+    Device::~Device() {
         vkDestroyCommandPool(m_device, m_commandPool, nullptr);
         vkDestroyDevice(m_device, nullptr);
 
@@ -74,7 +74,7 @@ namespace PalmTree {
         vkDestroyInstance(m_instance, nullptr);
     }
 
-    uint32_t PtDevice::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) {
+    uint32_t Device::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) {
         VkPhysicalDeviceMemoryProperties memProperties;
         vkGetPhysicalDeviceMemoryProperties(m_physicalDevice, &memProperties);
         for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++) {
@@ -87,7 +87,7 @@ namespace PalmTree {
         throw std::runtime_error("failed to find suitable memory type!");
     }
 
-    VkFormat PtDevice::findSupportedFormat(
+    VkFormat Device::findSupportedFormat(
         const std::vector<VkFormat>& candidates,
         VkImageTiling tiling,
         VkFormatFeatureFlags features
@@ -107,7 +107,7 @@ namespace PalmTree {
         throw std::runtime_error("failed to find supported format!");
     }
 
-    void PtDevice::createBuffer(
+    void Device::createBuffer(
         VkDeviceSize size,
         VkBufferUsageFlags usage,
         VkMemoryPropertyFlags properties,
@@ -139,7 +139,7 @@ namespace PalmTree {
         vkBindBufferMemory(m_device, buffer, bufferMemory, 0);
     }
 
-    VkCommandBuffer PtDevice::beginSingleTimeCommands() {
+    VkCommandBuffer Device::beginSingleTimeCommands() {
         VkCommandBufferAllocateInfo allocInfo{};
         allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
         allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
@@ -157,7 +157,7 @@ namespace PalmTree {
         return commandBuffer;
     }
 
-    void PtDevice::endSingleTimeCommands(VkCommandBuffer commandBuffer) {
+    void Device::endSingleTimeCommands(VkCommandBuffer commandBuffer) {
         vkEndCommandBuffer(commandBuffer);
 
         VkSubmitInfo submitInfo{};
@@ -171,7 +171,7 @@ namespace PalmTree {
         vkFreeCommandBuffers(m_device, m_commandPool, 1, &commandBuffer);
     }
 
-    void PtDevice::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size) {
+    void Device::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size) {
         VkCommandBuffer commandBuffer = beginSingleTimeCommands();
 
         VkBufferCopy copyRegion{};
@@ -183,7 +183,7 @@ namespace PalmTree {
         endSingleTimeCommands(commandBuffer);
     }
 
-    void PtDevice::copyBufferToImage(
+    void Device::copyBufferToImage(
         VkBuffer buffer,
         VkImage image,
         uint32_t width,
@@ -216,7 +216,7 @@ namespace PalmTree {
         endSingleTimeCommands(commandBuffer);
     }
 
-    void PtDevice::createImageWithInfo(
+    void Device::createImageWithInfo(
         const VkImageCreateInfo& imageInfo,
         VkMemoryPropertyFlags properties,
         VkImage& image,
@@ -243,7 +243,7 @@ namespace PalmTree {
         }
     }
 
-    void PtDevice::createInstance() {
+    void Device::createInstance() {
         if (enableValidationLayers && !checkValidationLayerSupport()) {
             throw std::runtime_error("validation layers requested, but not available!");
         }
@@ -286,7 +286,7 @@ namespace PalmTree {
         hasGlfwRequiredInstanceExtensions();
     }
 
-    void PtDevice::setupDebugMessenger() {
+    void Device::setupDebugMessenger() {
         if (!enableValidationLayers) return;
         VkDebugUtilsMessengerCreateInfoEXT createInfo;
         populateDebugMessengerCreateInfo(createInfo);
@@ -295,9 +295,9 @@ namespace PalmTree {
         }
     }
 
-    void PtDevice::createSurface() { m_window.createWindowSurface(m_instance, &m_surface); }
+    void Device::createSurface() { m_window.createWindowSurface(m_instance, &m_surface); }
 
-    void PtDevice::pickPhysicalDevice() {
+    void Device::pickPhysicalDevice() {
         uint32_t deviceCount = 0;
         vkEnumeratePhysicalDevices(m_instance, &deviceCount, nullptr);
         if (deviceCount == 0) {
@@ -322,7 +322,7 @@ namespace PalmTree {
         std::cout << "physical device: " << properties.deviceName << std::endl;
     }
 
-    void PtDevice::createLogicalDevice() {
+    void Device::createLogicalDevice() {
         QueueFamilyIndices indices = findQueueFamilies(m_physicalDevice);
 
         std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
@@ -369,7 +369,7 @@ namespace PalmTree {
         vkGetDeviceQueue(m_device, indices.presentFamily, 0, &m_presentQueue);
     }
 
-    void PtDevice::createCommandPool() {
+    void Device::createCommandPool() {
         QueueFamilyIndices queueFamilyIndices = findPhysicalQueueFamilies();
 
         VkCommandPoolCreateInfo poolInfo = {};
@@ -383,7 +383,7 @@ namespace PalmTree {
         }
     }
 
-    bool PtDevice::isDeviceSuitable(VkPhysicalDevice device) {
+    bool Device::isDeviceSuitable(VkPhysicalDevice device) {
         QueueFamilyIndices indices = findQueueFamilies(device);
 
         bool extensionsSupported = checkDeviceExtensionSupport(device);
@@ -401,7 +401,7 @@ namespace PalmTree {
             supportedFeatures.samplerAnisotropy;
     }
 
-    std::vector<const char*> PtDevice::getRequiredExtensions() {
+    std::vector<const char*> Device::getRequiredExtensions() {
         uint32_t glfwExtensionCount = 0;
         const char** glfwExtensions;
         glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
@@ -419,7 +419,7 @@ namespace PalmTree {
         return extensions;
     }
 
-    bool PtDevice::checkValidationLayerSupport() {
+    bool Device::checkValidationLayerSupport() {
         uint32_t layerCount;
         vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
 
@@ -444,7 +444,7 @@ namespace PalmTree {
         return true;
     }
 
-    QueueFamilyIndices PtDevice::findQueueFamilies(VkPhysicalDevice device) {
+    QueueFamilyIndices Device::findQueueFamilies(VkPhysicalDevice device) {
         QueueFamilyIndices indices;
 
         uint32_t queueFamilyCount = 0;
@@ -475,7 +475,7 @@ namespace PalmTree {
         return indices;
     }
 
-    void PtDevice::populateDebugMessengerCreateInfo(
+    void Device::populateDebugMessengerCreateInfo(
         VkDebugUtilsMessengerCreateInfoEXT& createInfo
     ) {
         createInfo = {};
@@ -489,7 +489,7 @@ namespace PalmTree {
         createInfo.pUserData = nullptr; // Optional
     }
 
-    void PtDevice::hasGlfwRequiredInstanceExtensions() {
+    void Device::hasGlfwRequiredInstanceExtensions() {
         uint32_t extensionCount = 0;
         vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
         std::vector<VkExtensionProperties> extensions(extensionCount);
@@ -512,7 +512,7 @@ namespace PalmTree {
         }
     }
 
-    bool PtDevice::checkDeviceExtensionSupport(VkPhysicalDevice device) {
+    bool Device::checkDeviceExtensionSupport(VkPhysicalDevice device) {
         uint32_t extensionCount;
         vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
 
@@ -533,7 +533,7 @@ namespace PalmTree {
         return requiredExtensions.empty();
     }
 
-    SwapChainSupportDetails PtDevice::querySwapChainSupport(VkPhysicalDevice device) {
+    SwapChainSupportDetails Device::querySwapChainSupport(VkPhysicalDevice device) {
         SwapChainSupportDetails details;
         vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, m_surface, &details.capabilities);
 

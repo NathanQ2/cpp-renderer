@@ -5,7 +5,7 @@
 #include <glm/glm.hpp>
 
 namespace PalmTree {
-    class PtCamera {
+    class Camera {
     public:
         void setOrthographicProjection(float left, float right, float top, float bottom, float near, float far);
         void setPerspectiveProjection(float fovy, float aspect, float near, float far);

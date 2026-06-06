@@ -1,21 +1,21 @@
 #pragma once
 
-#include "PtModel.h"
-#include "PtSwapChain.h"
-#include "PtWindow.h"
+#include "Model.h"
+#include "SwapChain.h"
+#include "Window.h"
 
 #include <cassert>
 #include <memory>
 #include <vector>
 
 namespace PalmTree {
-    class PtRenderer {
+    class Renderer {
     public:
-        PtRenderer(PtWindow& window, PtDevice& device);
-        ~PtRenderer();
+        Renderer(Window& window, Device& device);
+        ~Renderer();
 
-        PtRenderer(const PtRenderer&) = delete;
-        PtRenderer& operator=(const PtRenderer&) = delete;
+        Renderer(const Renderer&) = delete;
+        Renderer& operator=(const Renderer&) = delete;
 
         [[nodiscard]] VkRenderPass getSwapChainRenderPass() const { return m_swapChain->getRenderPass(); }
         [[nodiscard]] float getAspectRatio() const { return m_swapChain->extentAspectRatio(); }
@@ -42,9 +42,9 @@ namespace PalmTree {
         void freeCommandBuffers();
         void recreateSwapChain();
 
-        PtWindow& m_window;
-        PtDevice& m_device;
-        std::unique_ptr<PtSwapChain> m_swapChain = std::make_unique<PtSwapChain>(m_window, m_device);
+        Window& m_window;
+        Device& m_device;
+        std::unique_ptr<SwapChain> m_swapChain = std::make_unique<SwapChain>(m_window, m_device);
         std::vector<VkCommandBuffer> m_commandBuffers;
 
         uint32_t m_currentImageIndex;

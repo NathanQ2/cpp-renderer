@@ -1,6 +1,6 @@
-#include "PtPipeline.h"
+#include "Pipeline.h"
 
-#include "PtModel.h"
+#include "Model.h"
 
 #include <cassert>
 #include <fstream>
@@ -8,8 +8,8 @@
 #include <stdexcept>
 
 namespace PalmTree {
-    PtPipeline::PtPipeline(
-        PtDevice& device,
+    Pipeline::Pipeline(
+        Device& device,
         const std::string& vertPath,
         const std::string& fragPath,
         const PipelineConfig& config
@@ -17,13 +17,13 @@ namespace PalmTree {
         createGraphicsPipeline(vertPath, fragPath, config);
     }
 
-    PtPipeline::~PtPipeline() {
+    Pipeline::~Pipeline() {
         vkDestroyShaderModule(m_device.device(), m_vertShaderModule, nullptr);
         vkDestroyShaderModule(m_device.device(), m_fragShaderModule, nullptr);
         vkDestroyPipeline(m_device.device(), m_graphicsPipeline, nullptr);
     }
 
-    void PtPipeline::defaultPipelineConfig(PipelineConfig& config) {
+    void Pipeline::defaultPipelineConfig(PipelineConfig& config) {
         config.inputAssemblyInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
         config.inputAssemblyInfo.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
         config.inputAssemblyInfo.primitiveRestartEnable = VK_FALSE;
@@ -91,11 +91,11 @@ namespace PalmTree {
         config.dynamicStateInfo.dynamicStateCount = static_cast<uint32_t>(config.dynamicStateEnables.size());
         config.dynamicStateInfo.flags = 0;
 
-        config.bindingDescriptions = PtModel::Vertex::getBindingDescriptions();
-        config.attributeDescriptions = PtModel::Vertex::getAttributeDescriptions();
+        config.bindingDescriptions = Model::Vertex::getBindingDescriptions();
+        config.attributeDescriptions = Model::Vertex::getAttributeDescriptions();
     }
 
-    void PtPipeline::enableAlphaBlending(PipelineConfig& config) {
+    void Pipeline::enableAlphaBlending(PipelineConfig& config) {
         config.colorBlendAttachment.blendEnable = VK_TRUE;
         config.colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |
             VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
@@ -107,11 +107,11 @@ namespace PalmTree {
         config.colorBlendAttachment.alphaBlendOp = VK_BLEND_OP_ADD;
     }
 
-    void PtPipeline::bind(VkCommandBuffer commandBuffer) {
+    void Pipeline::bind(VkCommandBuffer commandBuffer) {
         vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_graphicsPipeline);
     }
 
-    std::vector<char> PtPipeline::readFile(const std::string& path) {
+    std::vector<char> Pipeline::readFile(const std::string& path) {
         std::ifstream file(path, std::ios::ate | std::ios::binary);
 
         if (!file.is_open()) {
@@ -127,7 +127,7 @@ namespace PalmTree {
         return buffer;
     }
 
-    void PtPipeline::createGraphicsPipeline(
+    void Pipeline::createGraphicsPipeline(
         const std::string& vertPath,
         const std::string& fragPath,
         const PipelineConfig& config
@@ -200,7 +200,7 @@ namespace PalmTree {
         }
     }
 
-    void PtPipeline::createShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule) {
+    void Pipeline::createShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule) {
         VkShaderModuleCreateInfo createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
         createInfo.codeSize = code.size();
