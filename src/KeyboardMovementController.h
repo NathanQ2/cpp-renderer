@@ -1,6 +1,6 @@
 #pragma once
 
-#include "PtGameObject.h"
+#include "EntityComponentSystem/GameObject.h"
 #include "PtWindow.h"
 
 namespace PalmTree {
@@ -23,7 +23,7 @@ namespace PalmTree {
             initialCursorPos
         ) {}
 
-        void moveInPlaneXZ(GLFWwindow* window, float dt, PtGameObject& gameObject);
+        void moveInPlaneXZ(GLFWwindow* window, float dt, GameObject& gameObject);
 
     private:
         KeyMappings m_keys{};

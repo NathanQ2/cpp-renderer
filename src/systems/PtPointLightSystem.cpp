@@ -6,6 +6,7 @@
 
 #include <map>
 #include <stdexcept>
+#include <glm/ext/matrix_transform.hpp>
 
 namespace PalmTree {
     struct PointLightPushConstants {
@@ -31,16 +32,16 @@ namespace PalmTree {
         auto rotateLight = glm::rotate(glm::mat4(1.0f), frameInfo.frameTime, {0.0f, -1.0f, 0.0f});
 
         int lightIndex = 0;
-        for (auto& kv : frameInfo.gameObjects) {
-            auto& obj = kv.second;
-            if (obj.pointLight == nullptr) continue;
-
+        for (Id id : m_ids) {
             assert(lightIndex < MAX_LIGHTS && "Point lights exceed maximum specified");
 
-            obj.transform.translation = glm::vec3(rotateLight * glm::vec4(obj.transform.translation, 1.0f));
+            GameObject& obj = m_ecs->getObject(id);
 
-            ubo.pointLights[lightIndex].position = glm::vec4(obj.transform.translation, 1.0f);
-            ubo.pointLights[lightIndex].color = glm::vec4(obj.color, obj.pointLight->lightIntensity);
+            obj.getTransform().translation = glm::vec3(rotateLight * glm::vec4(obj.getTransform().translation, 1.0f));
+
+            ubo.pointLights[lightIndex].position = glm::vec4(obj.getTransform().translation, 1.0f);
+            PointLightComponent& light = obj.getComponent<PointLightComponent>();
+            ubo.pointLights[lightIndex].color = glm::vec4(light.color, light.lightIntensity);
 
             lightIndex++;
         }
@@ -49,12 +50,11 @@ namespace PalmTree {
     }
 
     void PtPointLightSystem::render(FrameInfo& frameInfo) {
-        std::map<float, PtGameObject::id_t> sorted;
-        for (auto& kv : frameInfo.gameObjects) {
-            auto& obj = kv.second;
-            if (obj.pointLight == nullptr) continue;
+        std::map<float, Id> sorted;
+        for (Id id : m_ids) {
+            GameObject& obj = m_ecs->getObject(id);
 
-            auto offset = frameInfo.camera.getPosition() - obj.transform.translation;
+            auto offset = frameInfo.camera.getPosition() - obj.getTransform().translation;
             float distSquared = glm::dot(offset, offset);
             sorted[distSquared] = obj.getId();
         }
@@ -74,12 +74,13 @@ namespace PalmTree {
 
 
         for (auto it = sorted.rbegin(); it != sorted.rend(); ++it) {
-            auto& obj = frameInfo.gameObjects.at(it->second);
+            auto& obj = m_ecs->getObject(it->second);
 
             PointLightPushConstants push{};
-            push.position = glm::vec4(obj.transform.translation, 1.0f);
-            push.color = glm::vec4(obj.color, obj.pointLight->lightIntensity);
-            push.radius = obj.transform.scale.x;
+            push.position = glm::vec4(obj.getTransform().translation, 1.0f);
+            PointLightComponent& light = obj.getComponent<PointLightComponent>();
+            push.color = glm::vec4(light.color, light.lightIntensity);
+            push.radius = obj.getTransform().scale.x;
 
             vkCmdPushConstants(
                 frameInfo.commandBuffer,

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "PtDescriptors.h"
-#include "PtGameObject.h"
+#include "EntityComponentSystem/EntityComponentSystem.h"
 #include "PtModel.h"
 #include "PtRenderer.h"
 #include "PtWindow.h"
@@ -19,6 +19,7 @@ namespace PalmTree {
         PtApplication& operator=(const PtApplication&) = delete;
 
         void run();
+
     private:
         void loadGameObjects();
 
@@ -32,6 +33,7 @@ namespace PalmTree {
 
         // NOTE: Must be declared after PtDevice
         std::unique_ptr<PtDescriptorPool> m_globalPool{};
-        PtGameObject::Map m_gameObjects;
+       
+        EntityComponentSystem m_ecs{};
     };
 }

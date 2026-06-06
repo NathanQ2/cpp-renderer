@@ -3,8 +3,9 @@
 #include "KeyboardMovementController.h"
 #include "PtBuffer.h"
 #include "PtCamera.h"
-#include "systems/PtPointLightSystem.h"
-#include "systems/PtSimpleRenderSystem.h"
+#include "EntityComponentSystem/EntityComponentSystem.h"
+#include "Systems/PtPointLightSystem.h"
+#include "Systems/PtSimpleRenderSystem.h"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -13,6 +14,7 @@
 
 #include <chrono>
 #include <ostream>
+#include <glm/ext/matrix_transform.hpp>
 
 namespace PalmTree {
     PtApplication::PtApplication() {
@@ -49,21 +51,31 @@ namespace PalmTree {
                 .build(globalDescriptorSets[i]);
         }
 
-        PtSimpleRenderSystem simpleRenderSystem(
+        std::shared_ptr<PtSimpleRenderSystem> simpleRenderSystem = std::make_shared<PtSimpleRenderSystem>(
             m_device,
             m_renderer.getSwapChainRenderPass(),
             globalSetLayout->getDescriptorSetLayout()
         );
-        PtPointLightSystem pointLightSystem(
+        m_ecs.registerSystem<PtSimpleRenderSystem>(
+            simpleRenderSystem,
+            SignatureBuilder<TransformComponent, ModelComponent>(m_ecs.getComponentManager()).build()
+        );
+
+        std::shared_ptr<PtPointLightSystem> pointLightSystem = std::make_shared<PtPointLightSystem>(
             m_device,
             m_renderer.getSwapChainRenderPass(),
             globalSetLayout->getDescriptorSetLayout()
         );
+        m_ecs.registerSystem<PtPointLightSystem>(
+            pointLightSystem,
+            SignatureBuilder<TransformComponent, PointLightComponent>(m_ecs.getComponentManager()).build()
+        );
+
         PtCamera camera{};
         camera.setViewDirection(glm::vec3(0), glm::vec3(0.0, 0.0f, 1.0f));
 
-        auto viewerObject = PtGameObject::createGameObject();
-        viewerObject.transform.translation.z = -2.5f;
+        GameObject& viewerObject = m_ecs.createGameObject();
+        viewerObject.getTransform().translation.z = -2.5f;
 
         glfwSetInputMode(m_window.getGLFWWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         if (glfwRawMouseMotionSupported())
@@ -82,7 +94,7 @@ namespace PalmTree {
             currentTime = newTime;
 
             cameraController.moveInPlaneXZ(m_window.getGLFWWindow(), frameTime, viewerObject);
-            camera.setViewYXZ(viewerObject.transform.translation, viewerObject.transform.rotation);
+            camera.setViewYXZ(viewerObject.getTransform().translation, viewerObject.getTransform().rotation);
 
             float aspect = m_renderer.getAspectRatio();
             camera.setPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 100.0f);
@@ -95,7 +107,6 @@ namespace PalmTree {
                     commandBuffer,
                     camera,
                     globalDescriptorSets[frameIndex],
-                    m_gameObjects
                 };
 
                 // Update
@@ -103,14 +114,14 @@ namespace PalmTree {
                 ubo.projection = camera.getProjection();
                 ubo.view = camera.getView();
                 ubo.inverseView = camera.getInverseView();
-                pointLightSystem.update(frameInfo, ubo);
+                pointLightSystem->update(frameInfo, ubo);
                 uboBuffers[frameIndex]->writeToBuffer(&ubo);
                 uboBuffers[frameIndex]->flush();
 
                 // Render
                 m_renderer.beginSwapChainRenderPass(commandBuffer);
-                simpleRenderSystem.renderGameObjects(frameInfo);
-                pointLightSystem.render(frameInfo);
+                simpleRenderSystem->renderGameObjects(frameInfo);
+                pointLightSystem->render(frameInfo);
                 m_renderer.endSwapChainRenderPass(commandBuffer);
                 m_renderer.endFrame();
             }
@@ -120,37 +131,36 @@ namespace PalmTree {
     }
 
     void PtApplication::loadGameObjects() {
+        // Flat Vase
         {
-            std::shared_ptr model1 = PtModel::createModelFromFile(m_device, "../assets/models/flat_vase.obj");
+            std::shared_ptr model = PtModel::createModelFromFile(m_device, "../assets/models/flat_vase.obj");
 
-            PtGameObject obj1 = PtGameObject::createGameObject();
-            obj1.model = model1;
-            obj1.transform.translation = glm::vec3(-0.5, 0.0, 0.0f);
-            obj1.transform.scale = glm::vec3(3, 1.5, 3);
+            GameObject& obj = m_ecs.createGameObject();
 
-            m_gameObjects.emplace(obj1.getId(), std::move(obj1));
+            obj.addComponent<ModelComponent>(ModelComponent{glm::vec3(1), model});
+
+            obj.getTransform().translation = glm::vec3(-0.5, 0.0, 0.0f);
+            obj.getTransform().scale = glm::vec3(3, 1.5, 3);
         }
 
+        // Smooth Vase
         {
-            std::shared_ptr model2 = PtModel::createModelFromFile(m_device, "../assets/models/smooth_vase.obj");
+            std::shared_ptr model = PtModel::createModelFromFile(m_device, "../assets/models/smooth_vase.obj");
 
-            PtGameObject obj2 = PtGameObject::createGameObject();
-            obj2.model = model2;
-            obj2.transform.translation = glm::vec3(0.5, 0.0, 0.0f);
-            obj2.transform.scale = glm::vec3(3, 1.5, 3);
-
-            m_gameObjects.emplace(obj2.getId(), std::move(obj2));
+            GameObject& obj = m_ecs.createGameObject();
+            obj.addComponent(ModelComponent{glm::vec3(1), model});
+            obj.getTransform().translation = glm::vec3(0.5, 0.0, 0.0f);
+            obj.getTransform().scale = glm::vec3(3, 1.5, 3);
         }
 
+        // Floor
         {
-            std::shared_ptr model3 = PtModel::createModelFromFile(m_device, "../assets/models/quad.obj");
+            std::shared_ptr model = PtModel::createModelFromFile(m_device, "../assets/models/quad.obj");
 
-            PtGameObject obj3 = PtGameObject::createGameObject();
-            obj3.model = model3;
-            obj3.transform.translation = glm::vec3(0.0f, 0.0f, 0.0f);
-            obj3.transform.scale = glm::vec3(5);
-
-            m_gameObjects.emplace(obj3.getId(), std::move(obj3));
+            GameObject& obj = m_ecs.createGameObject();
+            obj.addComponent<ModelComponent>(ModelComponent{glm::vec3(1), model});
+            obj.getTransform().translation = glm::vec3(0.0f, 0.0f, 0.0f);
+            obj.getTransform().scale = glm::vec3(5);
         }
 
         std::vector<glm::vec3> lightColors{
@@ -163,16 +173,17 @@ namespace PalmTree {
         };
 
         for (int i = 0; i < lightColors.size(); i++) {
-            auto light = PtGameObject::createPointLight(0.2f);
-            light.color = lightColors[i];
+            GameObject& light = m_ecs.createGameObject();
+            light.addComponent<PointLightComponent>(PointLightComponent{0.2f, lightColors[i]});
+
             auto rotateLight = glm::rotate(
                 glm::mat4(1.0f),
                 (i * glm::two_pi<float>()) / lightColors.size(),
                 {0.0f, -1.0f, 0.0f}
             );
 
-            light.transform.translation = glm::vec3(rotateLight * glm::vec4(-1.0f, -1.0f, -1.0f, 1.0f));
-            m_gameObjects.emplace(light.getId(), std::move(light));
+            light.getTransform().translation = glm::vec3(rotateLight * glm::vec4(-1.0f, -1.0f, -1.0f, 1.0f));
+            light.getTransform().scale = glm::vec3(0.2);
         }
     }
 }

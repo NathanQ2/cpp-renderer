@@ -1,4 +1,4 @@
-#include "PtGameObject.h"
+#include "Components.h"
 
 namespace PalmTree {
     // Matrix corresponds to Translate * Ry * Rx * Rz * Scale
@@ -60,15 +60,5 @@ namespace PalmTree {
                 invScale.z * (c1 * c2),
             },
         };
-    }
-
-    PtGameObject PtGameObject::createPointLight(float intensity, float radius, glm::vec3 color) {
-        PtGameObject obj = createGameObject();
-        obj.color = color;
-        obj.transform.scale.x = radius;
-        obj.pointLight = std::make_unique<PointLightComponent>();
-        obj.pointLight->lightIntensity = intensity;
-
-        return obj;
     }
 }

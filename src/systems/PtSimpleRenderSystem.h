@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../EntityComponentSystem/System.h"
 #include "../PtFrameInfo.h"
 #include "../PtModel.h"
 #include "../PtPipeline.h"
@@ -7,7 +8,7 @@
 #include <memory>
 
 namespace PalmTree {
-    class PtSimpleRenderSystem {
+    class PtSimpleRenderSystem : public System {
     public:
         PtSimpleRenderSystem(PtDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout);
         ~PtSimpleRenderSystem();

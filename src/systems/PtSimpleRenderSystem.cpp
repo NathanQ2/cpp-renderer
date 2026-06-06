@@ -1,5 +1,7 @@
 #include "PtSimpleRenderSystem.h"
 
+#include "../EntityComponentSystem/EntityComponentSystem.h"
+
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
@@ -39,14 +41,12 @@ namespace PalmTree {
             nullptr
         );
 
-        for (auto& kv : frameInfo.gameObjects) {
-            auto& obj = kv.second;
-
-            if (obj.model == nullptr) continue;
+        for (Id id : m_ids) {
+            auto& obj = m_ecs->getObject(id);
 
             SimplePushConstantData push{};
-            push.modelMatrix = obj.transform.mat4();
-            push.normalMatrix = obj.transform.normalMatrix();
+            push.modelMatrix = obj.getTransform().mat4();
+            push.normalMatrix = obj.getTransform().normalMatrix();
 
             vkCmdPushConstants(
                 frameInfo.commandBuffer,
@@ -57,8 +57,9 @@ namespace PalmTree {
                 &push
             );
 
-            obj.model->bind(frameInfo.commandBuffer);
-            obj.model->draw(frameInfo.commandBuffer);
+            ModelComponent& model = obj.getComponent<ModelComponent>();
+            model.model->bind(frameInfo.commandBuffer);
+            model.model->draw(frameInfo.commandBuffer);
         }
     }
 

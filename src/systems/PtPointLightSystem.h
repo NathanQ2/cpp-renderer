@@ -4,10 +4,12 @@
 #include "../PtModel.h"
 #include "../PtPipeline.h"
 
+#include "../EntityComponentSystem/EntityComponentSystem.h"
+
 #include <memory>
 
 namespace PalmTree {
-    class PtPointLightSystem {
+    class PtPointLightSystem : public System {
     public:
         PtPointLightSystem(PtDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout);
         ~PtPointLightSystem();
@@ -24,6 +26,6 @@ namespace PalmTree {
 
         PtDevice& m_device;
         std::unique_ptr<PtPipeline> m_pipeline;
-        VkPipelineLayout m_pipelineLayout;
+        VkPipelineLayout m_pipelineLayout{};
     };
 }

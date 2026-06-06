@@ -1,7 +1,7 @@
 #pragma once
 
 #include "PtCamera.h"
-#include "PtGameObject.h"
+#include "EntityComponentSystem/GameObject.h"
 
 #include <vulkan/vulkan.h>
 
@@ -28,6 +28,5 @@ namespace PalmTree {
         VkCommandBuffer commandBuffer;
         PtCamera& camera;
         VkDescriptorSet globalDescriptorSet;
-        PtGameObject::Map& gameObjects;
     };
 }
