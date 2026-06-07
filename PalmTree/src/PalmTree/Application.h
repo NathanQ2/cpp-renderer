@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Core.h"
 #include "Descriptors.h"
 #include "EntityComponentSystem/EntityComponentSystem.h"
 #include "Model.h"
@@ -10,7 +11,7 @@
 #include <vector>
 
 namespace PalmTree {
-    class Application {
+    class PT_API Application {
     public:
         Application();
         ~Application() = default;
@@ -36,4 +37,6 @@ namespace PalmTree {
        
         EntityComponentSystem m_ecs{};
     };
+    
+    Application* createApplication();
 }

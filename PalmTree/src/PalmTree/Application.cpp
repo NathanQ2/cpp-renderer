@@ -133,7 +133,7 @@ namespace PalmTree {
     void Application::loadGameObjects() {
         // Flat Vase
         {
-            std::shared_ptr model = Model::createModelFromFile(m_device, "../assets/models/flat_vase.obj");
+            std::shared_ptr model = Model::createModelFromFile(m_device, "../../assets/models/flat_vase.obj");
 
             GameObject& obj = m_ecs.createGameObject();
 
@@ -145,7 +145,7 @@ namespace PalmTree {
 
         // Smooth Vase
         {
-            std::shared_ptr model = Model::createModelFromFile(m_device, "../assets/models/smooth_vase.obj");
+            std::shared_ptr model = Model::createModelFromFile(m_device, "../../assets/models/smooth_vase.obj");
 
             GameObject& obj = m_ecs.createGameObject();
             obj.addComponent(ModelComponent{glm::vec3(1), model});
@@ -155,7 +155,7 @@ namespace PalmTree {
 
         // Floor
         {
-            std::shared_ptr model = Model::createModelFromFile(m_device, "../assets/models/quad.obj");
+            std::shared_ptr model = Model::createModelFromFile(m_device, "../../assets/models/quad.obj");
 
             GameObject& obj = m_ecs.createGameObject();
             obj.addComponent<ModelComponent>(ModelComponent{glm::vec3(1), model});
