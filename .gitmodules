@@ -1,0 +1,3 @@
+[submodule "PalmTree/vendor/spdlog"]
+	path = PalmTree/vendor/spdlog
+	url = https://github.com/gabime/spdlog

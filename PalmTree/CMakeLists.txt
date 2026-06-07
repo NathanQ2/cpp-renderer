@@ -9,11 +9,13 @@ find_package(glm REQUIRED)
 
 file(GLOB_RECURSE SOURCES src/**.cpp src/**.h)
 
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 add_library(PalmTree SHARED ${SOURCES})
 
 target_link_libraries(${PROJECT_NAME} glfw ${GLFW_LIBRARIES} Vulkan::Vulkan glm::glm)
 target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>)
 target_include_directories(${PROJECT_NAME} PRIVATE vendor/tinyobjloader)
+target_include_directories(${PROJECT_NAME} PUBLIC vendor/spdlog/include)
 target_compile_definitions(PalmTree PRIVATE PT_BUILD)
 
 file(GLOB SHADERS ${CMAKE_CURRENT_SOURCE_DIR}/shaders/*.vert ${CMAKE_CURRENT_SOURCE_DIR}/shaders/*.frag)

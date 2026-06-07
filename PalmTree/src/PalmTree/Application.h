@@ -11,7 +11,7 @@
 #include <vector>
 
 namespace PalmTree {
-    class PT_API Application {
+    class Application {
     public:
         Application();
         ~Application() = default;

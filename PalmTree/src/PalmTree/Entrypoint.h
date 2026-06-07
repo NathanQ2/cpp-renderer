@@ -2,11 +2,14 @@
 
 #include <iostream>
 
+#include "Core.h"
 #include "Application.h"
 
 extern PalmTree::Application* PalmTree::createApplication();
 
 int main() {
+    PalmTree::Log::init();
+    
     PalmTree::Application* app = PalmTree::createApplication();
     
     try {
