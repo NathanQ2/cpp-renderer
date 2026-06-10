@@ -30,36 +30,36 @@ namespace PalmTree {
     public:
         virtual ~Event() = default;
         
-        virtual EventType getType() const = 0;
-        virtual EventCategory getEventCategory() const = 0;
+        virtual EventType GetType() const = 0;
+        virtual EventCategory GetEventCategory() const = 0;
         // TODO: Strip from release builds
-        virtual std::string_view getName() const = 0;
-        virtual std::string toString() const { return std::string(getName()); }
+        virtual std::string_view GetName() const = 0;
+        virtual std::string ToString() const { return std::string(GetName()); }
         
-        bool isInCategory(EventCategory category) const {
-            return getEventCategory() & category;
+        bool IsInCategory(EventCategory category) const {
+            return GetEventCategory() & category;
         }
     private:
-        bool m_handled = false;
+        bool m_Handled = false;
     };
     
-#define EVENT_CLASS_IMPL_CATEGORY(category) EventCategory getEventCategory() const override { return static_cast<EventCategory>(category); }
+#define EVENT_CLASS_IMPL_CATEGORY(category) EventCategory GetEventCategory() const override { return static_cast<EventCategory>(category); }
     
-#define EVENT_CLASS_IMPL_TYPE(type) static EventType getStaticType() { return type;} \
-    EventType getType() const override { return getStaticType(); } \
-    std::string_view getName() const override { return #type; }
+#define EVENT_CLASS_IMPL_TYPE(type) static EventType GetStaticType() { return type; } \
+    EventType GetType() const override { return GetStaticType(); } \
+    std::string_view GetName() const override { return #type; }
     
     class EventDispatcher {
         template<typename T>
         using EventFn = std::function<bool(T&)>;
         
     public:
-        EventDispatcher(Event& event) : m_event(event) {}
+        EventDispatcher(Event& event) : m_Event(event) {}
         
         template<typename T>
-        bool dispatch(EventFn<T> func) {
-            if (m_event.getType() == T::getStaticType()) {
-                m_event.m_handled = func(*(T*)(&m_event));
+        bool Dispatch(EventFn<T> func) {
+            if (m_Event.GetType() == T::GetStaticType()) {
+                m_Event.m_Handled = func(*(T*)(&m_Event));
                 
                 return true;
             }
@@ -67,6 +67,6 @@ namespace PalmTree {
             return false;
         }
     private:
-        Event& m_event;
+        Event& m_Event;
     };
 }

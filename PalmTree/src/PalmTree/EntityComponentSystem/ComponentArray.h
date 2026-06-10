@@ -11,12 +11,12 @@ namespace PalmTree {
     template <typename T>
     class ComponentArray : public IComponentArray {
     public:
-        void addComponent(Id id, const T& component) { m_components[id] = component; }
-        void removeComponent(Id id) { m_components[id] = T{}; }
+        void AddComponent(Id id, const T& component) { m_Components[id] = component; }
+        void RemoveComponent(Id id) { m_Components[id] = T{}; }
 
-        T& getComponent(Id id) { return m_components[id]; }
+        T& GetComponent(Id id) { return m_Components[id]; }
 
     private:
-        std::array<T, MAX_GAME_OBJECTS> m_components{};
+        std::array<T, MAX_GAME_OBJECTS> m_Components{};
     };
 }

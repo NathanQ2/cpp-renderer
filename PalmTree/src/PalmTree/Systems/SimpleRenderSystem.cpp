@@ -10,60 +10,60 @@
 
 namespace PalmTree {
     struct SimplePushConstantData {
-        glm::mat4 modelMatrix{1.0f};
-        glm::mat4 normalMatrix{1.0f};
+        glm::mat4 ModelMatrix{1.0f};
+        glm::mat4 NormalMatrix{1.0f};
     };
 
     SimpleRenderSystem::SimpleRenderSystem(
         Device& device,
         VkRenderPass renderPass,
         VkDescriptorSetLayout globalSetLayout
-    ) : m_device(device) {
-        createPipelineLayout(globalSetLayout);
-        createPipeline(renderPass);
+    ) : m_Device(device) {
+        CreatePipelineLayout(globalSetLayout);
+        CreatePipeline(renderPass);
     }
 
     SimpleRenderSystem::~SimpleRenderSystem() {
-        vkDestroyPipelineLayout(m_device.device(), m_pipelineLayout, nullptr);
+        vkDestroyPipelineLayout(m_Device.GetDevice(), m_PipelineLayout, nullptr);
     }
 
-    void SimpleRenderSystem::renderGameObjects(FrameInfo& frameInfo) {
-        m_pipeline->bind(frameInfo.commandBuffer);
+    void SimpleRenderSystem::RenderGameObjects(FrameInfo& frameInfo) {
+        m_Pipeline->Bind(frameInfo.CommandBuffer);
 
         vkCmdBindDescriptorSets(
-            frameInfo.commandBuffer,
+            frameInfo.CommandBuffer,
             VK_PIPELINE_BIND_POINT_GRAPHICS,
-            m_pipelineLayout,
+            m_PipelineLayout,
             0,
             1,
-            &frameInfo.globalDescriptorSet,
+            &frameInfo.GlobalDescriptorSet,
             0,
             nullptr
         );
 
-        for (Id id : m_ids) {
-            auto& obj = m_ecs->getObject(id);
+        for (Id id : m_Ids) {
+            auto& obj = m_Ecs->GetObject(id);
 
             SimplePushConstantData push{};
-            push.modelMatrix = obj.getTransform().mat4();
-            push.normalMatrix = obj.getTransform().normalMatrix();
+            push.ModelMatrix = obj.GetTransform().Mat4();
+            push.NormalMatrix = obj.GetTransform().NormalMatrix();
 
             vkCmdPushConstants(
-                frameInfo.commandBuffer,
-                m_pipelineLayout,
+                frameInfo.CommandBuffer,
+                m_PipelineLayout,
                 VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
                 0,
                 sizeof(SimplePushConstantData),
                 &push
             );
 
-            ModelComponent& model = obj.getComponent<ModelComponent>();
-            model.model->bind(frameInfo.commandBuffer);
-            model.model->draw(frameInfo.commandBuffer);
+            ModelComponent& model = obj.GetComponent<ModelComponent>();
+            model.Model->Bind(frameInfo.CommandBuffer);
+            model.Model->Draw(frameInfo.CommandBuffer);
         }
     }
 
-    void SimpleRenderSystem::createPipelineLayout(VkDescriptorSetLayout globalSetLayout) {
+    void SimpleRenderSystem::CreatePipelineLayout(VkDescriptorSetLayout globalSetLayout) {
         VkPushConstantRange pushConstantRange{};
         pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
         pushConstantRange.offset = 0;
@@ -78,21 +78,21 @@ namespace PalmTree {
         pipelineLayoutInfo.pushConstantRangeCount = 1;
         pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
 
-        if (vkCreatePipelineLayout(m_device.device(), &pipelineLayoutInfo, nullptr, &m_pipelineLayout) != VK_SUCCESS) {
+        if (vkCreatePipelineLayout(m_Device.GetDevice(), &pipelineLayoutInfo, nullptr, &m_PipelineLayout) != VK_SUCCESS) {
             throw std::runtime_error("Failed to create pipeline layout!");
         }
     }
 
-    void SimpleRenderSystem::createPipeline(VkRenderPass renderPass) {
-        assert(m_pipelineLayout != nullptr && "Cannot create pipeline before pipeline layout!");
+    void SimpleRenderSystem::CreatePipeline(VkRenderPass renderPass) {
+        assert(m_PipelineLayout != nullptr && "Cannot create pipeline before pipeline layout!");
 
         PipelineConfig pipelineConfig{};
-        Pipeline::defaultPipelineConfig(pipelineConfig);
+        Pipeline::DefaultPipelineConfig(pipelineConfig);
 
-        pipelineConfig.renderPass = renderPass;
-        pipelineConfig.pipelineLayout = m_pipelineLayout;
-        m_pipeline = std::make_unique<Pipeline>(
-            m_device,
+        pipelineConfig.RenderPass = renderPass;
+        pipelineConfig.PipelineLayout = m_PipelineLayout;
+        m_Pipeline = std::make_unique<Pipeline>(
+            m_Device,
             "simpleShader.vert.spv",
             "simpleShader.frag.spv",
             pipelineConfig

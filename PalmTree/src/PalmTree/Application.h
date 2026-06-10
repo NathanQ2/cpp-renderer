@@ -19,24 +19,24 @@ namespace PalmTree {
         Application(const Application&) = delete;
         Application& operator=(const Application&) = delete;
 
-        void run();
+        void Run();
 
     private:
-        void loadGameObjects();
+        void LoadGameObjects();
 
-        const int m_width = 800;
-        const int m_height = 600;
-        const std::string m_title = "PalmTree Window";
+        const int m_Width = 800;
+        const int m_Height = 600;
+        const std::string m_Title = "PalmTree Window";
 
-        Window m_window = Window(m_width, m_height, m_title);
-        Device m_device = Device(m_window);
-        Renderer m_renderer = Renderer(m_window, m_device);
+        Window m_Window = Window(m_Width, m_Height, m_Title);
+        Device m_Device = Device(m_Window);
+        Renderer m_Renderer = Renderer(m_Window, m_Device);
 
         // NOTE: Must be declared after PtDevice
-        std::unique_ptr<DescriptorPool> m_globalPool{};
+        std::unique_ptr<DescriptorPool> m_GlobalPool{};
        
-        EntityComponentSystem m_ecs{};
+        EntityComponentSystem m_Ecs{};
     };
     
-    Application* createApplication();
+    Application* CreateApplication();
 }

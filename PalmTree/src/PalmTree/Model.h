@@ -14,24 +14,24 @@ namespace PalmTree {
     class Model {
     public:
         struct Vertex {
-            glm::vec3 position{};
-            glm::vec3 color{};
-            glm::vec3 normal{};
-            glm::vec2 uv{};
+            glm::vec3 Position{};
+            glm::vec3 Color{};
+            glm::vec3 Normal{};
+            glm::vec2 Uv{};
 
-            static std::vector<VkVertexInputBindingDescription> getBindingDescriptions();
-            static std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions();
+            static std::vector<VkVertexInputBindingDescription> GetBindingDescriptions();
+            static std::vector<VkVertexInputAttributeDescription> GetAttributeDescriptions();
 
             bool operator==(const Vertex& other) const {
-                return position == other.position && color == other.color && normal == other.normal && uv == other.uv;
+                return Position == other.Position && Color == other.Color && Normal == other.Normal && Uv == other.Uv;
             }
         };
 
         struct Builder {
-            std::vector<Vertex> vertices{};
-            std::vector<uint32_t> indices{};
+            std::vector<Vertex> Vertices{};
+            std::vector<uint32_t> Indices{};
 
-            void loadModel(const std::string& path);
+            void LoadModel(const std::string& path);
         };
 
         Model(Device& device, const Model::Builder& builder);
@@ -40,22 +40,22 @@ namespace PalmTree {
         Model(const Model&) = delete;
         Model& operator=(const Model&) = delete;
 
-        static std::unique_ptr<Model> createModelFromFile(Device& device, const std::string& path);
+        static std::unique_ptr<Model> CreateModelFromFile(Device& device, const std::string& path);
 
-        void bind(VkCommandBuffer commandBuffer);
-        void draw(VkCommandBuffer commandBuffer);
+        void Bind(VkCommandBuffer commandBuffer);
+        void Draw(VkCommandBuffer commandBuffer);
 
     private:
-        void createVertexBuffers(const std::vector<Vertex>& vertices);
-        void createIndexBuffers(const std::vector<uint32_t>& indices);
+        void CreateVertexBuffers(const std::vector<Vertex>& vertices);
+        void CreateIndexBuffers(const std::vector<uint32_t>& indices);
 
-        Device& m_device;
+        Device& m_Device;
 
-        std::unique_ptr<Buffer> m_vertexBuffer;
-        uint32_t m_vertexCount;
+        std::unique_ptr<Buffer> m_VertexBuffer;
+        uint32_t m_VertexCount;
 
-        bool m_hasIndexBuffer = false;
-        std::unique_ptr<Buffer> m_indexBuffer;
-        uint32_t m_indexCount;
+        bool m_HasIndexBuffer = false;
+        std::unique_ptr<Buffer> m_IndexBuffer;
+        uint32_t m_IndexCount;
     };
 }

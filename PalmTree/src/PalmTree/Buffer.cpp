@@ -20,20 +20,20 @@ namespace PalmTree {
         VkMemoryPropertyFlags memoryPropertyFlags,
         VkDeviceSize minOffsetAlignment
     )
-        : m_device{device},
-          m_instanceCount{instanceCount},
-          m_instanceSize{instanceSize},
-          m_usageFlags{usageFlags},
-          m_memoryPropertyFlags{memoryPropertyFlags} {
-        m_alignmentSize = getAlignment(instanceSize, minOffsetAlignment);
-        m_bufferSize = m_alignmentSize * instanceCount;
-        device.createBuffer(m_bufferSize, usageFlags, memoryPropertyFlags, m_buffer, m_memory);
+        : m_Device{device},
+          m_InstanceCount{instanceCount},
+          m_InstanceSize{instanceSize},
+          m_UsageFlags{usageFlags},
+          m_MemoryPropertyFlags{memoryPropertyFlags} {
+        m_AlignmentSize = GetAlignment(instanceSize, minOffsetAlignment);
+        m_BufferSize = m_AlignmentSize * instanceCount;
+        device.CreateBuffer(m_BufferSize, usageFlags, memoryPropertyFlags, m_Buffer, m_Memory);
     }
 
     Buffer::~Buffer() {
-        unmap();
-        vkDestroyBuffer(m_device.device(), m_buffer, nullptr);
-        vkFreeMemory(m_device.device(), m_memory, nullptr);
+        Unmap();
+        vkDestroyBuffer(m_Device.GetDevice(), m_Buffer, nullptr);
+        vkFreeMemory(m_Device.GetDevice(), m_Memory, nullptr);
     }
 
     /**
@@ -45,9 +45,9 @@ namespace PalmTree {
      *
      * @return VkResult of the buffer mapping call
      */
-    VkResult Buffer::map(VkDeviceSize size, VkDeviceSize offset) {
-        assert(m_buffer && m_memory && "Called map on buffer before create");
-        return vkMapMemory(m_device.device(), m_memory, offset, size, 0, &m_mapped);
+    VkResult Buffer::Map(VkDeviceSize size, VkDeviceSize offset) {
+        assert(m_Buffer && m_Memory && "Called map on buffer before create");
+        return vkMapMemory(m_Device.GetDevice(), m_Memory, offset, size, 0, &m_Mapped);
     }
 
     /**
@@ -55,10 +55,10 @@ namespace PalmTree {
      *
      * @note Does not return a result as vkUnmapMemory can't fail
      */
-    void Buffer::unmap() {
-        if (m_mapped) {
-            vkUnmapMemory(m_device.device(), m_memory);
-            m_mapped = nullptr;
+    void Buffer::Unmap() {
+        if (m_Mapped) {
+            vkUnmapMemory(m_Device.GetDevice(), m_Memory);
+            m_Mapped = nullptr;
         }
     }
 
@@ -71,14 +71,14 @@ namespace PalmTree {
      * @param offset (Optional) Byte offset from beginning of mapped region
      *
      */
-    void Buffer::writeToBuffer(void* data, VkDeviceSize size, VkDeviceSize offset) {
-        assert(m_mapped && "Cannot copy to unmapped buffer");
+    void Buffer::WriteToBuffer(void* data, VkDeviceSize size, VkDeviceSize offset) {
+        assert(m_Mapped && "Cannot copy to unmapped buffer");
 
         if (size == VK_WHOLE_SIZE) {
-            memcpy(m_mapped, data, m_bufferSize);
+            memcpy(m_Mapped, data, m_BufferSize);
         }
         else {
-            char* memOffset = (char*)m_mapped;
+            char* memOffset = (char*)m_Mapped;
             memOffset += offset;
             memcpy(memOffset, data, size);
         }
@@ -95,13 +95,13 @@ namespace PalmTree {
      *
      * @return VkResult of the flush call
      */
-    VkResult Buffer::flush(VkDeviceSize size, VkDeviceSize offset) {
+    VkResult Buffer::Flush(VkDeviceSize size, VkDeviceSize offset) {
         VkMappedMemoryRange mappedRange = {};
         mappedRange.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
-        mappedRange.memory = m_memory;
+        mappedRange.memory = m_Memory;
         mappedRange.offset = offset;
         mappedRange.size = size;
-        return vkFlushMappedMemoryRanges(m_device.device(), 1, &mappedRange);
+        return vkFlushMappedMemoryRanges(m_Device.GetDevice(), 1, &mappedRange);
     }
 
     /**
@@ -112,9 +112,9 @@ namespace PalmTree {
      *
      * @return VkDescriptorBufferInfo of specified offset and range
      */
-    VkDescriptorBufferInfo Buffer::descriptorInfo(VkDeviceSize size, VkDeviceSize offset) {
+    VkDescriptorBufferInfo Buffer::DescriptorInfo(VkDeviceSize size, VkDeviceSize offset) {
         return VkDescriptorBufferInfo{
-            m_buffer,
+            m_Buffer,
             offset,
             size,
         };
@@ -131,13 +131,13 @@ namespace PalmTree {
      *
      * @return VkResult of the invalidate call
      */
-    VkResult Buffer::invalidate(VkDeviceSize size, VkDeviceSize offset) {
+    VkResult Buffer::Invalidate(VkDeviceSize size, VkDeviceSize offset) {
         VkMappedMemoryRange mappedRange = {};
         mappedRange.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
-        mappedRange.memory = m_memory;
+        mappedRange.memory = m_Memory;
         mappedRange.offset = offset;
         mappedRange.size = size;
-        return vkInvalidateMappedMemoryRanges(m_device.device(), 1, &mappedRange);
+        return vkInvalidateMappedMemoryRanges(m_Device.GetDevice(), 1, &mappedRange);
     }
 
     /**
@@ -147,8 +147,8 @@ namespace PalmTree {
      * @param index Used in offset calculation
      *
      */
-    void Buffer::writeToIndex(void* data, int index) {
-        writeToBuffer(data, m_instanceSize, index * m_alignmentSize);
+    void Buffer::WriteToIndex(void* data, int index) {
+        WriteToBuffer(data, m_InstanceSize, index * m_AlignmentSize);
     }
 
     /**
@@ -157,7 +157,7 @@ namespace PalmTree {
      * @param index Used in offset calculation
      *
      */
-    VkResult Buffer::flushIndex(int index) { return flush(m_alignmentSize, index * m_alignmentSize); }
+    VkResult Buffer::FlushIndex(int index) { return Flush(m_AlignmentSize, index * m_AlignmentSize); }
 
     /**
      * Create a buffer info descriptor
@@ -166,8 +166,8 @@ namespace PalmTree {
      *
      * @return VkDescriptorBufferInfo for instance at index
      */
-    VkDescriptorBufferInfo Buffer::descriptorInfoForIndex(int index) {
-        return descriptorInfo(m_alignmentSize, index * m_alignmentSize);
+    VkDescriptorBufferInfo Buffer::DescriptorInfoForIndex(int index) {
+        return DescriptorInfo(m_AlignmentSize, index * m_AlignmentSize);
     }
 
     /**
@@ -179,8 +179,8 @@ namespace PalmTree {
      *
      * @return VkResult of the invalidate call
      */
-    VkResult Buffer::invalidateIndex(int index) {
-        return invalidate(m_alignmentSize, index * m_alignmentSize);
+    VkResult Buffer::InvalidateIndex(int index) {
+        return Invalidate(m_AlignmentSize, index * m_AlignmentSize);
     }
 
     /**
@@ -192,7 +192,7 @@ namespace PalmTree {
      *
      * @return VkResult of the buffer mapping call
      */
-    VkDeviceSize Buffer::getAlignment(VkDeviceSize instanceSize, VkDeviceSize minOffsetAlignment) {
+    VkDeviceSize Buffer::GetAlignment(VkDeviceSize instanceSize, VkDeviceSize minOffsetAlignment) {
         if (minOffsetAlignment > 0) {
             return (instanceSize + minOffsetAlignment - 1) & ~(minOffsetAlignment - 1);
         }

@@ -12,8 +12,8 @@ namespace PalmTree {
         friend class SystemManager;
 
     protected:
-        std::set<Id> m_ids;
+        std::set<Id> m_Ids;
 
-        EntityComponentSystem* m_ecs = nullptr;
+        EntityComponentSystem* m_Ecs = nullptr;
     };
 }

@@ -10,81 +10,81 @@ namespace PalmTree {
     public:
         static constexpr int MAX_FRAMES_IN_FLIGHT = 2;
 
-        SwapChain(Window& window, Device& device) : m_window{window}, m_device{device} { init(); }
+        SwapChain(Window& window, Device& device) : m_Window{window}, m_Device{device} { Init(); }
 
         ~SwapChain() {
-            cleanupSwapChain();
-            cleanupSyncObjects();
+            CleanupSwapChain();
+            CleanupSyncObjects();
         }
 
         SwapChain(const SwapChain&) = delete;
         SwapChain& operator=(const SwapChain&) = delete;
 
-        VkFramebuffer getFrameBuffer(int index) { return m_swapChainFramebuffers[index]; }
-        VkRenderPass getRenderPass() { return m_renderPass; }
-        VkImageView getImageView(int index) { return m_swapChainImageViews[index]; }
-        void recreateSwapChain();
-        void cleanupSwapChain();
-        size_t imageCount() { return m_swapChainImages.size(); }
-        VkFormat getSwapChainImageFormat() { return m_swapChainImageFormat; }
-        VkExtent2D getSwapChainExtent() { return m_swapChainExtent; }
-        uint32_t width() { return m_swapChainExtent.width; }
-        uint32_t height() { return m_swapChainExtent.height; }
+        VkFramebuffer GetFrameBuffer(int index) { return m_SwapChainFramebuffers[index]; }
+        VkRenderPass GetRenderPass() { return m_RenderPass; }
+        VkImageView GetImageView(int index) { return m_SwapChainImageViews[index]; }
+        void RecreateSwapChain();
+        void CleanupSwapChain();
+        size_t ImageCount() { return m_SwapChainImages.size(); }
+        VkFormat GetSwapChainImageFormat() { return m_SwapChainImageFormat; }
+        VkExtent2D GetSwapChainExtent() { return m_SwapChainExtent; }
+        uint32_t GetWidth() { return m_SwapChainExtent.width; }
+        uint32_t GetHeight() { return m_SwapChainExtent.height; }
 
-        float extentAspectRatio() {
-            return static_cast<float>(m_swapChainExtent.width) / static_cast<float>(m_swapChainExtent.height);
+        float ExtentAspectRatio() {
+            return static_cast<float>(m_SwapChainExtent.width) / static_cast<float>(m_SwapChainExtent.height);
         }
 
-        VkFormat findDepthFormat();
+        VkFormat FindDepthFormat();
 
-        VkResult acquireNextImage(uint32_t* imageIndex);
-        VkResult submitCommandBuffers(const VkCommandBuffer* buffers, uint32_t* imageIndex);
+        VkResult AcquireNextImage(uint32_t* imageIndex);
+        VkResult SubmitCommandBuffers(const VkCommandBuffer* buffers, uint32_t* imageIndex);
 
-        bool compareSwapFormats(VkFormat otherDepthFormat, VkFormat otherImageFormat) const {
-            return otherDepthFormat == m_swapChainDepthFormat && otherImageFormat == m_swapChainImageFormat;
+        bool CompareSwapFormats(VkFormat otherDepthFormat, VkFormat otherImageFormat) const {
+            return otherDepthFormat == m_SwapChainDepthFormat && otherImageFormat == m_SwapChainImageFormat;
         }
 
     private:
-        void init();
-        void cleanupSyncObjects();
-        void createSwapChain();
-        void createImageViews();
-        void createDepthResources();
-        void createRenderPass();
-        void createFramebuffers();
-        void createSyncObjects();
+        void Init();
+        void CleanupSyncObjects();
+        void CreateSwapChain();
+        void CreateImageViews();
+        void CreateDepthResources();
+        void CreateRenderPass();
+        void CreateFramebuffers();
+        void CreateSyncObjects();
 
         // Helper functions
-        VkSurfaceFormatKHR chooseSwapSurfaceFormat(
+        VkSurfaceFormatKHR ChooseSwapSurfaceFormat(
             const std::vector<VkSurfaceFormatKHR>& availableFormats
         );
-        VkPresentModeKHR chooseSwapPresentMode(
+        VkPresentModeKHR ChooseSwapPresentMode(
             const std::vector<VkPresentModeKHR>& availablePresentModes
         );
-        VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
+        VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
 
-        VkFormat m_swapChainImageFormat;
-        VkFormat m_swapChainDepthFormat;
-        VkExtent2D m_swapChainExtent;
+        VkFormat m_SwapChainImageFormat;
+        VkFormat m_SwapChainDepthFormat;
+        VkExtent2D m_SwapChainExtent;
 
-        std::vector<VkFramebuffer> m_swapChainFramebuffers;
-        VkRenderPass m_renderPass;
+        std::vector<VkFramebuffer> m_SwapChainFramebuffers;
+        VkRenderPass m_RenderPass;
 
-        std::vector<VkImage> m_depthImages;
-        std::vector<VkDeviceMemory> m_depthImageMemories;
-        std::vector<VkImageView> m_depthImageViews;
-        std::vector<VkImage> m_swapChainImages;
-        std::vector<VkImageView> m_swapChainImageViews;
+        std::vector<VkImage> m_DepthImages;
+        std::vector<VkDeviceMemory> m_DepthImageMemories;
+        std::vector<VkImageView> m_DepthImageViews;
+        std::vector<VkImage> m_SwapChainImages;
+        std::vector<VkImageView> m_SwapChainImageViews;
 
-        Window& m_window;
-        Device& m_device;
+        Window& m_Window;
+        Device& m_Device;
 
-        VkSwapchainKHR m_swapChain = VK_NULL_HANDLE;
+        VkSwapchainKHR m_SwapChain = VK_NULL_HANDLE;
 
-        std::vector<VkSemaphore> m_imageAvailableSemaphores;
-        std::vector<VkSemaphore> m_renderFinishedSemaphores;
-        std::vector<VkFence> m_inFlightFences;
-        std::vector<VkFence> m_imagesInFlight;
-        size_t m_currentFrame = 0;
+        std::vector<VkSemaphore> m_ImageAvailableSemaphores;
+        std::vector<VkSemaphore> m_RenderFinishedSemaphores;
+        std::vector<VkFence> m_InFlightFences;
+        std::vector<VkFence> m_ImagesInFlight;
+        size_t m_CurrentFrame = 0;
     };
 }

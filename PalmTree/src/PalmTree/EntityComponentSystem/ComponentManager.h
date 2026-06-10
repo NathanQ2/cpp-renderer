@@ -13,87 +13,87 @@ namespace PalmTree {
     class ComponentManager {
     public:
         template <typename T>
-        void registerComponent() {
+        void RegisterComponent() {
             const char* name = typeid(T).name();
 
-            assert(!m_componentTypes.contains(name) && "Component has already been registered!");
-            assert(m_componentTypes.size() < MAX_COMPONENTS && "Too many components registered!");
+            assert(!m_ComponentTypes.contains(name) && "Component has already been registered!");
+            assert(m_ComponentTypes.size() < MAX_COMPONENTS && "Too many components registered!");
 
-            ComponentType type = m_nextComponentType;
-            m_componentTypes[name] = type;
-            m_nextComponentType++;
+            ComponentType type = m_NextComponentType;
+            m_ComponentTypes[name] = type;
+            m_NextComponentType++;
 
-            m_componentArrays[type] = std::make_shared<ComponentArray<T>>();
+            m_ComponentArrays[type] = std::make_shared<ComponentArray<T>>();
         }
 
         template <typename T>
-        void addComponent(Id id, const T& component) {
-            getComponentArray<T>()->addComponent(id, component);
+        void AddComponent(Id id, const T& component) {
+            GetComponentArray<T>()->AddComponent(id, component);
         }
 
         template <typename T>
-        void removeComponent(Id id) {
-            getComponentArray<T>()->removeComponent(id);
+        void RemoveComponent(Id id) {
+            GetComponentArray<T>()->RemoveComponent(id);
         }
 
         template <typename T>
-        T& getComponent(Id id) {
-            return getComponentArray<T>()->getComponent(id);
+        T& GetComponent(Id id) {
+            return GetComponentArray<T>()->GetComponent(id);
         }
 
         template <typename T>
-        ComponentType getComponentType() {
+        ComponentType GetComponentType() {
             const char* name = typeid(T).name();
 
-            assert(m_componentTypes.contains(name) && "Component has not been registered!");
+            assert(m_ComponentTypes.contains(name) && "Component has not been registered!");
 
-            return m_componentTypes[name];
+            return m_ComponentTypes[name];
         }
 
     private:
-        std::unordered_map<std::string_view, ComponentType> m_componentTypes{};
-        ComponentType m_nextComponentType = 0;
+        std::unordered_map<std::string_view, ComponentType> m_ComponentTypes{};
+        ComponentType m_NextComponentType = 0;
 
-        std::unordered_map<ComponentType, std::shared_ptr<IComponentArray>> m_componentArrays{};
+        std::unordered_map<ComponentType, std::shared_ptr<IComponentArray>> m_ComponentArrays{};
 
         template <typename T>
-        std::shared_ptr<ComponentArray<T>> getComponentArray() {
-            ComponentType type = getComponentType<T>();
+        std::shared_ptr<ComponentArray<T>> GetComponentArray() {
+            ComponentType type = GetComponentType<T>();
 
-            assert(m_componentArrays.contains(type) && "Component has not been registered!");
+            assert(m_ComponentArrays.contains(type) && "Component has not been registered!");
 
-            return std::static_pointer_cast<ComponentArray<T>>(m_componentArrays[type]);
+            return std::static_pointer_cast<ComponentArray<T>>(m_ComponentArrays[type]);
         }
     };
 
     template <typename... Ts>
     class SignatureBuilder {
     public:
-        SignatureBuilder(ComponentManager& cm) : m_cm(cm) {
-            (add<Ts>(), ...);
+        SignatureBuilder(ComponentManager& cm) : m_Cm(cm) {
+            (Add<Ts>(), ...);
         }
 
         template <typename U>
-        SignatureBuilder& add() {
-            m_signature.set(m_cm.getComponentType<U>(), true);
+        SignatureBuilder& Add() {
+            m_Signature.set(m_Cm.GetComponentType<U>(), true);
 
             return *this;
         }
 
         template <typename U>
-        SignatureBuilder& remove() {
-            m_signature.set(m_cm.getComponentType<U>(), false);
+        SignatureBuilder& Aemove() {
+            m_Signature.set(m_Cm.GetComponentType<U>(), false);
 
             return *this;
         }
 
-        [[nodiscard]] Signature build() const {
-            return m_signature;
+        [[nodiscard]] Signature Build() const {
+            return m_Signature;
         }
 
     private:
-        Signature m_signature{};
+        Signature m_Signature{};
 
-        ComponentManager& m_cm;
+        ComponentManager& m_Cm;
     };
 }

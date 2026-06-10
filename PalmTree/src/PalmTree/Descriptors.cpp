@@ -7,24 +7,24 @@
 namespace PalmTree {
     // *************** Descriptor Set Layout Builder *********************
 
-    DescriptorSetLayout::Builder& DescriptorSetLayout::Builder::addBinding(
+    DescriptorSetLayout::Builder& DescriptorSetLayout::Builder::AddBinding(
         uint32_t binding,
         VkDescriptorType descriptorType,
         VkShaderStageFlags stageFlags,
         uint32_t count
     ) {
-        assert(m_bindings.count(binding) == 0 && "Binding already in use");
+        assert(m_Bindings.count(binding) == 0 && "Binding already in use");
         VkDescriptorSetLayoutBinding layoutBinding{};
         layoutBinding.binding = binding;
         layoutBinding.descriptorType = descriptorType;
         layoutBinding.descriptorCount = count;
         layoutBinding.stageFlags = stageFlags;
-        m_bindings[binding] = layoutBinding;
+        m_Bindings[binding] = layoutBinding;
         return *this;
     }
 
-    std::unique_ptr<DescriptorSetLayout> DescriptorSetLayout::Builder::build() const {
-        return std::make_unique<DescriptorSetLayout>(m_device, m_bindings);
+    std::unique_ptr<DescriptorSetLayout> DescriptorSetLayout::Builder::Build() const {
+        return std::make_unique<DescriptorSetLayout>(m_Device, m_Bindings);
     }
 
     // *************** Descriptor Set Layout *********************
@@ -33,7 +33,7 @@ namespace PalmTree {
         Device& ptDevice,
         std::unordered_map<uint32_t, VkDescriptorSetLayoutBinding> bindings
     )
-        : m_device{ptDevice}, m_bindings{bindings} {
+        : m_Device{ptDevice}, m_Bindings{bindings} {
         std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings{};
         for (auto kv : bindings) {
             setLayoutBindings.push_back(kv.second);
@@ -45,43 +45,43 @@ namespace PalmTree {
         descriptorSetLayoutInfo.pBindings = setLayoutBindings.data();
 
         if (vkCreateDescriptorSetLayout(
-            ptDevice.device(),
+            ptDevice.GetDevice(),
             &descriptorSetLayoutInfo,
             nullptr,
-            &m_descriptorSetLayout
+            &m_DescriptorSetLayout
         ) != VK_SUCCESS) {
             throw std::runtime_error("failed to create descriptor set layout!");
         }
     }
 
     DescriptorSetLayout::~DescriptorSetLayout() {
-        vkDestroyDescriptorSetLayout(m_device.device(), m_descriptorSetLayout, nullptr);
+        vkDestroyDescriptorSetLayout(m_Device.GetDevice(), m_DescriptorSetLayout, nullptr);
     }
 
     // *************** Descriptor Pool Builder *********************
 
-    DescriptorPool::Builder& DescriptorPool::Builder::addPoolSize(
+    DescriptorPool::Builder& DescriptorPool::Builder::AddPoolSize(
         VkDescriptorType descriptorType,
         uint32_t count
     ) {
-        m_poolSizes.push_back({descriptorType, count});
+        m_PoolSizes.push_back({descriptorType, count});
         return *this;
     }
 
-    DescriptorPool::Builder& DescriptorPool::Builder::setPoolFlags(
+    DescriptorPool::Builder& DescriptorPool::Builder::SetPoolFlags(
         VkDescriptorPoolCreateFlags flags
     ) {
-        m_poolFlags = flags;
+        m_PoolFlags = flags;
         return *this;
     }
 
-    DescriptorPool::Builder& DescriptorPool::Builder::setMaxSets(uint32_t count) {
-        m_maxSets = count;
+    DescriptorPool::Builder& DescriptorPool::Builder::SetMaxSets(uint32_t count) {
+        m_MaxSets = count;
         return *this;
     }
 
-    std::unique_ptr<DescriptorPool> DescriptorPool::Builder::build() const {
-        return std::make_unique<DescriptorPool>(m_device, m_maxSets, m_poolFlags, m_poolSizes);
+    std::unique_ptr<DescriptorPool> DescriptorPool::Builder::Build() const {
+        return std::make_unique<DescriptorPool>(m_Device, m_MaxSets, m_PoolFlags, m_PoolSizes);
     }
 
     // *************** Descriptor Pool *********************
@@ -92,7 +92,7 @@ namespace PalmTree {
         VkDescriptorPoolCreateFlags poolFlags,
         const std::vector<VkDescriptorPoolSize>& poolSizes
     )
-        : m_device{ptDevice} {
+        : m_Device{ptDevice} {
         VkDescriptorPoolCreateInfo descriptorPoolInfo{};
         descriptorPoolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
         descriptorPoolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
@@ -100,59 +100,59 @@ namespace PalmTree {
         descriptorPoolInfo.maxSets = maxSets;
         descriptorPoolInfo.flags = poolFlags;
 
-        if (vkCreateDescriptorPool(ptDevice.device(), &descriptorPoolInfo, nullptr, &m_descriptorPool) !=
+        if (vkCreateDescriptorPool(ptDevice.GetDevice(), &descriptorPoolInfo, nullptr, &m_DescriptorPool) !=
             VK_SUCCESS) {
             throw std::runtime_error("failed to create descriptor pool!");
         }
     }
 
     DescriptorPool::~DescriptorPool() {
-        vkDestroyDescriptorPool(m_device.device(), m_descriptorPool, nullptr);
+        vkDestroyDescriptorPool(m_Device.GetDevice(), m_DescriptorPool, nullptr);
     }
 
-    bool DescriptorPool::allocateDescriptor(
+    bool DescriptorPool::AllocateDescriptor(
         const VkDescriptorSetLayout descriptorSetLayout,
         VkDescriptorSet& descriptor
     ) const {
         VkDescriptorSetAllocateInfo allocInfo{};
         allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-        allocInfo.descriptorPool = m_descriptorPool;
+        allocInfo.descriptorPool = m_DescriptorPool;
         allocInfo.pSetLayouts = &descriptorSetLayout;
         allocInfo.descriptorSetCount = 1;
 
         // Might want to create a "DescriptorPoolManager" class that handles this case, and builds
         // a new pool whenever an old pool fills up. But this is beyond our current scope
-        if (vkAllocateDescriptorSets(m_device.device(), &allocInfo, &descriptor) != VK_SUCCESS) {
+        if (vkAllocateDescriptorSets(m_Device.GetDevice(), &allocInfo, &descriptor) != VK_SUCCESS) {
             return false;
         }
         return true;
     }
 
-    void DescriptorPool::freeDescriptors(std::vector<VkDescriptorSet>& descriptors) const {
+    void DescriptorPool::FreeDescriptors(std::vector<VkDescriptorSet>& descriptors) const {
         vkFreeDescriptorSets(
-            m_device.device(),
-            m_descriptorPool,
+            m_Device.GetDevice(),
+            m_DescriptorPool,
             static_cast<uint32_t>(descriptors.size()),
             descriptors.data()
         );
     }
 
-    void DescriptorPool::resetPool() {
-        vkResetDescriptorPool(m_device.device(), m_descriptorPool, 0);
+    void DescriptorPool::ResetPool() {
+        vkResetDescriptorPool(m_Device.GetDevice(), m_DescriptorPool, 0);
     }
 
     // *************** Descriptor Writer *********************
 
     DescriptorWriter::DescriptorWriter(DescriptorSetLayout& setLayout, DescriptorPool& pool)
-        : m_setLayout{setLayout}, m_pool{pool} {}
+        : m_SetLayout{setLayout}, m_Pool{pool} {}
 
-    DescriptorWriter& DescriptorWriter::writeBuffer(
+    DescriptorWriter& DescriptorWriter::WriteBuffer(
         uint32_t binding,
         VkDescriptorBufferInfo* bufferInfo
     ) {
-        assert(m_setLayout.m_bindings.count(binding) == 1 && "Layout does not contain specified binding");
+        assert(m_SetLayout.m_Bindings.count(binding) == 1 && "Layout does not contain specified binding");
 
-        auto& bindingDescription = m_setLayout.m_bindings[binding];
+        auto& bindingDescription = m_SetLayout.m_Bindings[binding];
 
         assert(
             bindingDescription.descriptorCount == 1 &&
@@ -166,17 +166,17 @@ namespace PalmTree {
         write.pBufferInfo = bufferInfo;
         write.descriptorCount = 1;
 
-        m_writes.push_back(write);
+        m_Writes.push_back(write);
         return *this;
     }
 
-    DescriptorWriter& DescriptorWriter::writeImage(
+    DescriptorWriter& DescriptorWriter::WriteImage(
         uint32_t binding,
         VkDescriptorImageInfo* imageInfo
     ) {
-        assert(m_setLayout.m_bindings.count(binding) == 1 && "Layout does not contain specified binding");
+        assert(m_SetLayout.m_Bindings.count(binding) == 1 && "Layout does not contain specified binding");
 
-        auto& bindingDescription = m_setLayout.m_bindings[binding];
+        auto& bindingDescription = m_SetLayout.m_Bindings[binding];
 
         assert(
             bindingDescription.descriptorCount == 1 &&
@@ -190,23 +190,23 @@ namespace PalmTree {
         write.pImageInfo = imageInfo;
         write.descriptorCount = 1;
 
-        m_writes.push_back(write);
+        m_Writes.push_back(write);
         return *this;
     }
 
-    bool DescriptorWriter::build(VkDescriptorSet& set) {
-        bool success = m_pool.allocateDescriptor(m_setLayout.getDescriptorSetLayout(), set);
+    bool DescriptorWriter::Build(VkDescriptorSet& set) {
+        bool success = m_Pool.AllocateDescriptor(m_SetLayout.GetDescriptorSetLayout(), set);
         if (!success) {
             return false;
         }
-        overwrite(set);
+        Overwrite(set);
         return true;
     }
 
-    void DescriptorWriter::overwrite(VkDescriptorSet& set) {
-        for (auto& write : m_writes) {
+    void DescriptorWriter::Overwrite(VkDescriptorSet& set) {
+        for (auto& write : m_Writes) {
             write.dstSet = set;
         }
-        vkUpdateDescriptorSets(m_pool.m_device.device(), m_writes.size(), m_writes.data(), 0, nullptr);
+        vkUpdateDescriptorSets(m_Pool.m_Device.GetDevice(), m_Writes.size(), m_Writes.data(), 0, nullptr);
     }
 }

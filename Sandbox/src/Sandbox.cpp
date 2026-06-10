@@ -5,6 +5,6 @@ public:
     Sandbox() = default;
 };
 
-PalmTree::Application* PalmTree::createApplication() {
+PalmTree::Application* PalmTree::CreateApplication() {
     return new Sandbox();
 }

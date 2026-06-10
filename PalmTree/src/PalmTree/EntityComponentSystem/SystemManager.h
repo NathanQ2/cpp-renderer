@@ -11,15 +11,15 @@ namespace PalmTree {
     class SystemManager {
     public:
         template <typename T>
-        void registerSystem(std::shared_ptr<T> system, Signature signature, EntityComponentSystem* ecs) {
+        void RegisterSystem(std::shared_ptr<T> system, Signature signature, EntityComponentSystem* ecs) {
             const char* name = typeid(T).name();
 
-            assert(!m_systems.contains(name) && "The system has already been registered!");
+            assert(!m_Systems.contains(name) && "The system has already been registered!");
 
-            system->m_ecs = ecs;
+            system->m_Ecs = ecs;
 
-            m_systems[name] = system;
-            m_signatures[name] = signature;
+            m_Systems[name] = system;
+            m_Signatures[name] = signature;
         }
 
         /**
@@ -30,33 +30,33 @@ namespace PalmTree {
          * @param objSignature The signature of the object
          */
         template <typename T>
-        void initSystemWithObject(Id id, Signature objSignature) {
+        void InitSystemWithObject(Id id, Signature objSignature) {
             const char* name = typeid(T).name();
 
-            std::shared_ptr<System> system = m_systems[name];
-            Signature systemSignature = m_signatures[name];
+            std::shared_ptr<System> system = m_Systems[name];
+            Signature systemSignature = m_Signatures[name];
 
             if ((objSignature & systemSignature) == systemSignature) {
-                system->m_ids.insert(id);
+                system->m_Ids.insert(id);
             }
         }
 
-        void gameObjectSignatureChanged(Id id, Signature objSignature) {
-            for (const auto& kv : m_systems) {
+        void GameObjectSignatureChanged(Id id, Signature objSignature) {
+            for (const auto& kv : m_Systems) {
                 std::shared_ptr<System> system = kv.second;
-                Signature signature = m_signatures[kv.first];
+                Signature signature = m_Signatures[kv.first];
 
                 if ((objSignature & signature) == signature) {
-                    system->m_ids.insert(id);
+                    system->m_Ids.insert(id);
                 }
                 else {
-                    system->m_ids.erase(id);
+                    system->m_Ids.erase(id);
                 }
             }
         }
 
     private:
-        std::unordered_map<const char*, std::shared_ptr<System>> m_systems{};
-        std::unordered_map<const char*, Signature> m_signatures{};
+        std::unordered_map<const char*, std::shared_ptr<System>> m_Systems{};
+        std::unordered_map<const char*, Signature> m_Signatures{};
     };
 }

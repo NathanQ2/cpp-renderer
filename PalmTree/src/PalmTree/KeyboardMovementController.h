@@ -7,30 +7,30 @@ namespace PalmTree {
     class KeyboardMovementController {
     public:
         struct KeyMappings {
-            int moveLeft = GLFW_KEY_A;
-            int moveRight = GLFW_KEY_D;
-            int moveForward = GLFW_KEY_W;
-            int moveBackward = GLFW_KEY_S;
-            int moveUp = GLFW_KEY_E;
-            int moveDown = GLFW_KEY_Q;
-            int lookLeft = GLFW_KEY_LEFT;
-            int lookRight = GLFW_KEY_RIGHT;
-            int lookUp = GLFW_KEY_UP;
-            int lookDown = GLFW_KEY_DOWN;
+            int MoveLeft = GLFW_KEY_A;
+            int MoveRight = GLFW_KEY_D;
+            int MoveForward = GLFW_KEY_W;
+            int MoveBackward = GLFW_KEY_S;
+            int MoveUp = GLFW_KEY_E;
+            int MoveDown = GLFW_KEY_Q;
+            int LookLeft = GLFW_KEY_LEFT;
+            int LookRight = GLFW_KEY_RIGHT;
+            int LookUp = GLFW_KEY_UP;
+            int LookDown = GLFW_KEY_DOWN;
         };
 
-        explicit KeyboardMovementController(const glm::f64vec2 initialCursorPos) : m_previousCursorPosition(
+        explicit KeyboardMovementController(const glm::f64vec2 initialCursorPos) : m_PreviousCursorPosition(
             initialCursorPos
         ) {}
 
-        void moveInPlaneXZ(GLFWwindow* window, float dt, GameObject& gameObject);
+        void MoveInPlaneXZ(GLFWwindow* window, float dt, GameObject& gameObject);
 
     private:
-        KeyMappings m_keys{};
-        float m_moveSpeed = 3.0f;
-        float m_keyboardLookSpeed = 1.5f;
-        float m_mouseLookSpeed = 0.015f;
+        KeyMappings m_Keys{};
+        float m_MoveSpeed = 3.0f;
+        float m_KeyboardLookSpeed = 1.5f;
+        float m_MouseLookSpeed = 0.015f;
 
-        glm::f64vec2 m_previousCursorPosition;
+        glm::f64vec2 m_PreviousCursorPosition;
     };
 }

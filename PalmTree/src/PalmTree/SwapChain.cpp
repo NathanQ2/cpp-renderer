@@ -8,71 +8,71 @@
 #include <stdexcept>
 
 namespace PalmTree {
-    void SwapChain::recreateSwapChain() {
-        while (m_window.getWidth() == 0 || m_window.getHeight() == 0) {
+    void SwapChain::RecreateSwapChain() {
+        while (m_Window.GetWidth() == 0 || m_Window.GetHeight() == 0) {
             glfwWaitEvents();
         }
-        VkFormat oldDepthFormat = m_swapChainDepthFormat;
-        VkFormat oldImageFormat = m_swapChainImageFormat;
-        vkDeviceWaitIdle(m_device.device());
-        cleanupSwapChain();
-        createSwapChain();
-        createImageViews();
-        createRenderPass();
-        createDepthResources();
-        createFramebuffers();
+        VkFormat oldDepthFormat = m_SwapChainDepthFormat;
+        VkFormat oldImageFormat = m_SwapChainImageFormat;
+        vkDeviceWaitIdle(m_Device.GetDevice());
+        CleanupSwapChain();
+        CreateSwapChain();
+        CreateImageViews();
+        CreateRenderPass();
+        CreateDepthResources();
+        CreateFramebuffers();
 
-        if (!compareSwapFormats(oldDepthFormat, oldImageFormat)) {
+        if (!CompareSwapFormats(oldDepthFormat, oldImageFormat)) {
             throw std::runtime_error("Swap chain image or depth format has changed!");
         }
     }
 
-    void SwapChain::cleanupSwapChain() {
-        for (auto imageView : m_swapChainImageViews) {
-            vkDestroyImageView(m_device.device(), imageView, nullptr);
+    void SwapChain::CleanupSwapChain() {
+        for (auto imageView : m_SwapChainImageViews) {
+            vkDestroyImageView(m_Device.GetDevice(), imageView, nullptr);
         }
-        m_swapChainImageViews.clear();
+        m_SwapChainImageViews.clear();
 
-        if (m_swapChain != nullptr) {
-            vkDestroySwapchainKHR(m_device.device(), m_swapChain, nullptr);
-            m_swapChain = nullptr;
-        }
-
-        for (int i = 0; i < m_depthImages.size(); i++) {
-            vkDestroyImageView(m_device.device(), m_depthImageViews[i], nullptr);
-            vkDestroyImage(m_device.device(), m_depthImages[i], nullptr);
-            vkFreeMemory(m_device.device(), m_depthImageMemories[i], nullptr);
+        if (m_SwapChain != nullptr) {
+            vkDestroySwapchainKHR(m_Device.GetDevice(), m_SwapChain, nullptr);
+            m_SwapChain = nullptr;
         }
 
-        for (auto framebuffer : m_swapChainFramebuffers) {
-            vkDestroyFramebuffer(m_device.device(), framebuffer, nullptr);
+        for (int i = 0; i < m_DepthImages.size(); i++) {
+            vkDestroyImageView(m_Device.GetDevice(), m_DepthImageViews[i], nullptr);
+            vkDestroyImage(m_Device.GetDevice(), m_DepthImages[i], nullptr);
+            vkFreeMemory(m_Device.GetDevice(), m_DepthImageMemories[i], nullptr);
         }
 
-        vkDestroyRenderPass(m_device.device(), m_renderPass, nullptr);
+        for (auto framebuffer : m_SwapChainFramebuffers) {
+            vkDestroyFramebuffer(m_Device.GetDevice(), framebuffer, nullptr);
+        }
+
+        vkDestroyRenderPass(m_Device.GetDevice(), m_RenderPass, nullptr);
     }
 
-    VkFormat SwapChain::findDepthFormat() {
-        return m_device.findSupportedFormat(
+    VkFormat SwapChain::FindDepthFormat() {
+        return m_Device.FindSupportedFormat(
             {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT},
             VK_IMAGE_TILING_OPTIMAL,
             VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
         );
     }
 
-    VkResult SwapChain::acquireNextImage(uint32_t* imageIndex) {
+    VkResult SwapChain::AcquireNextImage(uint32_t* imageIndex) {
         vkWaitForFences(
-            m_device.device(),
+            m_Device.GetDevice(),
             1,
-            &m_inFlightFences[m_currentFrame],
+            &m_InFlightFences[m_CurrentFrame],
             VK_TRUE,
             std::numeric_limits<uint64_t>::max()
         );
 
         VkResult result = vkAcquireNextImageKHR(
-            m_device.device(),
-            m_swapChain,
+            m_Device.GetDevice(),
+            m_SwapChain,
             std::numeric_limits<uint64_t>::max(),
-            m_imageAvailableSemaphores[m_currentFrame],
+            m_ImageAvailableSemaphores[m_CurrentFrame],
             // must be a not signaled semaphore
             VK_NULL_HANDLE,
             imageIndex
@@ -81,16 +81,16 @@ namespace PalmTree {
         return result;
     }
 
-    VkResult SwapChain::submitCommandBuffers(const VkCommandBuffer* buffers, uint32_t* imageIndex) {
-        if (m_imagesInFlight[*imageIndex] != VK_NULL_HANDLE) {
-            vkWaitForFences(m_device.device(), 1, &m_imagesInFlight[*imageIndex], VK_TRUE, UINT64_MAX);
+    VkResult SwapChain::SubmitCommandBuffers(const VkCommandBuffer* buffers, uint32_t* imageIndex) {
+        if (m_ImagesInFlight[*imageIndex] != VK_NULL_HANDLE) {
+            vkWaitForFences(m_Device.GetDevice(), 1, &m_ImagesInFlight[*imageIndex], VK_TRUE, UINT64_MAX);
         }
-        m_imagesInFlight[*imageIndex] = m_inFlightFences[m_currentFrame];
+        m_ImagesInFlight[*imageIndex] = m_InFlightFences[m_CurrentFrame];
 
         VkSubmitInfo submitInfo = {};
         submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-        VkSemaphore waitSemaphores[] = {m_imageAvailableSemaphores[m_currentFrame]};
+        VkSemaphore waitSemaphores[] = {m_ImageAvailableSemaphores[m_CurrentFrame]};
         VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
         submitInfo.waitSemaphoreCount = 1;
         submitInfo.pWaitSemaphores = waitSemaphores;
@@ -99,12 +99,12 @@ namespace PalmTree {
         submitInfo.commandBufferCount = 1;
         submitInfo.pCommandBuffers = buffers;
 
-        VkSemaphore signalSemaphores[] = {m_renderFinishedSemaphores[m_currentFrame]};
+        VkSemaphore signalSemaphores[] = {m_RenderFinishedSemaphores[m_CurrentFrame]};
         submitInfo.signalSemaphoreCount = 1;
         submitInfo.pSignalSemaphores = signalSemaphores;
 
-        vkResetFences(m_device.device(), 1, &m_inFlightFences[m_currentFrame]);
-        if (vkQueueSubmit(m_device.graphicsQueue(), 1, &submitInfo, m_inFlightFences[m_currentFrame]) !=
+        vkResetFences(m_Device.GetDevice(), 1, &m_InFlightFences[m_CurrentFrame]);
+        if (vkQueueSubmit(m_Device.GraphicsQueue(), 1, &submitInfo, m_InFlightFences[m_CurrentFrame]) !=
             VK_SUCCESS) {
             throw std::runtime_error("failed to submit draw command buffer!");
         }
@@ -115,37 +115,37 @@ namespace PalmTree {
         presentInfo.waitSemaphoreCount = 1;
         presentInfo.pWaitSemaphores = signalSemaphores;
 
-        VkSwapchainKHR swapChains[] = {m_swapChain};
+        VkSwapchainKHR swapChains[] = {m_SwapChain};
         presentInfo.swapchainCount = 1;
         presentInfo.pSwapchains = swapChains;
 
         presentInfo.pImageIndices = imageIndex;
 
-        auto result = vkQueuePresentKHR(m_device.presentQueue(), &presentInfo);
+        auto result = vkQueuePresentKHR(m_Device.PresentQueue(), &presentInfo);
 
-        m_currentFrame = (m_currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
+        m_CurrentFrame = (m_CurrentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 
         return result;
     }
 
-    void SwapChain::init() {
-        createSwapChain();
-        createImageViews();
-        createRenderPass();
-        createDepthResources();
-        createFramebuffers();
-        createSyncObjects();
+    void SwapChain::Init() {
+        CreateSwapChain();
+        CreateImageViews();
+        CreateRenderPass();
+        CreateDepthResources();
+        CreateFramebuffers();
+        CreateSyncObjects();
     }
 
-    void SwapChain::cleanupSyncObjects() {
+    void SwapChain::CleanupSyncObjects() {
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-            vkDestroySemaphore(m_device.device(), m_renderFinishedSemaphores[i], nullptr);
-            vkDestroySemaphore(m_device.device(), m_imageAvailableSemaphores[i], nullptr);
-            vkDestroyFence(m_device.device(), m_inFlightFences[i], nullptr);
+            vkDestroySemaphore(m_Device.GetDevice(), m_RenderFinishedSemaphores[i], nullptr);
+            vkDestroySemaphore(m_Device.GetDevice(), m_ImageAvailableSemaphores[i], nullptr);
+            vkDestroyFence(m_Device.GetDevice(), m_InFlightFences[i], nullptr);
         }
     }
 
-    void SwapChain::createSwapChain() {
+    void SwapChain::CreateSwapChain() {
         // TODO That's all it takes to recreate the swap chain! However, the
         // disadvantage of this approach is that we need to stop all rendering
         // before creating the new swap chain. It is possible to create a new swap
@@ -154,25 +154,25 @@ namespace PalmTree {
         // oldSwapChain field in the VkSwapchainCreateInfoKHR struct and destroy the
         // old swap chain as soon as you've finished using it. Also might be the
         // reason frame drops on resizing or moving the window
-        SwapChainSupportDetails swapChainSupport = m_device.getSwapChainSupport();
+        SwapChainSupportDetails swapChainSupport = m_Device.GetSwapChainSupport();
 
-        VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
-        VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
-        VkExtent2D extent = chooseSwapExtent(swapChainSupport.capabilities);
+        VkSurfaceFormatKHR surfaceFormat = ChooseSwapSurfaceFormat(swapChainSupport.Formats);
+        VkPresentModeKHR presentMode = ChooseSwapPresentMode(swapChainSupport.PresentModes);
+        VkExtent2D extent = ChooseSwapExtent(swapChainSupport.Capabilities);
 
-        std::cout << "Min Image Count: " << swapChainSupport.capabilities.minImageCount << std::endl;
-        std::cout << "Max Image Count: " << swapChainSupport.capabilities.maxImageCount << std::endl;
+        std::cout << "Min Image Count: " << swapChainSupport.Capabilities.minImageCount << std::endl;
+        std::cout << "Max Image Count: " << swapChainSupport.Capabilities.maxImageCount << std::endl;
         //uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
         // Not sure if this is really 100% correct but it works so
         uint32_t imageCount = MAX_FRAMES_IN_FLIGHT;
-        if (swapChainSupport.capabilities.maxImageCount > 0 &&
-            imageCount > swapChainSupport.capabilities.maxImageCount) {
-            imageCount = swapChainSupport.capabilities.maxImageCount;
+        if (swapChainSupport.Capabilities.maxImageCount > 0 &&
+            imageCount > swapChainSupport.Capabilities.maxImageCount) {
+            imageCount = swapChainSupport.Capabilities.maxImageCount;
         }
 
         VkSwapchainCreateInfoKHR createInfo = {};
         createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-        createInfo.surface = m_device.surface();
+        createInfo.surface = m_Device.Surface();
 
         createInfo.minImageCount = imageCount;
         createInfo.imageFormat = surfaceFormat.format;
@@ -181,10 +181,10 @@ namespace PalmTree {
         createInfo.imageArrayLayers = 1;
         createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-        QueueFamilyIndices indices = m_device.findPhysicalQueueFamilies();
-        uint32_t queueFamilyIndices[] = {indices.graphicsFamily, indices.presentFamily};
+        QueueFamilyIndices indices = m_Device.FindPhysicalQueueFamilies();
+        uint32_t queueFamilyIndices[] = {indices.GraphicsFamily, indices.PresentFamily};
 
-        if (indices.graphicsFamily != indices.presentFamily) {
+        if (indices.GraphicsFamily != indices.PresentFamily) {
             createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
             createInfo.queueFamilyIndexCount = 2;
             createInfo.pQueueFamilyIndices = queueFamilyIndices;
@@ -195,15 +195,15 @@ namespace PalmTree {
             createInfo.pQueueFamilyIndices = nullptr; // Optional
         }
 
-        createInfo.preTransform = swapChainSupport.capabilities.currentTransform;
+        createInfo.preTransform = swapChainSupport.Capabilities.currentTransform;
         createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
 
         createInfo.presentMode = presentMode;
         createInfo.clipped = VK_TRUE;
 
-        createInfo.oldSwapchain = m_swapChain;
+        createInfo.oldSwapchain = m_SwapChain;
 
-        if (vkCreateSwapchainKHR(m_device.device(), &createInfo, nullptr, &m_swapChain) != VK_SUCCESS) {
+        if (vkCreateSwapchainKHR(m_Device.GetDevice(), &createInfo, nullptr, &m_SwapChain) != VK_SUCCESS) {
             throw std::runtime_error("failed to create swap chain!");
         }
 
@@ -211,45 +211,45 @@ namespace PalmTree {
         // allowed to create a swap chain with more. That's why we'll first query the final number of
         // images with vkGetSwapchainImagesKHR, then resize the container and finally call it again to
         // retrieve the handles.
-        vkGetSwapchainImagesKHR(m_device.device(), m_swapChain, &imageCount, nullptr);
-        m_swapChainImages.resize(imageCount);
-        vkGetSwapchainImagesKHR(m_device.device(), m_swapChain, &imageCount, m_swapChainImages.data());
+        vkGetSwapchainImagesKHR(m_Device.GetDevice(), m_SwapChain, &imageCount, nullptr);
+        m_SwapChainImages.resize(imageCount);
+        vkGetSwapchainImagesKHR(m_Device.GetDevice(), m_SwapChain, &imageCount, m_SwapChainImages.data());
 
-        m_swapChainImageFormat = surfaceFormat.format;
-        m_swapChainExtent = extent;
+        m_SwapChainImageFormat = surfaceFormat.format;
+        m_SwapChainExtent = extent;
     }
 
-    void SwapChain::createImageViews() {
-        m_swapChainImageViews.resize(m_swapChainImages.size());
-        for (size_t i = 0; i < m_swapChainImages.size(); i++) {
+    void SwapChain::CreateImageViews() {
+        m_SwapChainImageViews.resize(m_SwapChainImages.size());
+        for (size_t i = 0; i < m_SwapChainImages.size(); i++) {
             VkImageViewCreateInfo viewInfo{};
             viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-            viewInfo.image = m_swapChainImages[i];
+            viewInfo.image = m_SwapChainImages[i];
             viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-            viewInfo.format = m_swapChainImageFormat;
+            viewInfo.format = m_SwapChainImageFormat;
             viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
             viewInfo.subresourceRange.baseMipLevel = 0;
             viewInfo.subresourceRange.levelCount = 1;
             viewInfo.subresourceRange.baseArrayLayer = 0;
             viewInfo.subresourceRange.layerCount = 1;
 
-            if (vkCreateImageView(m_device.device(), &viewInfo, nullptr, &m_swapChainImageViews[i]) !=
+            if (vkCreateImageView(m_Device.GetDevice(), &viewInfo, nullptr, &m_SwapChainImageViews[i]) !=
                 VK_SUCCESS) {
                 throw std::runtime_error("failed to create texture image view!");
             }
         }
     }
 
-    void SwapChain::createDepthResources() {
-        VkFormat depthFormat = findDepthFormat();
-        m_swapChainImageFormat = depthFormat;
-        VkExtent2D swapChainExtent = getSwapChainExtent();
+    void SwapChain::CreateDepthResources() {
+        VkFormat depthFormat = FindDepthFormat();
+        m_SwapChainImageFormat = depthFormat;
+        VkExtent2D swapChainExtent = GetSwapChainExtent();
 
-        m_depthImages.resize(imageCount());
-        m_depthImageMemories.resize(imageCount());
-        m_depthImageViews.resize(imageCount());
+        m_DepthImages.resize(ImageCount());
+        m_DepthImageMemories.resize(ImageCount());
+        m_DepthImageViews.resize(ImageCount());
 
-        for (int i = 0; i < m_depthImages.size(); i++) {
+        for (int i = 0; i < m_DepthImages.size(); i++) {
             VkImageCreateInfo imageInfo{};
             imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
             imageInfo.imageType = VK_IMAGE_TYPE_2D;
@@ -266,16 +266,16 @@ namespace PalmTree {
             imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
             imageInfo.flags = 0;
 
-            m_device.createImageWithInfo(
+            m_Device.CreateImageWithInfo(
                 imageInfo,
                 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-                m_depthImages[i],
-                m_depthImageMemories[i]
+                m_DepthImages[i],
+                m_DepthImageMemories[i]
             );
 
             VkImageViewCreateInfo viewInfo{};
             viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-            viewInfo.image = m_depthImages[i];
+            viewInfo.image = m_DepthImages[i];
             viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
             viewInfo.format = depthFormat;
             viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
@@ -284,16 +284,16 @@ namespace PalmTree {
             viewInfo.subresourceRange.baseArrayLayer = 0;
             viewInfo.subresourceRange.layerCount = 1;
 
-            if (vkCreateImageView(m_device.device(), &viewInfo, nullptr, &m_depthImageViews[i]) !=
+            if (vkCreateImageView(m_Device.GetDevice(), &viewInfo, nullptr, &m_DepthImageViews[i]) !=
                 VK_SUCCESS) {
                 throw std::runtime_error("failed to create texture image view!");
             }
         }
     }
 
-    void SwapChain::createRenderPass() {
+    void SwapChain::CreateRenderPass() {
         VkAttachmentDescription depthAttachment{};
-        depthAttachment.format = findDepthFormat();
+        depthAttachment.format = FindDepthFormat();
         depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
         depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
         depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
@@ -307,7 +307,7 @@ namespace PalmTree {
         depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
         VkAttachmentDescription colorAttachment = {};
-        colorAttachment.format = getSwapChainImageFormat();
+        colorAttachment.format = GetSwapChainImageFormat();
         colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
         colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
         colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -356,20 +356,20 @@ namespace PalmTree {
         renderPassInfo.dependencyCount = 1;
         renderPassInfo.pDependencies = &dependency;
 
-        if (vkCreateRenderPass(m_device.device(), &renderPassInfo, nullptr, &m_renderPass) != VK_SUCCESS) {
+        if (vkCreateRenderPass(m_Device.GetDevice(), &renderPassInfo, nullptr, &m_RenderPass) != VK_SUCCESS) {
             throw std::runtime_error("failed to create render pass!");
         }
     }
 
-    void SwapChain::createFramebuffers() {
-        m_swapChainFramebuffers.resize(imageCount());
-        for (size_t i = 0; i < imageCount(); i++) {
-            std::array<VkImageView, 2> attachments = {m_swapChainImageViews[i], m_depthImageViews[i]};
+    void SwapChain::CreateFramebuffers() {
+        m_SwapChainFramebuffers.resize(ImageCount());
+        for (size_t i = 0; i < ImageCount(); i++) {
+            std::array<VkImageView, 2> attachments = {m_SwapChainImageViews[i], m_DepthImageViews[i]};
 
-            VkExtent2D swapChainExtent = getSwapChainExtent();
+            VkExtent2D swapChainExtent = GetSwapChainExtent();
             VkFramebufferCreateInfo framebufferInfo = {};
             framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-            framebufferInfo.renderPass = m_renderPass;
+            framebufferInfo.renderPass = m_RenderPass;
             framebufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
             framebufferInfo.pAttachments = attachments.data();
             framebufferInfo.width = swapChainExtent.width;
@@ -377,21 +377,21 @@ namespace PalmTree {
             framebufferInfo.layers = 1;
 
             if (vkCreateFramebuffer(
-                m_device.device(),
+                m_Device.GetDevice(),
                 &framebufferInfo,
                 nullptr,
-                &m_swapChainFramebuffers[i]
+                &m_SwapChainFramebuffers[i]
             ) != VK_SUCCESS) {
                 throw std::runtime_error("failed to create framebuffer!");
             }
         }
     }
 
-    void SwapChain::createSyncObjects() {
-        m_imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
-        m_renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
-        m_inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
-        m_imagesInFlight.resize(imageCount(), VK_NULL_HANDLE);
+    void SwapChain::CreateSyncObjects() {
+        m_ImageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+        m_RenderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+        m_InFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
+        m_ImagesInFlight.resize(ImageCount(), VK_NULL_HANDLE);
 
         VkSemaphoreCreateInfo semaphoreInfo = {};
         semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
@@ -402,24 +402,24 @@ namespace PalmTree {
 
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
             if (vkCreateSemaphore(
-                    m_device.device(),
+                    m_Device.GetDevice(),
                     &semaphoreInfo,
                     nullptr,
-                    &m_imageAvailableSemaphores[i]
+                    &m_ImageAvailableSemaphores[i]
                 ) != VK_SUCCESS ||
                 vkCreateSemaphore(
-                    m_device.device(),
+                    m_Device.GetDevice(),
                     &semaphoreInfo,
                     nullptr,
-                    &m_renderFinishedSemaphores[i]
+                    &m_RenderFinishedSemaphores[i]
                 ) != VK_SUCCESS ||
-                vkCreateFence(m_device.device(), &fenceInfo, nullptr, &m_inFlightFences[i]) != VK_SUCCESS) {
+                vkCreateFence(m_Device.GetDevice(), &fenceInfo, nullptr, &m_InFlightFences[i]) != VK_SUCCESS) {
                 throw std::runtime_error("failed to create synchronization objects for a frame!");
             }
         }
     }
 
-    VkSurfaceFormatKHR SwapChain::chooseSwapSurfaceFormat(
+    VkSurfaceFormatKHR SwapChain::ChooseSwapSurfaceFormat(
         const std::vector<VkSurfaceFormatKHR>& availableFormats
     ) {
         for (const auto& availableFormat : availableFormats) {
@@ -432,7 +432,7 @@ namespace PalmTree {
         return availableFormats[0];
     }
 
-    VkPresentModeKHR SwapChain::chooseSwapPresentMode(
+    VkPresentModeKHR SwapChain::ChooseSwapPresentMode(
         const std::vector<VkPresentModeKHR>& availablePresentModes
     ) {
         for (const auto& availablePresentMode : availablePresentModes) {
@@ -451,14 +451,14 @@ namespace PalmTree {
         // return VK_PRESENT_MODE_IMMEDIATE_KHR;
     }
 
-    VkExtent2D SwapChain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities) {
+    VkExtent2D SwapChain::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities) {
         if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
             return capabilities.currentExtent;
         }
         else {
             VkExtent2D actualExtent = {
-                static_cast<uint32_t>(m_window.getWidth()),
-                static_cast<uint32_t>(m_window.getHeight())
+                static_cast<uint32_t>(m_Window.GetWidth()),
+                static_cast<uint32_t>(m_Window.GetHeight())
             };
 
             actualExtent.width = std::max(

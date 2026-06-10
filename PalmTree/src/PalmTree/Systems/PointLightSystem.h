@@ -17,15 +17,15 @@ namespace PalmTree {
         PointLightSystem(const PointLightSystem&) = delete;
         PointLightSystem& operator=(const PointLightSystem&) = delete;
 
-        void update(FrameInfo& frameInfo, GlobalUBO& ubo);
-        void render(FrameInfo& fameInfo);
+        void Update(FrameInfo& frameInfo, GlobalUBO& ubo);
+        void Render(FrameInfo& fameInfo);
 
     private:
-        void createPipelineLayout(VkDescriptorSetLayout globalSetLayout);
-        void createPipeline(VkRenderPass renderPass);
+        void CreatePipelineLayout(VkDescriptorSetLayout globalSetLayout);
+        void CreatePipeline(VkRenderPass renderPass);
 
-        Device& m_device;
-        std::unique_ptr<Pipeline> m_pipeline;
-        VkPipelineLayout m_pipelineLayout{};
+        Device& m_Device;
+        std::unique_ptr<Pipeline> m_Pipeline;
+        VkPipelineLayout m_PipelineLayout{};
     };
 }

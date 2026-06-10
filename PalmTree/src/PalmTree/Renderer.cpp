@@ -4,22 +4,22 @@
 #include <stdexcept>
 
 namespace PalmTree {
-    Renderer::Renderer(Window& window, Device& device) : m_window(window), m_device(device) {
-        recreateSwapChain();
-        createCommandBuffers();
+    Renderer::Renderer(Window& window, Device& device) : m_Window(window), m_Device(device) {
+        RecreateSwapChain();
+        CreateCommandBuffers();
     }
 
     Renderer::~Renderer() {
-        freeCommandBuffers();
+        FreeCommandBuffers();
     }
 
-    VkCommandBuffer Renderer::beginFrame() {
-        assert(!m_isFrameStarted && "Can't call begin frame while already in progress!");
+    VkCommandBuffer Renderer::BeginFrame() {
+        assert(!m_IsFrameStarted && "Can't call begin frame while already in progress!");
 
-        auto result = m_swapChain->acquireNextImage(&m_currentImageIndex);
+        auto result = m_SwapChain->AcquireNextImage(&m_CurrentImageIndex);
 
         if (result == VK_ERROR_OUT_OF_DATE_KHR) {
-            recreateSwapChain();
+            RecreateSwapChain();
 
             return nullptr;
         }
@@ -28,9 +28,9 @@ namespace PalmTree {
             throw std::runtime_error("Failed to acquire swap chain image!");
         }
 
-        m_isFrameStarted = true;
+        m_IsFrameStarted = true;
 
-        VkCommandBuffer commandBuffer = getCurrentCommandBuffer();
+        VkCommandBuffer commandBuffer = GetCurrentCommandBuffer();
 
         VkCommandBufferBeginInfo beginInfo{};
         beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -42,43 +42,43 @@ namespace PalmTree {
         return commandBuffer;
     }
 
-    void Renderer::endFrame() {
-        assert(m_isFrameStarted && "Can't call end frame while frame is not in progress");
+    void Renderer::EndFrame() {
+        assert(m_IsFrameStarted && "Can't call end frame while frame is not in progress");
 
-        VkCommandBuffer commandBuffer = getCurrentCommandBuffer();
+        VkCommandBuffer commandBuffer = GetCurrentCommandBuffer();
 
         if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS) {
             throw std::runtime_error("Failed to create command buffer!");
         }
 
-        auto result = m_swapChain->submitCommandBuffers(&commandBuffer, &m_currentImageIndex);
+        auto result = m_SwapChain->SubmitCommandBuffers(&commandBuffer, &m_CurrentImageIndex);
 
-        if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || m_window.wasWindowResized()) {
-            m_window.resetWindowResizedFlag();
-            recreateSwapChain();
+        if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || m_Window.WasWindowResized()) {
+            m_Window.ResetWindowResizedFlag();
+            RecreateSwapChain();
         }
         else if (result != VK_SUCCESS) {
             throw std::runtime_error("Failed to present swap chain image!");
         }
 
-        m_isFrameStarted = false;
-        m_currentFrameIndex = (m_currentFrameIndex + 1) % SwapChain::MAX_FRAMES_IN_FLIGHT;
+        m_IsFrameStarted = false;
+        m_CurrentFrameIndex = (m_CurrentFrameIndex + 1) % SwapChain::MAX_FRAMES_IN_FLIGHT;
     }
 
-    void Renderer::beginSwapChainRenderPass(VkCommandBuffer commandBuffer) {
-        assert(m_isFrameStarted && "Can't call BeginSwapChainRenderPass if frame is not in progress!");
+    void Renderer::BeginSwapChainRenderPass(VkCommandBuffer commandBuffer) {
+        assert(m_IsFrameStarted && "Can't call BeginSwapChainRenderPass if frame is not in progress!");
         assert(
-            commandBuffer == getCurrentCommandBuffer() &&
+            commandBuffer == GetCurrentCommandBuffer() &&
             "Can't begin render pass on command buffer from a different frame!"
         );
 
         VkRenderPassBeginInfo renderPassInfo{};
         renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-        renderPassInfo.renderPass = m_swapChain->getRenderPass();
-        renderPassInfo.framebuffer = m_swapChain->getFrameBuffer(m_currentImageIndex);
+        renderPassInfo.renderPass = m_SwapChain->GetRenderPass();
+        renderPassInfo.framebuffer = m_SwapChain->GetFrameBuffer(m_CurrentImageIndex);
 
         renderPassInfo.renderArea.offset = {0, 0};
-        renderPassInfo.renderArea.extent = m_swapChain->getSwapChainExtent();
+        renderPassInfo.renderArea.extent = m_SwapChain->GetSwapChainExtent();
 
         std::array<VkClearValue, 2> clearValues{};
         clearValues[0].color = {0.01f, 0.01f, 0.01f, 1.0f};
@@ -92,51 +92,51 @@ namespace PalmTree {
         VkViewport viewport{};
         viewport.x = 0.0f;
         viewport.y = 0.0f;
-        viewport.width = static_cast<float>(m_swapChain->getSwapChainExtent().width);
-        viewport.height = static_cast<float>(m_swapChain->getSwapChainExtent().height);
+        viewport.width = static_cast<float>(m_SwapChain->GetSwapChainExtent().width);
+        viewport.height = static_cast<float>(m_SwapChain->GetSwapChainExtent().height);
         viewport.minDepth = 0.0f;
         viewport.maxDepth = 1.0f;
-        VkRect2D scissor{{0, 0}, m_swapChain->getSwapChainExtent()};
+        VkRect2D scissor{{0, 0}, m_SwapChain->GetSwapChainExtent()};
         vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
         vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
     }
 
-    void Renderer::endSwapChainRenderPass(VkCommandBuffer commandBuffer) {
-        assert(m_isFrameStarted && "Can't call EndSwapChainRenderPass if frame is not in progress!");
+    void Renderer::EndSwapChainRenderPass(VkCommandBuffer commandBuffer) {
+        assert(m_IsFrameStarted && "Can't call EndSwapChainRenderPass if frame is not in progress!");
         assert(
-            commandBuffer == getCurrentCommandBuffer() &&
+            commandBuffer == GetCurrentCommandBuffer() &&
             "Can't end render pass on command buffer from a different frame!"
         );
 
         vkCmdEndRenderPass(commandBuffer);
     }
 
-    void Renderer::createCommandBuffers() {
-        m_commandBuffers.resize(SwapChain::MAX_FRAMES_IN_FLIGHT);
+    void Renderer::CreateCommandBuffers() {
+        m_CommandBuffers.resize(SwapChain::MAX_FRAMES_IN_FLIGHT);
 
         VkCommandBufferAllocateInfo allocInfo{};
         allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
         allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-        allocInfo.commandPool = m_device.getCommandPool();
-        allocInfo.commandBufferCount = static_cast<uint32_t>(m_commandBuffers.size());
+        allocInfo.commandPool = m_Device.GetCommandPool();
+        allocInfo.commandBufferCount = static_cast<uint32_t>(m_CommandBuffers.size());
 
-        if (vkAllocateCommandBuffers(m_device.device(), &allocInfo, m_commandBuffers.data()) != VK_SUCCESS) {
+        if (vkAllocateCommandBuffers(m_Device.GetDevice(), &allocInfo, m_CommandBuffers.data()) != VK_SUCCESS) {
             throw std::runtime_error("Failed to allocate command buffers!");
         }
     }
 
-    void Renderer::freeCommandBuffers() {
+    void Renderer::FreeCommandBuffers() {
         vkFreeCommandBuffers(
-            m_device.device(),
-            m_device.getCommandPool(),
-            static_cast<uint32_t>(m_commandBuffers.size()),
-            m_commandBuffers.data()
+            m_Device.GetDevice(),
+            m_Device.GetCommandPool(),
+            static_cast<uint32_t>(m_CommandBuffers.size()),
+            m_CommandBuffers.data()
         );
 
-        m_commandBuffers.clear();
+        m_CommandBuffers.clear();
     }
 
-    void Renderer::recreateSwapChain() {
+    void Renderer::RecreateSwapChain() {
         // auto extent = m_Window.GetExtent();
         // while (extent.width == 0 || extent.height == 0) {
         //     extent = m_Window.GetExtent();
@@ -145,12 +145,12 @@ namespace PalmTree {
 
         // vkDeviceWaitIdle(m_Device.device());
         // m_SwapChain = std::make_unique<SwapChain>(m_Window, m_Device);
-        m_swapChain->recreateSwapChain();
-        if (m_swapChain->imageCount() != m_commandBuffers.size()) {
+        m_SwapChain->RecreateSwapChain();
+        if (m_SwapChain->ImageCount() != m_CommandBuffers.size()) {
             // Vulkan will complain if we free 0 command buffers
-            if (!m_commandBuffers.empty())
-                freeCommandBuffers();
-            createCommandBuffers();
+            if (!m_CommandBuffers.empty())
+                FreeCommandBuffers();
+            CreateCommandBuffers();
         }
     }
 }

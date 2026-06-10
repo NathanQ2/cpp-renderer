@@ -5,15 +5,15 @@
 #include "Core.h"
 #include "Application.h"
 
-extern PalmTree::Application* PalmTree::createApplication();
+extern PalmTree::Application* PalmTree::CreateApplication();
 
 int main() {
-    PalmTree::Log::init();
+    PalmTree::Log::Init();
     
-    PalmTree::Application* app = PalmTree::createApplication();
+    PalmTree::Application* app = PalmTree::CreateApplication();
     
     try {
-        app->run();
+        app->Run();
     }
     catch (std::exception& e) {
         std::cerr << e.what() << std::endl;

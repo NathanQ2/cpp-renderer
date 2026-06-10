@@ -6,21 +6,21 @@
 
 namespace PalmTree {
     struct TransformComponent {
-        glm::vec3 translation{};
-        glm::vec3 scale{1.0f};
-        glm::vec3 rotation;
+        glm::vec3 Translation{};
+        glm::vec3 Scale{1.0f};
+        glm::vec3 Rotation;
 
-        glm::mat4 mat4();
-        glm::mat3 normalMatrix();
+        glm::mat4 Mat4();
+        glm::mat3 NormalMatrix();
     };
 
     struct PointLightComponent {
-        float lightIntensity = 1.0f;
-        glm::vec3 color{};
+        float LightIntensity = 1.0f;
+        glm::vec3 Color{};
     };
 
     struct ModelComponent {
-        glm::vec3 color{};
-        std::shared_ptr<Model> model{};
+        glm::vec3 Color{};
+        std::shared_ptr<Model> Model{};
     };
 }

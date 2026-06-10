@@ -8,27 +8,27 @@ namespace PalmTree {
     public:
         EVENT_CLASS_IMPL_CATEGORY(EventCategoryInput | EventCategoryKeyboard)
         
-        int getKeyCode() const { return m_keyCode; }
+        int GetKeyCode() const { return m_KeyCode; }
     protected:
-        KeyEvent(int keyCode) : m_keyCode(keyCode) {}
+        KeyEvent(int keyCode) : m_KeyCode(keyCode) {}
         
-        int m_keyCode;
+        int m_KeyCode;
     };
     
     class KeyPressedEvent : public KeyEvent {
     public:
-        KeyPressedEvent(int keyCode, int repeatCount) : KeyEvent(keyCode), m_repeatCount(repeatCount) {}
+        KeyPressedEvent(int keyCode, int repeatCount) : KeyEvent(keyCode), m_RepeatCount(repeatCount) {}
         
         EVENT_CLASS_IMPL_TYPE(EventType::KeyPressed)
         
-        std::string toString() const override {
-            return std::format("KeyPressedEvent: KeyCode={}, RepeatCount={}", m_keyCode, m_repeatCount);
+        std::string ToString() const override {
+            return std::format("KeyPressedEvent: KeyCode={}, RepeatCount={}", m_KeyCode, m_RepeatCount);
         }
         
-        int getRepeatCount() const { return m_repeatCount; }
-        bool isRepeating() const { return m_repeatCount > 0; }
+        int GetRepeatCount() const { return m_RepeatCount; }
+        bool IsRepeating() const { return m_RepeatCount > 0; }
     private:
-        int m_repeatCount;
+        int m_RepeatCount;
     };
     
     class KeyReleasedEvent : public KeyEvent {
@@ -37,8 +37,8 @@ namespace PalmTree {
         
         EVENT_CLASS_IMPL_TYPE(EventType::KeyReleased)
         
-        std::string toString() const override {
-            return std::format("KeyReleasedEvent: KeyCode={}", m_keyCode);
+        std::string ToString() const override {
+            return std::format("KeyReleasedEvent: KeyCode={}", m_KeyCode);
         }
     };
 }

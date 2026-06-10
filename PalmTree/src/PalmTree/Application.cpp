@@ -18,89 +18,89 @@
 
 namespace PalmTree {
     Application::Application() {
-        m_globalPool = DescriptorPool::Builder(m_device)
-            .setMaxSets(SwapChain::MAX_FRAMES_IN_FLIGHT)
-            .addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, SwapChain::MAX_FRAMES_IN_FLIGHT)
-            .build();
-        loadGameObjects();
+        m_GlobalPool = DescriptorPool::Builder(m_Device)
+            .SetMaxSets(SwapChain::MAX_FRAMES_IN_FLIGHT)
+            .AddPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, SwapChain::MAX_FRAMES_IN_FLIGHT)
+            .Build();
+        LoadGameObjects();
     }
 
-    void Application::run() {
+    void Application::Run() {
         std::vector<std::unique_ptr<Buffer>> uboBuffers(SwapChain::MAX_FRAMES_IN_FLIGHT);
         for (int i = 0; i < uboBuffers.size(); i++) {
             uboBuffers[i] = std::make_unique<Buffer>(
-                m_device,
+                m_Device,
                 sizeof(GlobalUBO),
                 SwapChain::MAX_FRAMES_IN_FLIGHT,
                 VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
                 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
-                m_device.properties.limits.minUniformBufferOffsetAlignment
+                m_Device.m_Properties.limits.minUniformBufferOffsetAlignment
             );
-            uboBuffers[i]->map();
+            uboBuffers[i]->Map();
         }
 
-        auto globalSetLayout = DescriptorSetLayout::Builder(m_device)
-            .addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
-            .build();
+        auto globalSetLayout = DescriptorSetLayout::Builder(m_Device)
+            .AddBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
+            .Build();
 
         std::vector<VkDescriptorSet> globalDescriptorSets(SwapChain::MAX_FRAMES_IN_FLIGHT);
         for (int i = 0; i < globalDescriptorSets.size(); i++) {
-            auto bufferInfo = uboBuffers[i]->descriptorInfo();
-            DescriptorWriter(*globalSetLayout, *m_globalPool)
-                .writeBuffer(0, &bufferInfo)
-                .build(globalDescriptorSets[i]);
+            auto bufferInfo = uboBuffers[i]->DescriptorInfo();
+            DescriptorWriter(*globalSetLayout, *m_GlobalPool)
+                .WriteBuffer(0, &bufferInfo)
+                .Build(globalDescriptorSets[i]);
         }
 
         std::shared_ptr<SimpleRenderSystem> simpleRenderSystem = std::make_shared<SimpleRenderSystem>(
-            m_device,
-            m_renderer.getSwapChainRenderPass(),
-            globalSetLayout->getDescriptorSetLayout()
+            m_Device,
+            m_Renderer.GetSwapChainRenderPass(),
+            globalSetLayout->GetDescriptorSetLayout()
         );
-        m_ecs.registerSystem<SimpleRenderSystem>(
+        m_Ecs.RegisterSystem<SimpleRenderSystem>(
             simpleRenderSystem,
-            SignatureBuilder<TransformComponent, ModelComponent>(m_ecs.getComponentManager()).build()
+            SignatureBuilder<TransformComponent, ModelComponent>(m_Ecs.GetComponentManager()).Build()
         );
 
         std::shared_ptr<PointLightSystem> pointLightSystem = std::make_shared<PointLightSystem>(
-            m_device,
-            m_renderer.getSwapChainRenderPass(),
-            globalSetLayout->getDescriptorSetLayout()
+            m_Device,
+            m_Renderer.GetSwapChainRenderPass(),
+            globalSetLayout->GetDescriptorSetLayout()
         );
-        m_ecs.registerSystem<PointLightSystem>(
+        m_Ecs.RegisterSystem<PointLightSystem>(
             pointLightSystem,
-            SignatureBuilder<TransformComponent, PointLightComponent>(m_ecs.getComponentManager()).build()
+            SignatureBuilder<TransformComponent, PointLightComponent>(m_Ecs.GetComponentManager()).Build()
         );
 
         Camera camera{};
-        camera.setViewDirection(glm::vec3(0), glm::vec3(0.0, 0.0f, 1.0f));
+        camera.SetViewDirection(glm::vec3(0), glm::vec3(0.0, 0.0f, 1.0f));
 
-        GameObject& viewerObject = m_ecs.createGameObject();
-        viewerObject.getTransform().translation.z = -2.5f;
+        GameObject& viewerObject = m_Ecs.CreateGameObject();
+        viewerObject.GetTransform().Translation.z = -2.5f;
 
-        glfwSetInputMode(m_window.getGLFWWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        glfwSetInputMode(m_Window.GetGLFWWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         if (glfwRawMouseMotionSupported())
-            glfwSetInputMode(m_window.getGLFWWindow(), GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+            glfwSetInputMode(m_Window.GetGLFWWindow(), GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
         glm::f64vec2 cursorPos = glm::f64vec2(0);
-        glfwGetCursorPos(m_window.getGLFWWindow(), &cursorPos.x, &cursorPos.y);
+        glfwGetCursorPos(m_Window.GetGLFWWindow(), &cursorPos.x, &cursorPos.y);
         KeyboardMovementController cameraController = KeyboardMovementController(cursorPos);
 
         auto currentTime = std::chrono::high_resolution_clock::now();
 
-        while (!m_window.shouldClose()) {
+        while (!m_Window.ShouldClose()) {
             glfwPollEvents();
 
             auto newTime = std::chrono::high_resolution_clock::now();
             float frameTime = std::chrono::duration<float>(newTime - currentTime).count();
             currentTime = newTime;
 
-            cameraController.moveInPlaneXZ(m_window.getGLFWWindow(), frameTime, viewerObject);
-            camera.setViewYXZ(viewerObject.getTransform().translation, viewerObject.getTransform().rotation);
+            cameraController.MoveInPlaneXZ(m_Window.GetGLFWWindow(), frameTime, viewerObject);
+            camera.SetViewYXZ(viewerObject.GetTransform().Translation, viewerObject.GetTransform().Rotation);
 
-            float aspect = m_renderer.getAspectRatio();
-            camera.setPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 100.0f);
+            float aspect = m_Renderer.GetAspectRatio();
+            camera.SetPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 100.0f);
 
-            if (VkCommandBuffer commandBuffer = m_renderer.beginFrame()) {
-                int frameIndex = m_renderer.getFrameIndex();
+            if (VkCommandBuffer commandBuffer = m_Renderer.BeginFrame()) {
+                int frameIndex = m_Renderer.GetFrameIndex();
                 FrameInfo frameInfo{
                     frameIndex,
                     frameTime,
@@ -111,56 +111,56 @@ namespace PalmTree {
 
                 // Update
                 GlobalUBO ubo{};
-                ubo.projection = camera.getProjection();
-                ubo.view = camera.getView();
-                ubo.inverseView = camera.getInverseView();
-                pointLightSystem->update(frameInfo, ubo);
-                uboBuffers[frameIndex]->writeToBuffer(&ubo);
-                uboBuffers[frameIndex]->flush();
+                ubo.Projection = camera.GetProjection();
+                ubo.View = camera.GetView();
+                ubo.InverseView = camera.GetInverseView();
+                pointLightSystem->Update(frameInfo, ubo);
+                uboBuffers[frameIndex]->WriteToBuffer(&ubo);
+                uboBuffers[frameIndex]->Flush();
 
                 // Render
-                m_renderer.beginSwapChainRenderPass(commandBuffer);
-                simpleRenderSystem->renderGameObjects(frameInfo);
-                pointLightSystem->render(frameInfo);
-                m_renderer.endSwapChainRenderPass(commandBuffer);
-                m_renderer.endFrame();
+                m_Renderer.BeginSwapChainRenderPass(commandBuffer);
+                simpleRenderSystem->RenderGameObjects(frameInfo);
+                pointLightSystem->Render(frameInfo);
+                m_Renderer.EndSwapChainRenderPass(commandBuffer);
+                m_Renderer.EndFrame();
             }
         }
 
-        vkDeviceWaitIdle(m_device.device());
+        vkDeviceWaitIdle(m_Device.GetDevice());
     }
 
-    void Application::loadGameObjects() {
+    void Application::LoadGameObjects() {
         // Flat Vase
         {
-            std::shared_ptr model = Model::createModelFromFile(m_device, "../../assets/models/flat_vase.obj");
+            std::shared_ptr model = Model::CreateModelFromFile(m_Device, "../../assets/models/flat_vase.obj");
 
-            GameObject& obj = m_ecs.createGameObject();
+            GameObject& obj = m_Ecs.CreateGameObject();
 
-            obj.addComponent<ModelComponent>(ModelComponent{glm::vec3(1), model});
+            obj.AddComponent<ModelComponent>(ModelComponent{glm::vec3(1), model});
 
-            obj.getTransform().translation = glm::vec3(-0.5, 0.0, 0.0f);
-            obj.getTransform().scale = glm::vec3(3, 1.5, 3);
+            obj.GetTransform().Translation = glm::vec3(-0.5, 0.0, 0.0f);
+            obj.GetTransform().Scale = glm::vec3(3, 1.5, 3);
         }
 
         // Smooth Vase
         {
-            std::shared_ptr model = Model::createModelFromFile(m_device, "../../assets/models/smooth_vase.obj");
+            std::shared_ptr model = Model::CreateModelFromFile(m_Device, "../../assets/models/smooth_vase.obj");
 
-            GameObject& obj = m_ecs.createGameObject();
-            obj.addComponent(ModelComponent{glm::vec3(1), model});
-            obj.getTransform().translation = glm::vec3(0.5, 0.0, 0.0f);
-            obj.getTransform().scale = glm::vec3(3, 1.5, 3);
+            GameObject& obj = m_Ecs.CreateGameObject();
+            obj.AddComponent(ModelComponent{glm::vec3(1), model});
+            obj.GetTransform().Translation = glm::vec3(0.5, 0.0, 0.0f);
+            obj.GetTransform().Scale = glm::vec3(3, 1.5, 3);
         }
 
         // Floor
         {
-            std::shared_ptr model = Model::createModelFromFile(m_device, "../../assets/models/quad.obj");
+            std::shared_ptr model = Model::CreateModelFromFile(m_Device, "../../assets/models/quad.obj");
 
-            GameObject& obj = m_ecs.createGameObject();
-            obj.addComponent<ModelComponent>(ModelComponent{glm::vec3(1), model});
-            obj.getTransform().translation = glm::vec3(0.0f, 0.0f, 0.0f);
-            obj.getTransform().scale = glm::vec3(5);
+            GameObject& obj = m_Ecs.CreateGameObject();
+            obj.AddComponent<ModelComponent>(ModelComponent{glm::vec3(1), model});
+            obj.GetTransform().Translation = glm::vec3(0.0f, 0.0f, 0.0f);
+            obj.GetTransform().Scale = glm::vec3(5);
         }
 
         std::vector<glm::vec3> lightColors{
@@ -173,8 +173,8 @@ namespace PalmTree {
         };
 
         for (int i = 0; i < lightColors.size(); i++) {
-            GameObject& light = m_ecs.createGameObject();
-            light.addComponent<PointLightComponent>(PointLightComponent{0.2f, lightColors[i]});
+            GameObject& light = m_Ecs.CreateGameObject();
+            light.AddComponent<PointLightComponent>(PointLightComponent{0.2f, lightColors[i]});
 
             auto rotateLight = glm::rotate(
                 glm::mat4(1.0f),
@@ -182,8 +182,8 @@ namespace PalmTree {
                 {0.0f, -1.0f, 0.0f}
             );
 
-            light.getTransform().translation = glm::vec3(rotateLight * glm::vec4(-1.0f, -1.0f, -1.0f, 1.0f));
-            light.getTransform().scale = glm::vec3(0.2);
+            light.GetTransform().Translation = glm::vec3(rotateLight * glm::vec4(-1.0f, -1.0f, -1.0f, 1.0f));
+            light.GetTransform().Scale = glm::vec3(0.2);
         }
     }
 }

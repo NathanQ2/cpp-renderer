@@ -11,20 +11,20 @@ namespace PalmTree {
         PipelineConfig(const PipelineConfig&) = delete;
         PipelineConfig& operator=(const PipelineConfig&) = delete;
 
-        std::vector<VkVertexInputBindingDescription> bindingDescriptions{};
-        std::vector<VkVertexInputAttributeDescription> attributeDescriptions{};
-        VkPipelineViewportStateCreateInfo viewportInfo;
-        VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo;
-        VkPipelineRasterizationStateCreateInfo rasterizationInfo;
-        VkPipelineMultisampleStateCreateInfo multisampleInfo;
-        VkPipelineColorBlendAttachmentState colorBlendAttachment;
-        VkPipelineColorBlendStateCreateInfo colorBlendInfo;
-        VkPipelineDepthStencilStateCreateInfo depthStencilInfo;
-        std::vector<VkDynamicState> dynamicStateEnables;
-        VkPipelineDynamicStateCreateInfo dynamicStateInfo;
-        VkPipelineLayout pipelineLayout = nullptr;
-        VkRenderPass renderPass = nullptr;
-        uint32_t subpass = 0;
+        std::vector<VkVertexInputBindingDescription> BindingDescriptions{};
+        std::vector<VkVertexInputAttributeDescription> AttributeDescriptions{};
+        VkPipelineViewportStateCreateInfo ViewportInfo;
+        VkPipelineInputAssemblyStateCreateInfo InputAssemblyInfo;
+        VkPipelineRasterizationStateCreateInfo RasterizationInfo;
+        VkPipelineMultisampleStateCreateInfo MultisampleInfo;
+        VkPipelineColorBlendAttachmentState ColorBlendAttachment;
+        VkPipelineColorBlendStateCreateInfo ColorBlendInfo;
+        VkPipelineDepthStencilStateCreateInfo DepthStencilInfo;
+        std::vector<VkDynamicState> DynamicStateEnables;
+        VkPipelineDynamicStateCreateInfo DynamicStateInfo;
+        VkPipelineLayout PipelineLayout = nullptr;
+        VkRenderPass RenderPass = nullptr;
+        uint32_t Subpass = 0;
     };
 
     class Pipeline {
@@ -41,25 +41,25 @@ namespace PalmTree {
         Pipeline(const Pipeline&) = delete;
         Pipeline& operator=(const Pipeline) = delete;
 
-        static void defaultPipelineConfig(PipelineConfig& config);
-        static void enableAlphaBlending(PipelineConfig& config);
+        static void DefaultPipelineConfig(PipelineConfig& config);
+        static void EnableAlphaBlending(PipelineConfig& config);
 
-        void bind(VkCommandBuffer commandBuffer);
+        void Bind(VkCommandBuffer commandBuffer);
 
     private:
-        static std::vector<char> readFile(const std::string& path);
+        static std::vector<char> ReadFile(const std::string& path);
 
-        void createGraphicsPipeline(
+        void CreateGraphicsPipeline(
             const std::string& vertPath,
             const std::string& fragPath,
             const PipelineConfig& config
         );
 
-        void createShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule);
+        void CreateShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule);
 
-        Device& m_device;
-        VkPipeline m_graphicsPipeline;
-        VkShaderModule m_vertShaderModule;
-        VkShaderModule m_fragShaderModule;
+        Device& m_Device;
+        VkPipeline m_GraphicsPipeline;
+        VkShaderModule m_VertShaderModule;
+        VkShaderModule m_FragShaderModule;
     };
 }

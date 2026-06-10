@@ -5,22 +5,22 @@
 namespace PalmTree {
     EntityManager::EntityManager() {
         for (Id i = 0; i < MAX_GAME_OBJECTS; i++) {
-            m_availableGameObjects.push(i);
+            m_AvailableGameObjects.push(i);
         }
     }
 
-    Id EntityManager::createGameObject() {
-        assert(m_gameObjectsCount < MAX_GAME_OBJECTS && "Too many game objects!");
+    Id EntityManager::CreateGameObject() {
+        assert(m_GameObjectsCount < MAX_GAME_OBJECTS && "Too many game objects!");
 
-        const Id id = m_availableGameObjects.front();
-        m_availableGameObjects.pop();
-        m_gameObjectsCount++;
+        const Id id = m_AvailableGameObjects.front();
+        m_AvailableGameObjects.pop();
+        m_GameObjectsCount++;
 
         return id;
     }
 
-    void EntityManager::destroyGameObject(Id id) {
-        m_availableGameObjects.push(id);
-        m_gameObjectsCount--;
+    void EntityManager::DestroyGameObject(Id id) {
+        m_AvailableGameObjects.push(id);
+        m_GameObjectsCount--;
     }
 }

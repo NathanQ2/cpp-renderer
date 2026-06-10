@@ -13,62 +13,62 @@ namespace PalmTree {
     public:
         EntityComponentSystem();
 
-        GameObject& createGameObject(TransformComponent transform = TransformComponent{});
-        GameObject& getObject(Id id);
+        GameObject& CreateGameObject(TransformComponent transform = TransformComponent{});
+        GameObject& GetObject(Id id);
 
         template <typename T>
-        void registerComponent() {
-            m_componentManager.registerComponent<T>();
+        void RegisterComponent() {
+            m_ComponentManager.RegisterComponent<T>();
         }
 
         template <typename T>
-        void addComponent(Id id, T component) {
-            m_componentManager.addComponent<T>(id, component);
-            m_entityManager.setSignatureBit(id, m_componentManager.getComponentType<T>(), true);
-            m_systemManager.gameObjectSignatureChanged(id, m_entityManager.getSignature(id));
+        void AddComponent(Id id, T component) {
+            m_ComponentManager.AddComponent<T>(id, component);
+            m_EntityManager.SetSignatureBit(id, m_ComponentManager.GetComponentType<T>(), true);
+            m_SystemManager.GameObjectSignatureChanged(id, m_EntityManager.GetSignature(id));
         }
 
         template <typename T>
-        void removeComponent(Id id) {
-            m_componentManager.removeComponent<T>(id);
-            m_entityManager.setSignatureBit(id, m_componentManager.getComponentType<T>(), false);
-            m_systemManager.gameObjectSignatureChanged(id, m_entityManager.getSignature(id));
+        void RemoveComponent(Id id) {
+            m_ComponentManager.RemoveComponent<T>(id);
+            m_EntityManager.SetSignatureBit(id, m_ComponentManager.GetComponentType<T>(), false);
+            m_SystemManager.GameObjectSignatureChanged(id, m_EntityManager.GetSignature(id));
         }
 
         template <typename T>
-        T& getComponent(Id id) {
-            return m_componentManager.getComponent<T>(id);
+        T& GetComponent(Id id) {
+            return m_ComponentManager.GetComponent<T>(id);
         }
 
         template <typename T>
-        ComponentType getComponentType() {
-            return m_componentManager.getComponentType<T>();
+        ComponentType GetComponentType() {
+            return m_ComponentManager.GetComponentType<T>();
         }
 
         template <typename T>
-        void registerSystem(std::shared_ptr<T> system, Signature signature) {
-            m_systemManager.registerSystem<T>(system, signature, this);
-            size_t numObjects = m_entityManager.getGameObjectsCount();
+        void RegisterSystem(std::shared_ptr<T> system, Signature signature) {
+            m_SystemManager.RegisterSystem<T>(system, signature, this);
+            size_t numObjects = m_EntityManager.GetGameObjectsCount();
 
             for (size_t i = 0; i < numObjects; i++) {
-                m_systemManager.initSystemWithObject<T>(i, m_entityManager.getSignature(i));
+                m_SystemManager.InitSystemWithObject<T>(i, m_EntityManager.GetSignature(i));
             }
         }
 
-        ComponentManager& getComponentManager() { return m_componentManager; }
+        ComponentManager& GetComponentManager() { return m_ComponentManager; }
     private:
-        EntityManager m_entityManager{};
-        ComponentManager m_componentManager{};
-        SystemManager m_systemManager{};
+        EntityManager m_EntityManager{};
+        ComponentManager m_ComponentManager{};
+        SystemManager m_SystemManager{};
 
-        std::vector<GameObject> m_gameObjects{};
+        std::vector<GameObject> m_GameObjects{};
     };
 
     template <typename T>
-    T& GameObject::getComponent() { return m_ecs->getComponent<T>(m_id); }
+    T& GameObject::GetComponent() { return m_Ecs->GetComponent<T>(m_Id); }
 
     template <typename T>
-    void GameObject::addComponent(T component) { m_ecs->addComponent<T>(m_id, component); }
+    void GameObject::AddComponent(T component) { m_Ecs->AddComponent<T>(m_Id, component); }
 
-    inline TransformComponent& GameObject::getTransform() { return getComponent<TransformComponent>(); }
+    inline TransformComponent& GameObject::GetTransform() { return GetComponent<TransformComponent>(); }
 }

@@ -2,24 +2,24 @@
 
 namespace PalmTree {
     EntityComponentSystem::EntityComponentSystem() {
-        m_componentManager.registerComponent<TransformComponent>();
-        m_componentManager.registerComponent<PointLightComponent>();
-        m_componentManager.registerComponent<ModelComponent>();
+        m_ComponentManager.RegisterComponent<TransformComponent>();
+        m_ComponentManager.RegisterComponent<PointLightComponent>();
+        m_ComponentManager.RegisterComponent<ModelComponent>();
 
-        m_gameObjects.reserve(MAX_GAME_OBJECTS);
+        m_GameObjects.reserve(MAX_GAME_OBJECTS);
     }
 
-    GameObject& EntityComponentSystem::createGameObject(TransformComponent transform) {
-        Id id = m_entityManager.createGameObject();
+    GameObject& EntityComponentSystem::CreateGameObject(TransformComponent transform) {
+        Id id = m_EntityManager.CreateGameObject();
 
-        addComponent<TransformComponent>(id, transform);
+        AddComponent<TransformComponent>(id, transform);
 
-        m_gameObjects.emplace_back(id, m_entityManager.getSignature(id), this);
+        m_GameObjects.emplace_back(id, m_EntityManager.GetSignature(id), this);
 
-        return m_gameObjects[id];
+        return m_GameObjects[id];
     }
 
-    GameObject& EntityComponentSystem::getObject(Id id) {
-        return m_gameObjects[id];
+    GameObject& EntityComponentSystem::GetObject(Id id) {
+        return m_GameObjects[id];
     }
 }

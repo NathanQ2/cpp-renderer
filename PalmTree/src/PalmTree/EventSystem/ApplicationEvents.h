@@ -6,19 +6,19 @@
 namespace PalmTree {
     class WindowResizedEvent : public Event {
     public:
-        WindowResizedEvent(int width, int height) : m_width(width), m_height(height) {}
+        WindowResizedEvent(int width, int height) : m_Width(width), m_Height(height) {}
         
         EVENT_CLASS_IMPL_CATEGORY(EventCategoryApplication)
         EVENT_CLASS_IMPL_TYPE(EventType::WindowResized)
         
-        std::string toString() const override {
-            return std::format("WindowResizedEvent: Width={}, Height={}", m_width, m_height);
+        std::string ToString() const override {
+            return std::format("WindowResizedEvent: Width={}, Height={}", m_Width, m_Height);
         }
         
-        int getWidth() const { return m_width; }
-        int getHeight() const { return m_height; }
+        int GetWidth() const { return m_Width; }
+        int GetHeight() const { return m_Height; }
     private:
-        unsigned int m_width, m_height;
+        unsigned int m_Width, m_Height;
     };
     
     class WindowClosedEvent : public Event {

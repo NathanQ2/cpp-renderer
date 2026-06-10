@@ -7,22 +7,22 @@
 namespace PalmTree {
     class Log {
     public:
-        static void init();
+        static void Init();
 
-        static std::shared_ptr<spdlog::logger>& getCoreLogger() { return s_coreLogger; }
-        static std::shared_ptr<spdlog::logger>& getClientLogger() { return s_clientLogger; }
+        static std::shared_ptr<spdlog::logger>& GetCoreLogger() { return s_CoreLogger; }
+        static std::shared_ptr<spdlog::logger>& GetClientLogger() { return s_ClientLogger; }
     private:
-        static std::shared_ptr<spdlog::logger> s_coreLogger;
-        static std::shared_ptr<spdlog::logger> s_clientLogger;
+        static std::shared_ptr<spdlog::logger> s_CoreLogger;
+        static std::shared_ptr<spdlog::logger> s_ClientLogger;
     };
 }
 
-#define PT_CORE_TRACE(...) ::PalmTree::Log::getCoreLogger()->trace(__VA_ARGS__)
-#define PT_CORE_INFO(...)  ::PalmTree::Log::getCoreLogger()->info(__VA_ARGS__)
-#define PT_CORE_WARN(...)  ::PalmTree::Log::getCoreLogger()->warn(__VA_ARGS__)
-#define PT_CORE_ERROR(...) ::PalmTree::Log::getCoreLogger()->error(__VA_ARGS__)
+#define PT_CORE_TRACE(...) ::PalmTree::Log::GetCoreLogger()->trace(__VA_ARGS__)
+#define PT_CORE_INFO(...)  ::PalmTree::Log::GetCoreLogger()->info(__VA_ARGS__)
+#define PT_CORE_WARN(...)  ::PalmTree::Log::GetCoreLogger()->warn(__VA_ARGS__)
+#define PT_CORE_ERROR(...) ::PalmTree::Log::GetCoreLogger()->error(__VA_ARGS__)
 
-#define PT_TRACE(...) ::PalmTree::Log::getClientLogger()->trace(__VA_ARGS__)
-#define PT_INFO(...)  ::PalmTree::Log::getClientLogger()->info(__VA_ARGS__)
-#define PT_WARN(...)  ::PalmTree::Log::getClientLogger()->warn(__VA_ARGS__)
-#define PT_ERROR(...) ::PalmTree::Log::getClientLogger()->error(__VA_ARGS__)
+#define PT_TRACE(...) ::PalmTree::Log::GetClientLogger()->trace(__VA_ARGS__)
+#define PT_INFO(...)  ::PalmTree::Log::GetClientLogger()->info(__VA_ARGS__)
+#define PT_WARN(...)  ::PalmTree::Log::GetClientLogger()->warn(__VA_ARGS__)
+#define PT_ERROR(...) ::PalmTree::Log::GetClientLogger()->error(__VA_ARGS__)

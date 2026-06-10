@@ -15,30 +15,30 @@ namespace PalmTree {
             Id id,
             const Signature& signature,
             EntityComponentSystem* ecs
-        ) : m_id(id), m_signature(signature), m_ecs(ecs) {}
+        ) : m_Id(id), m_Signature(signature), m_Ecs(ecs) {}
 
         GameObject(const GameObject&) = delete;
         GameObject& operator=(const GameObject&) = delete;
         GameObject(GameObject&&) = default;
         GameObject& operator=(GameObject&& other) = delete;
 
-        [[nodiscard]] Id getId() const { return m_id; }
+        [[nodiscard]] Id GetId() const { return m_Id; }
 
 
         // Implemented in EntityComponentSystem.h
         template <typename T>
-        T& getComponent();
+        T& GetComponent();
 
         // Implemented in EntityComponentSystem.h
         template <typename T>
-        void addComponent(T component);
+        void AddComponent(T component);
 
         // Implemented in EntityComponentSystem.h
-        TransformComponent& getTransform();
+        TransformComponent& GetTransform();
 
     private:
-        Id m_id;
-        const Signature& m_signature;
-        EntityComponentSystem* m_ecs;
+        Id m_Id;
+        const Signature& m_Signature;
+        EntityComponentSystem* m_Ecs;
     };
 }

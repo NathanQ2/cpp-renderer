@@ -9,24 +9,24 @@
 
 namespace PalmTree {
     struct PointLight {
-        glm::vec4 position{};
-        glm::vec4 color{};
+        glm::vec4 Position{};
+        glm::vec4 Color{};
     };
 
     struct GlobalUBO {
-        glm::mat4 projection = glm::mat4(1.0f);
-        glm::mat4 view = glm::mat4(1.0f);
-        glm::mat4 inverseView = glm::mat4(1.0f);
-        glm::vec4 ambientLightColor = glm::vec4(1.0f, 1.0f, 1.0f, 0.02f);
-        PointLight pointLights[MAX_LIGHTS];
-        int numLights;
+        glm::mat4 Projection = glm::mat4(1.0f);
+        glm::mat4 View = glm::mat4(1.0f);
+        glm::mat4 InverseView = glm::mat4(1.0f);
+        glm::vec4 AmbientLightColor = glm::vec4(1.0f, 1.0f, 1.0f, 0.02f);
+        PointLight PointLights[MAX_LIGHTS];
+        int NumLights;
     };
 
     struct FrameInfo {
-        int frameIndex;
-        float frameTime;
-        VkCommandBuffer commandBuffer;
-        Camera& camera;
-        VkDescriptorSet globalDescriptorSet;
+        int FrameIndex;
+        float FrameTime;
+        VkCommandBuffer CommandBuffer;
+        Camera& Camera;
+        VkDescriptorSet GlobalDescriptorSet;
     };
 }

@@ -16,14 +16,14 @@ namespace PalmTree {
         SimpleRenderSystem(const SimpleRenderSystem&) = delete;
         SimpleRenderSystem& operator=(const SimpleRenderSystem&) = delete;
 
-        void renderGameObjects(FrameInfo& fameInfo);
+        void RenderGameObjects(FrameInfo& fameInfo);
 
     private:
-        void createPipelineLayout(VkDescriptorSetLayout globalSetLayout);
-        void createPipeline(VkRenderPass renderPass);
+        void CreatePipelineLayout(VkDescriptorSetLayout globalSetLayout);
+        void CreatePipeline(VkRenderPass renderPass);
 
-        Device& m_device;
-        std::unique_ptr<Pipeline> m_pipeline;
-        VkPipelineLayout m_pipelineLayout;
+        Device& m_Device;
+        std::unique_ptr<Pipeline> m_Pipeline;
+        VkPipelineLayout m_PipelineLayout;
     };
 }
