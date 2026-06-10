@@ -93,8 +93,8 @@ namespace PalmTree {
         pipelineConfig.PipelineLayout = m_PipelineLayout;
         m_Pipeline = std::make_unique<Pipeline>(
             m_Device,
-            "simpleShader.vert.spv",
-            "simpleShader.frag.spv",
+            "PalmTree/simpleShader.vert.spv",
+            "PalmTree/simpleShader.frag.spv",
             pipelineConfig
         );
     }

@@ -128,8 +128,8 @@ namespace PalmTree {
         pipelineConfig.PipelineLayout = m_PipelineLayout;
         m_Pipeline = std::make_unique<Pipeline>(
             m_Device,
-            "pointLight.vert.spv",
-            "pointLight.frag.spv",
+            "PalmTree/pointLight.vert.spv",
+            "PalmTree/pointLight.frag.spv",
             pipelineConfig
         );
     }

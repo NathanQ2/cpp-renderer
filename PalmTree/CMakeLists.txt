@@ -18,9 +18,9 @@ target_include_directories(${PROJECT_NAME} PRIVATE vendor/tinyobjloader)
 target_include_directories(${PROJECT_NAME} PUBLIC vendor/spdlog/include)
 target_compile_definitions(PalmTree PRIVATE PT_BUILD)
 
-file(GLOB SHADERS ${CMAKE_CURRENT_SOURCE_DIR}/shaders/*.vert ${CMAKE_CURRENT_SOURCE_DIR}/shaders/*.frag)
+file(GLOB shaders shaders/*.vert shaders/*.frag)
 
-foreach (SHADER IN LISTS SHADERS)
+foreach (SHADER IN LISTS shaders)
     get_filename_component(FILENAME ${SHADER} NAME)
     add_custom_command(
             OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${FILENAME}.spv
