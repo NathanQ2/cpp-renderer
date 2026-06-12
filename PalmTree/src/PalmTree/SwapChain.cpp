@@ -5,6 +5,8 @@
 #include <set>
 #include <stdexcept>
 
+#include "Log.h"
+
 namespace PalmTree {
     void SwapChain::RecreateSwapChain() {
         while (m_Window.GetWidth() == 0 || m_Window.GetHeight() == 0) {
@@ -158,8 +160,8 @@ namespace PalmTree {
         VkPresentModeKHR presentMode = ChooseSwapPresentMode(swapChainSupport.PresentModes);
         VkExtent2D extent = ChooseSwapExtent(swapChainSupport.Capabilities);
 
-        std::cout << "Min Image Count: " << swapChainSupport.Capabilities.minImageCount << std::endl;
-        std::cout << "Max Image Count: " << swapChainSupport.Capabilities.maxImageCount << std::endl;
+        PT_CORE_TRACE("Min Image Count: {}", swapChainSupport.Capabilities.minImageCount);
+        PT_CORE_TRACE("Max Image Count: {}", swapChainSupport.Capabilities.maxImageCount);
         //uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
         // Not sure if this is really 100% correct but it works so
         uint32_t imageCount = MAX_FRAMES_IN_FLIGHT;
@@ -435,14 +437,14 @@ namespace PalmTree {
     ) {
         for (const auto& availablePresentMode : availablePresentModes) {
             if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR) {
-                std::cout << "Present mode: Tripple Buffered" << std::endl;
+                PT_CORE_TRACE("Present mode: Tripple Buffered");
                 return availablePresentMode;
             }
         }
 
         // if using this mode glfwPollEvents will block on movement, so dragging
         // becomes choppy framerate fixed to 60 fps
-        std::cout << "Present mode: V-Sync" << std::endl;
+        PT_CORE_TRACE("Present mode: V-Sync");
         return VK_PRESENT_MODE_FIFO_KHR;
 
         // std::cout << "Present mode: Immediate" << std::endl;

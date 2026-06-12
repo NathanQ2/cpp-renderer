@@ -1,13 +1,15 @@
 #include "ptpch.h"
 #include "Window.h"
 
+#include "Log.h"
+
 #include <stdio.h>
 
 #include <vulkan/vulkan.h>
 
 namespace PalmTree {
     static void glfw_error_callback(int error, const char* description) {
-        fprintf(stderr, "GLFW error %d: %s", error, description);
+        PT_CORE_ERROR("GLFW error {0}: {1}", error, description);
     }
 
     Window::Window(const int width, const int height, const std::string& title) : m_Width(width), m_Height(height),
@@ -23,7 +25,7 @@ namespace PalmTree {
     void Window::Init() {
         glfwSetErrorCallback(glfw_error_callback);
         if (glfwInit() == GLFW_FALSE) {
-            std::cerr << "Could not initialize GLFW!" << std::endl;
+            PT_CORE_ERROR("Could not initialize GLFW!");
 
             return;
         }
@@ -37,7 +39,7 @@ namespace PalmTree {
         uint32_t extensionCount = 0;
         vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
 
-        std::cout << extensionCount << " extensions supported" << std::endl;
+        PT_CORE_TRACE("{} extensions supported", extensionCount);
     }
 
     void Window::CreateWindowSurface(VkInstance instance, VkSurfaceKHR* surface) {
@@ -51,6 +53,6 @@ namespace PalmTree {
 
         window->m_FrameBufferResized = true;
         window->m_Width = width,
-            window->m_Height = height;
+        window->m_Height = height;
     }
 }

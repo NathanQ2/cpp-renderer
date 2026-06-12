@@ -7,6 +7,8 @@
 #include <set>
 #include <unordered_set>
 
+#include "Log.h"
+
 namespace PalmTree {
     // local callback functions
     static VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(
@@ -303,7 +305,7 @@ namespace PalmTree {
         if (deviceCount == 0) {
             throw std::runtime_error("failed to find GPUs with Vulkan support!");
         }
-        std::cout << "Device count: " << deviceCount << std::endl;
+        PT_CORE_TRACE("Device count: {}", deviceCount);
         std::vector<VkPhysicalDevice> devices(deviceCount);
         vkEnumeratePhysicalDevices(m_Instance, &deviceCount, devices.data());
 
@@ -319,7 +321,7 @@ namespace PalmTree {
         }
 
         vkGetPhysicalDeviceProperties(m_PhysicalDevice, &m_Properties);
-        std::cout << "physical device: " << m_Properties.deviceName << std::endl;
+        PT_CORE_TRACE("physical device: {}", m_Properties.deviceName);
     }
 
     void Device::CreateLogicalDevice() {
@@ -495,21 +497,23 @@ namespace PalmTree {
         std::vector<VkExtensionProperties> extensions(extensionCount);
         vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, extensions.data());
 
-        std::cout << "available extensions:" << std::endl;
+        std::stringstream ss;
         std::unordered_set<std::string> available;
         for (const auto& extension : extensions) {
-            std::cout << "\t" << extension.extensionName << std::endl;
+            ss << "\t" << extension.extensionName << '\n';
             available.insert(extension.extensionName);
         }
+        PT_CORE_TRACE("available extensions:\n{}", ss.str());
 
-        std::cout << "required extensions:" << std::endl;
+        ss.clear();
         auto requiredExtensions = GetRequiredExtensions();
         for (const auto& required : requiredExtensions) {
-            std::cout << "\t" << required << std::endl;
+            ss << "\t" << required << '\n';
             if (available.find(required) == available.end()) {
                 throw std::runtime_error("Missing required glfw extension");
             }
         }
+        PT_CORE_TRACE("required extensions:\n{}", ss.str());
     }
 
     bool Device::CheckDeviceExtensionSupport(VkPhysicalDevice device) {
