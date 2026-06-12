@@ -33,7 +33,7 @@ namespace PalmTree {
 
         int lightIndex = 0;
         for (Id id : m_Ids) {
-            assert(lightIndex < MAX_LIGHTS && "Point lights exceed maximum specified");
+            PT_CORE_ASSERT(lightIndex < MAX_LIGHTS, "Point lights exceed maximum specified");
 
             GameObject& obj = m_Ecs->GetObject(id);
 
@@ -121,7 +121,7 @@ namespace PalmTree {
     }
 
     void PointLightSystem::CreatePipeline(VkRenderPass renderPass) {
-        assert(m_PipelineLayout != nullptr && "Cannot create pipeline before pipeline layout!");
+        PT_CORE_ASSERT(m_PipelineLayout != nullptr, "Cannot create pipeline before pipeline layout!");
 
         PipelineConfig pipelineConfig{};
         Pipeline::DefaultPipelineConfig(pipelineConfig);

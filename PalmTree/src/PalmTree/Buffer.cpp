@@ -11,6 +11,8 @@
 // std
 #include <cassert>
 
+#include "Log.h"
+
 namespace PalmTree {
     Buffer::Buffer(
         Device& device,
@@ -46,7 +48,7 @@ namespace PalmTree {
      * @return VkResult of the buffer mapping call
      */
     VkResult Buffer::Map(VkDeviceSize size, VkDeviceSize offset) {
-        assert(m_Buffer && m_Memory && "Called map on buffer before create");
+        PT_CORE_ASSERT(m_Buffer && m_Memory, "Called map on buffer before create");
         return vkMapMemory(m_Device.GetDevice(), m_Memory, offset, size, 0, &m_Mapped);
     }
 
@@ -72,7 +74,7 @@ namespace PalmTree {
      *
      */
     void Buffer::WriteToBuffer(void* data, VkDeviceSize size, VkDeviceSize offset) {
-        assert(m_Mapped && "Cannot copy to unmapped buffer");
+        PT_CORE_ASSERT(m_Mapped, "Cannot copy to unmapped buffer");
 
         if (size == VK_WHOLE_SIZE) {
             memcpy(m_Mapped, data, m_BufferSize);

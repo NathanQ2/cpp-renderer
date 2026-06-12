@@ -89,7 +89,7 @@ namespace PalmTree {
     }
 
     void SimpleRenderSystem::CreatePipeline(VkRenderPass renderPass) {
-        assert(m_PipelineLayout != nullptr && "Cannot create pipeline before pipeline layout!");
+        PT_CORE_ASSERT(m_PipelineLayout != nullptr, "Cannot create pipeline before pipeline layout!");
 
         PipelineConfig pipelineConfig{};
         Pipeline::DefaultPipelineConfig(pipelineConfig);

@@ -1,6 +1,8 @@
 #include "ptpch.h"
 #include "Descriptors.h"
 
+#include "Log.h"
+
 #include <stdexcept>
 
 namespace PalmTree {
@@ -12,7 +14,7 @@ namespace PalmTree {
         VkShaderStageFlags stageFlags,
         uint32_t count
     ) {
-        assert(m_Bindings.count(binding) == 0 && "Binding already in use");
+        PT_CORE_ASSERT(m_Bindings.count(binding) == 0, "Binding already in use");
         VkDescriptorSetLayoutBinding layoutBinding{};
         layoutBinding.binding = binding;
         layoutBinding.descriptorType = descriptorType;
@@ -149,12 +151,12 @@ namespace PalmTree {
         uint32_t binding,
         VkDescriptorBufferInfo* bufferInfo
     ) {
-        assert(m_SetLayout.m_Bindings.count(binding) == 1 && "Layout does not contain specified binding");
+        PT_CORE_ASSERT(m_SetLayout.m_Bindings.count(binding) == 1, "Layout does not contain specified binding");
 
         auto& bindingDescription = m_SetLayout.m_Bindings[binding];
 
-        assert(
-            bindingDescription.descriptorCount == 1 &&
+        PT_CORE_ASSERT(
+            bindingDescription.descriptorCount == 1,
             "Binding single descriptor info, but binding expects multiple"
         );
 
@@ -173,12 +175,12 @@ namespace PalmTree {
         uint32_t binding,
         VkDescriptorImageInfo* imageInfo
     ) {
-        assert(m_SetLayout.m_Bindings.count(binding) == 1 && "Layout does not contain specified binding");
+        PT_CORE_ASSERT(m_SetLayout.m_Bindings.count(binding) == 1, "Layout does not contain specified binding");
 
         auto& bindingDescription = m_SetLayout.m_Bindings[binding];
 
-        assert(
-            bindingDescription.descriptorCount == 1 &&
+        PT_CORE_ASSERT(
+            bindingDescription.descriptorCount == 1,
             "Binding single descriptor info, but binding expects multiple"
         );
 

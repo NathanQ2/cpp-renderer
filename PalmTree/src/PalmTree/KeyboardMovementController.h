@@ -1,6 +1,6 @@
 #pragma once
 
-#include "EntityComponentSystem/GameObject.h"
+#include "EntityComponentSystem/EntityComponentSystem.h"
 #include "Window.h"
 
 namespace PalmTree {

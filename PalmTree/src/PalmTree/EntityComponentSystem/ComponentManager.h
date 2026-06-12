@@ -4,6 +4,7 @@
 
 #include "ComponentArray.h"
 #include "Components.h"
+#include "PalmTree/Log.h"
 
 namespace PalmTree {
     class ComponentManager {
@@ -12,8 +13,8 @@ namespace PalmTree {
         void RegisterComponent() {
             const char* name = typeid(T).name();
 
-            assert(!m_ComponentTypes.contains(name) && "Component has already been registered!");
-            assert(m_ComponentTypes.size() < MAX_COMPONENTS && "Too many components registered!");
+            PT_CORE_ASSERT(!m_ComponentTypes.contains(name), "Component has already been registered!");
+            PT_CORE_ASSERT(m_ComponentTypes.size() < MAX_COMPONENTS, "Too many components registered!");
 
             ComponentType type = m_NextComponentType;
             m_ComponentTypes[name] = type;
@@ -41,7 +42,7 @@ namespace PalmTree {
         ComponentType GetComponentType() {
             const char* name = typeid(T).name();
 
-            assert(m_ComponentTypes.contains(name) && "Component has not been registered!");
+            PT_CORE_ASSERT(m_ComponentTypes.contains(name), "Component has not been registered!");
 
             return m_ComponentTypes[name];
         }
@@ -56,7 +57,7 @@ namespace PalmTree {
         std::shared_ptr<ComponentArray<T>> GetComponentArray() {
             ComponentType type = GetComponentType<T>();
 
-            assert(m_ComponentArrays.contains(type) && "Component has not been registered!");
+            PT_CORE_ASSERT(m_ComponentArrays.contains(type), "Component has not been registered!");
 
             return std::static_pointer_cast<ComponentArray<T>>(m_ComponentArrays[type]);
         }

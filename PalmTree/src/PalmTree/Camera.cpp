@@ -3,6 +3,8 @@
 
 #include <limits>
 
+#include "Log.h"
+
 namespace PalmTree {
     void Camera::SetOrthographicProjection(
         float left,
@@ -22,7 +24,7 @@ namespace PalmTree {
     }
 
     void Camera::SetPerspectiveProjection(float fovy, float aspect, float near, float far) {
-        assert(glm::abs(aspect - std::numeric_limits<float>::epsilon()) > 0.0f);
+        PT_CORE_ASSERT(glm::abs(aspect - std::numeric_limits<float>::epsilon()) > 0.0f, "Invalid aspect ratio");
         const float tanHalfFovy = tan(fovy / 2.f);
         m_ProjectionMatrix = glm::mat4{0.0f};
         m_ProjectionMatrix[0][0] = 1.f / (aspect * tanHalfFovy);

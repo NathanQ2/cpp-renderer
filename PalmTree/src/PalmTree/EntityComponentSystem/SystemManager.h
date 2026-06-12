@@ -11,7 +11,7 @@ namespace PalmTree {
         void RegisterSystem(std::shared_ptr<T> system, Signature signature, EntityComponentSystem* ecs) {
             const char* name = typeid(T).name();
 
-            assert(!m_Systems.contains(name) && "The system has already been registered!");
+            PT_CORE_ASSERT(!m_Systems.contains(name), "The system has already been registered!");
 
             system->m_Ecs = ecs;
 

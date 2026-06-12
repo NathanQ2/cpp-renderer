@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Log.h"
 #include "Model.h"
 #include "SwapChain.h"
 #include "Window.h"
@@ -19,7 +20,7 @@ namespace PalmTree {
         [[nodiscard]] bool IsFrameInProgress() const { return m_IsFrameStarted; }
 
         [[nodiscard]] VkCommandBuffer GetCurrentCommandBuffer() const {
-            assert(m_IsFrameStarted && "Cannot get command buffer when frame not in progress");
+            PT_CORE_ASSERT(m_IsFrameStarted, "Cannot get command buffer when frame not in progress");
             return m_CommandBuffers[m_CurrentFrameIndex];
         }
 
@@ -29,7 +30,7 @@ namespace PalmTree {
         void EndSwapChainRenderPass(VkCommandBuffer commandBuffer);
 
         [[nodiscard]] int GetFrameIndex() const {
-            assert(m_IsFrameStarted && "Cannot get command buffer when frame not in progress");
+            PT_CORE_ASSERT(m_IsFrameStarted, "Cannot get command buffer when frame not in progress");
 
             return m_CurrentFrameIndex;
         }

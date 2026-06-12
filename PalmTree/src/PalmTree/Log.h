@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Core.h"
 
 #include <spdlog/spdlog.h>
 
@@ -27,3 +26,12 @@ namespace PalmTree {
 #define PT_INFO(...)  ::PalmTree::Log::GetClientLogger()->info(__VA_ARGS__)
 #define PT_WARN(...)  ::PalmTree::Log::GetClientLogger()->warn(__VA_ARGS__)
 #define PT_ERROR(...) ::PalmTree::Log::GetClientLogger()->error(__VA_ARGS__)
+
+#ifdef PT_ENABLE_ASSERTS
+    #include <cassert>
+    #define PT_CORE_ASSERT(x, ...) if(!(x)) { PT_CORE_ERROR("Assertion Failed: {0}", __VA_ARGS__); assert(false); }
+    #define PT_ASSERT(x, ...) if(!(x)) { PT_ERROR("Assertion Failed: {0}", __VA_ARGS__); assert(false); }
+#else
+    #define PT_CORE_ASSERT(x, ...)
+    #define PT_ASSERT(x, ...)
+#endif

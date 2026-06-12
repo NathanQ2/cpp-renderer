@@ -7,6 +7,8 @@
 #include <iostream>
 #include <stdexcept>
 
+#include "Log.h"
+
 namespace PalmTree {
     Pipeline::Pipeline(
         Device& device,
@@ -132,12 +134,12 @@ namespace PalmTree {
         const std::string& fragPath,
         const PipelineConfig& config
     ) {
-        assert(
-            config.PipelineLayout != VK_NULL_HANDLE &&
+        PT_CORE_ASSERT(
+            config.PipelineLayout != VK_NULL_HANDLE,
             "Cannot create graphics pipeline:: no pipelinelayout provided in config"
         );
-        assert(
-            config.RenderPass != VK_NULL_HANDLE &&
+        PT_CORE_ASSERT(
+            config.RenderPass != VK_NULL_HANDLE,
             "Cannot create graphics pipeline:: no renderPass provided in config"
         );
 

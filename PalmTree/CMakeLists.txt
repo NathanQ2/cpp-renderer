@@ -16,7 +16,7 @@ target_link_libraries(${PROJECT_NAME} glfw ${GLFW_LIBRARIES} Vulkan::Vulkan glm:
 target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>)
 target_include_directories(${PROJECT_NAME} PRIVATE vendor/tinyobjloader)
 target_include_directories(${PROJECT_NAME} PUBLIC vendor/spdlog/include)
-target_compile_definitions(PalmTree PRIVATE PT_BUILD)
+target_compile_definitions(PalmTree PRIVATE $<$<CONFIG:Debug>:PT_ENABLE_ASSERTS>)
 target_precompile_headers(PalmTree PUBLIC src/ptpch.h)
 
 file(GLOB shaders shaders/*.vert shaders/*.frag)

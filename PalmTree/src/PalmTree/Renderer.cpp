@@ -1,7 +1,8 @@
-#include "ptpch.h"
 #include "Renderer.h"
 
 #include <stdexcept>
+
+#include "Log.h"
 
 namespace PalmTree {
     Renderer::Renderer(Window& window, Device& device) : m_Window(window), m_Device(device) {
@@ -14,7 +15,7 @@ namespace PalmTree {
     }
 
     VkCommandBuffer Renderer::BeginFrame() {
-        assert(!m_IsFrameStarted && "Can't call begin frame while already in progress!");
+        PT_CORE_ASSERT(!m_IsFrameStarted, "Can't call begin frame while already in progress!");
 
         auto result = m_SwapChain->AcquireNextImage(&m_CurrentImageIndex);
 
@@ -43,7 +44,7 @@ namespace PalmTree {
     }
 
     void Renderer::EndFrame() {
-        assert(m_IsFrameStarted && "Can't call end frame while frame is not in progress");
+        PT_CORE_ASSERT(m_IsFrameStarted, "Can't call end frame while frame is not in progress");
 
         VkCommandBuffer commandBuffer = GetCurrentCommandBuffer();
 
@@ -66,9 +67,9 @@ namespace PalmTree {
     }
 
     void Renderer::BeginSwapChainRenderPass(VkCommandBuffer commandBuffer) {
-        assert(m_IsFrameStarted && "Can't call BeginSwapChainRenderPass if frame is not in progress!");
-        assert(
-            commandBuffer == GetCurrentCommandBuffer() &&
+        PT_CORE_ASSERT(m_IsFrameStarted, "Can't call BeginSwapChainRenderPass if frame is not in progress!");
+        PT_CORE_ASSERT(
+            commandBuffer == GetCurrentCommandBuffer(),
             "Can't begin render pass on command buffer from a different frame!"
         );
 
@@ -102,9 +103,9 @@ namespace PalmTree {
     }
 
     void Renderer::EndSwapChainRenderPass(VkCommandBuffer commandBuffer) {
-        assert(m_IsFrameStarted && "Can't call EndSwapChainRenderPass if frame is not in progress!");
-        assert(
-            commandBuffer == GetCurrentCommandBuffer() &&
+        PT_CORE_ASSERT(m_IsFrameStarted, "Can't call EndSwapChainRenderPass if frame is not in progress!");
+        PT_CORE_ASSERT(
+            commandBuffer == GetCurrentCommandBuffer(),
             "Can't end render pass on command buffer from a different frame!"
         );
 
