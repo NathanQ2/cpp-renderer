@@ -3,7 +3,6 @@
 #include "Device.h"
 #include "Window.h"
 
-#include <vector>
 
 namespace PalmTree {
     class SwapChain {

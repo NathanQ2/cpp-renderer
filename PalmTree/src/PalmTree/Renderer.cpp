@@ -1,6 +1,6 @@
+#include "ptpch.h"
 #include "Renderer.h"
 
-#include <array>
 #include <stdexcept>
 
 namespace PalmTree {

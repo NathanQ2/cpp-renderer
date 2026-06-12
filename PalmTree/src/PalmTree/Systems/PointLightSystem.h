@@ -6,7 +6,6 @@
 
 #include "../EntityComponentSystem/EntityComponentSystem.h"
 
-#include <memory>
 
 namespace PalmTree {
     class PointLightSystem : public System {

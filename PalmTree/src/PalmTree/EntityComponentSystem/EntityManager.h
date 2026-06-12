@@ -2,7 +2,6 @@
 
 #include "Types.h"
 
-#include <array>
 #include <queue>
 
 namespace PalmTree {

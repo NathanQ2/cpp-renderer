@@ -7,8 +7,6 @@
 #include "Renderer.h"
 #include "Window.h"
 
-#include <memory>
-#include <vector>
 
 namespace PalmTree {
     class Application {
@@ -34,9 +32,9 @@ namespace PalmTree {
 
         // NOTE: Must be declared after PtDevice
         std::unique_ptr<DescriptorPool> m_GlobalPool{};
-       
+
         EntityComponentSystem m_Ecs{};
     };
-    
+
     Application* CreateApplication();
 }

@@ -1,3 +1,4 @@
+#include "ptpch.h"
 #include "EntityComponentSystem.h"
 
 namespace PalmTree {

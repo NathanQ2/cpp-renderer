@@ -1,3 +1,4 @@
+#include "ptpch.h"
 #include "Components.h"
 
 namespace PalmTree {

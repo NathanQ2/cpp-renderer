@@ -1,6 +1,6 @@
+#include "ptpch.h"
 #include "EntityManager.h"
 
-#include <cassert>
 
 namespace PalmTree {
     EntityManager::EntityManager() {

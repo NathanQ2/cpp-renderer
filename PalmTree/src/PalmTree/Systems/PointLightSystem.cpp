@@ -110,7 +110,12 @@ namespace PalmTree {
         pipelineLayoutInfo.pushConstantRangeCount = 1;
         pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
 
-        if (vkCreatePipelineLayout(m_Device.GetDevice(), &pipelineLayoutInfo, nullptr, &m_PipelineLayout) != VK_SUCCESS) {
+        if (vkCreatePipelineLayout(
+            m_Device.GetDevice(),
+            &pipelineLayoutInfo,
+            nullptr,
+            &m_PipelineLayout
+        ) != VK_SUCCESS) {
             throw std::runtime_error("Failed to create pipeline layout!");
         }
     }

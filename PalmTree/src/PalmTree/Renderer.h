@@ -4,9 +4,6 @@
 #include "SwapChain.h"
 #include "Window.h"
 
-#include <cassert>
-#include <memory>
-#include <vector>
 
 namespace PalmTree {
     class Renderer {

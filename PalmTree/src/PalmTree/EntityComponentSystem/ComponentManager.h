@@ -1,9 +1,5 @@
 #pragma once
 
-#include <unordered_map>
-#include <string_view>
-#include <cassert>
-#include <print>
 #include <typeinfo>
 
 #include "ComponentArray.h"
@@ -81,7 +77,7 @@ namespace PalmTree {
         }
 
         template <typename U>
-        SignatureBuilder& Aemove() {
+        SignatureBuilder& Remove() {
             m_Signature.set(m_Cm.GetComponentType<U>(), false);
 
             return *this;

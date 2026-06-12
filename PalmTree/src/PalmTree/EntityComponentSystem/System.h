@@ -6,7 +6,7 @@
 
 namespace PalmTree {
     class EntityComponentSystem;
-   
+
     class System {
     public:
         friend class SystemManager;

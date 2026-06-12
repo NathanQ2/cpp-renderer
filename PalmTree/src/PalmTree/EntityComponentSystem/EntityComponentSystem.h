@@ -6,7 +6,6 @@
 #include "EntityManager.h"
 #include "SystemManager.h"
 
-#include <vector>
 
 namespace PalmTree {
     class EntityComponentSystem {
@@ -56,6 +55,7 @@ namespace PalmTree {
         }
 
         ComponentManager& GetComponentManager() { return m_ComponentManager; }
+
     private:
         EntityManager m_EntityManager{};
         ComponentManager m_ComponentManager{};

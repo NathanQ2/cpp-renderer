@@ -2,9 +2,6 @@
 
 #include "Device.h"
 
-#include <memory>
-#include <unordered_map>
-#include <vector>
 
 namespace PalmTree {
     class DescriptorSetLayout {

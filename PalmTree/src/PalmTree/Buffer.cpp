@@ -5,11 +5,11 @@
  * https://github.com/SaschaWillems/Vulkan/blob/master/base/VulkanBuffer.h
  */
 
+#include "ptpch.h"
 #include "Buffer.h"
 
 // std
 #include <cassert>
-#include <cstring>
 
 namespace PalmTree {
     Buffer::Buffer(

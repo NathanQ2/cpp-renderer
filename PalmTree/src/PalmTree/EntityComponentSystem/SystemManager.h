@@ -2,10 +2,7 @@
 
 #include "System.h"
 
-#include <unordered_map>
 #include <typeinfo>
-#include <cassert>
-#include <memory>
 
 namespace PalmTree {
     class SystemManager {

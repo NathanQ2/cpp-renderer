@@ -1,8 +1,8 @@
+#include "ptpch.h"
 #include "Pipeline.h"
 
 #include "Model.h"
 
-#include <cassert>
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
@@ -194,7 +194,14 @@ namespace PalmTree {
         pipelineInfo.basePipelineIndex = -1;
         pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 
-        if (vkCreateGraphicsPipelines(m_Device.GetDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &m_GraphicsPipeline)
+        if (vkCreateGraphicsPipelines(
+                m_Device.GetDevice(),
+                VK_NULL_HANDLE,
+                1,
+                &pipelineInfo,
+                nullptr,
+                &m_GraphicsPipeline
+            )
             != VK_SUCCESS) {
             throw std::runtime_error("Failed to create graphics pipeline!");
         }

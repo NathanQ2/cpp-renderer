@@ -1,7 +1,6 @@
+#include "ptpch.h"
 #include "Descriptors.h"
 
-// std
-#include <cassert>
 #include <stdexcept>
 
 namespace PalmTree {

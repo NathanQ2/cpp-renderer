@@ -1,6 +1,5 @@
 #pragma once
 
-#include <functional>
 
 namespace PalmTree {
     // from: https://stackoverflow.com/a/57595105

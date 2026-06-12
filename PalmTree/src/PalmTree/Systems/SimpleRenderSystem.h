@@ -2,10 +2,8 @@
 
 #include "../EntityComponentSystem/System.h"
 #include "../FrameInfo.h"
-#include "../Model.h"
 #include "../Pipeline.h"
 
-#include <memory>
 
 namespace PalmTree {
     class SimpleRenderSystem : public System {

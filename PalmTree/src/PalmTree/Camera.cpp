@@ -1,6 +1,6 @@
+#include "ptpch.h"
 #include "Camera.h"
 
-#include <cassert>
 #include <limits>
 
 namespace PalmTree {

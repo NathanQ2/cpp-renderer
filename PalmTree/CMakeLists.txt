@@ -17,6 +17,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURR
 target_include_directories(${PROJECT_NAME} PRIVATE vendor/tinyobjloader)
 target_include_directories(${PROJECT_NAME} PUBLIC vendor/spdlog/include)
 target_compile_definitions(PalmTree PRIVATE PT_BUILD)
+target_precompile_headers(PalmTree PUBLIC src/ptpch.h)
 
 file(GLOB shaders shaders/*.vert shaders/*.frag)
 
