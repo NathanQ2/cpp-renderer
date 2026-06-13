@@ -4,6 +4,24 @@
 
 namespace PalmTree {
     void KeyboardMovementController::MoveInPlaneXZ(GLFWwindow* window, float dt, GameObject& gameObject) {
+        if (glfwGetMouseButton(window, m_Keys.LeftButton) == GLFW_PRESS) {
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+            if (glfwRawMouseMotionSupported())
+                glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+            
+            m_Enabled = true;
+            
+            glfwGetCursorPos(window, &m_PreviousCursorPosition.x, &m_PreviousCursorPosition.y);
+        }
+        
+        if (glfwGetKey(window, m_Keys.Escape) == GLFW_PRESS) {
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            
+            m_Enabled = false;
+        }
+        
+        if (!m_Enabled) return;
+        
         glm::vec3 keyboardRotate = glm::vec3(0);
 
         if (glfwGetKey(window, m_Keys.LookRight) == GLFW_PRESS) keyboardRotate.y += 1.0f;

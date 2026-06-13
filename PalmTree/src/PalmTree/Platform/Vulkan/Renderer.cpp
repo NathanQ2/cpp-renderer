@@ -2,10 +2,10 @@
 
 #include <stdexcept>
 
-#include "Log.h"
+#include "../../Log.h"
 
 namespace PalmTree {
-    Renderer::Renderer(Window& window, Device& device) : m_Window(window), m_Device(device) {
+    Renderer::Renderer(const std::shared_ptr<Window>& window, const std::shared_ptr<Device>& device) : m_Window(window), m_Device(device) {
         RecreateSwapChain();
         CreateCommandBuffers();
     }
@@ -54,8 +54,10 @@ namespace PalmTree {
 
         auto result = m_SwapChain->SubmitCommandBuffers(&commandBuffer, &m_CurrentImageIndex);
 
-        if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || m_Window.WasWindowResized()) {
-            m_Window.ResetWindowResizedFlag();
+        // TODO: Recreate swap chain when window resized
+        // if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || m_Window.WasWindowResized()) {
+        if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR) {
+            // m_Window.ResetWindowResizedFlag();
             RecreateSwapChain();
         }
         else if (result != VK_SUCCESS) {
@@ -118,18 +120,18 @@ namespace PalmTree {
         VkCommandBufferAllocateInfo allocInfo{};
         allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
         allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-        allocInfo.commandPool = m_Device.GetCommandPool();
+        allocInfo.commandPool = m_Device->GetCommandPool();
         allocInfo.commandBufferCount = static_cast<uint32_t>(m_CommandBuffers.size());
 
-        if (vkAllocateCommandBuffers(m_Device.GetDevice(), &allocInfo, m_CommandBuffers.data()) != VK_SUCCESS) {
+        if (vkAllocateCommandBuffers(m_Device->GetDevice(), &allocInfo, m_CommandBuffers.data()) != VK_SUCCESS) {
             throw std::runtime_error("Failed to allocate command buffers!");
         }
     }
 
     void Renderer::FreeCommandBuffers() {
         vkFreeCommandBuffers(
-            m_Device.GetDevice(),
-            m_Device.GetCommandPool(),
+            m_Device->GetDevice(),
+            m_Device->GetCommandPool(),
             static_cast<uint32_t>(m_CommandBuffers.size()),
             m_CommandBuffers.data()
         );

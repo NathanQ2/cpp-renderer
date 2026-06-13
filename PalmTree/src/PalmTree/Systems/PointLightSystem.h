@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../FrameInfo.h"
+#include "../Platform/Vulkan/FrameInfo.h"
 #include "../Model.h"
-#include "../Pipeline.h"
+#include "../Platform/Vulkan/Pipeline.h"
 
 #include "../EntityComponentSystem/EntityComponentSystem.h"
 

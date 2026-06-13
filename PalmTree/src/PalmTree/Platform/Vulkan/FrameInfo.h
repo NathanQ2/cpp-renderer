@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Camera.h"
-#include "EntityComponentSystem/GameObject.h"
+#include "../../Camera.h"
+#include "../../EntityComponentSystem/GameObject.h"
 
 #include <vulkan/vulkan.h>
 

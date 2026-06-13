@@ -1,7 +1,7 @@
 #include "Application.h"
 
 #include "KeyboardMovementController.h"
-#include "Buffer.h"
+#include "Platform/Vulkan/Buffer.h"
 #include "Camera.h"
 #include "EntityComponentSystem/EntityComponentSystem.h"
 #include "Systems/PointLightSystem.h"
@@ -16,9 +16,19 @@
 #include <ostream>
 #include <glm/ext/matrix_transform.hpp>
 
+#include "Platform/Mac/MacWindow.h"
+
+#define BIND_EVENT_FN(x) std::bind(&x, this, std::placeholders::_1)
+
 namespace PalmTree {
     Application::Application() {
-        m_GlobalPool = DescriptorPool::Builder(m_Device)
+        m_Window = std::shared_ptr<Window>(Window::Create());
+        m_Window->SetEventCallback(BIND_EVENT_FN(Application::OnEvent));
+        
+        m_Device = std::make_shared<Device>(m_Window);
+        m_Renderer = std::make_unique<Renderer>(m_Window, m_Device);
+        
+        m_GlobalPool = DescriptorPool::Builder(*m_Device)
             .SetMaxSets(SwapChain::MAX_FRAMES_IN_FLIGHT)
             .AddPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, SwapChain::MAX_FRAMES_IN_FLIGHT)
             .Build();
@@ -29,17 +39,17 @@ namespace PalmTree {
         std::vector<std::unique_ptr<Buffer>> uboBuffers(SwapChain::MAX_FRAMES_IN_FLIGHT);
         for (int i = 0; i < uboBuffers.size(); i++) {
             uboBuffers[i] = std::make_unique<Buffer>(
-                m_Device,
+                *m_Device,
                 sizeof(GlobalUBO),
                 SwapChain::MAX_FRAMES_IN_FLIGHT,
                 VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
                 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
-                m_Device.m_Properties.limits.minUniformBufferOffsetAlignment
+                m_Device->m_Properties.limits.minUniformBufferOffsetAlignment
             );
             uboBuffers[i]->Map();
         }
 
-        auto globalSetLayout = DescriptorSetLayout::Builder(m_Device)
+        auto globalSetLayout = DescriptorSetLayout::Builder(*m_Device)
             .AddBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
             .Build();
 
@@ -52,8 +62,8 @@ namespace PalmTree {
         }
 
         std::shared_ptr<SimpleRenderSystem> simpleRenderSystem = std::make_shared<SimpleRenderSystem>(
-            m_Device,
-            m_Renderer.GetSwapChainRenderPass(),
+            *m_Device,
+            m_Renderer->GetSwapChainRenderPass(),
             globalSetLayout->GetDescriptorSetLayout()
         );
         m_Ecs.RegisterSystem<SimpleRenderSystem>(
@@ -62,8 +72,8 @@ namespace PalmTree {
         );
 
         std::shared_ptr<PointLightSystem> pointLightSystem = std::make_shared<PointLightSystem>(
-            m_Device,
-            m_Renderer.GetSwapChainRenderPass(),
+            *m_Device,
+            m_Renderer->GetSwapChainRenderPass(),
             globalSetLayout->GetDescriptorSetLayout()
         );
         m_Ecs.RegisterSystem<PointLightSystem>(
@@ -77,30 +87,29 @@ namespace PalmTree {
         GameObject& viewerObject = m_Ecs.CreateGameObject();
         viewerObject.GetTransform().Translation.z = -2.5f;
 
-        glfwSetInputMode(m_Window.GetGLFWWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-        if (glfwRawMouseMotionSupported())
-            glfwSetInputMode(m_Window.GetGLFWWindow(), GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+        GLFWwindow* glfwWindow = std::static_pointer_cast<MacWindow>(m_Window)->GetGLFWWindow();
+        
         glm::f64vec2 cursorPos = glm::f64vec2(0);
-        glfwGetCursorPos(m_Window.GetGLFWWindow(), &cursorPos.x, &cursorPos.y);
+        glfwGetCursorPos(glfwWindow, &cursorPos.x, &cursorPos.y);
         KeyboardMovementController cameraController = KeyboardMovementController(cursorPos);
 
         auto currentTime = std::chrono::high_resolution_clock::now();
 
-        while (!m_Window.ShouldClose()) {
-            glfwPollEvents();
-
+        while (m_Running) {
+            m_Window->OnUpdate();
+            
             auto newTime = std::chrono::high_resolution_clock::now();
             float frameTime = std::chrono::duration<float>(newTime - currentTime).count();
             currentTime = newTime;
 
-            cameraController.MoveInPlaneXZ(m_Window.GetGLFWWindow(), frameTime, viewerObject);
+            cameraController.MoveInPlaneXZ(glfwWindow, frameTime, viewerObject);
             camera.SetViewYXZ(viewerObject.GetTransform().Translation, viewerObject.GetTransform().Rotation);
 
-            float aspect = m_Renderer.GetAspectRatio();
+            float aspect = m_Renderer->GetAspectRatio();
             camera.SetPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 100.0f);
 
-            if (VkCommandBuffer commandBuffer = m_Renderer.BeginFrame()) {
-                int frameIndex = m_Renderer.GetFrameIndex();
+            if (VkCommandBuffer commandBuffer = m_Renderer->BeginFrame()) {
+                int frameIndex = m_Renderer->GetFrameIndex();
                 FrameInfo frameInfo{
                     frameIndex,
                     frameTime,
@@ -119,21 +128,29 @@ namespace PalmTree {
                 uboBuffers[frameIndex]->Flush();
 
                 // Render
-                m_Renderer.BeginSwapChainRenderPass(commandBuffer);
+                m_Renderer->BeginSwapChainRenderPass(commandBuffer);
                 simpleRenderSystem->RenderGameObjects(frameInfo);
                 pointLightSystem->Render(frameInfo);
-                m_Renderer.EndSwapChainRenderPass(commandBuffer);
-                m_Renderer.EndFrame();
+                m_Renderer->EndSwapChainRenderPass(commandBuffer);
+                m_Renderer->EndFrame();
             }
         }
 
-        vkDeviceWaitIdle(m_Device.GetDevice());
+        vkDeviceWaitIdle(m_Device->GetDevice());
+    }
+
+    void Application::OnEvent(Event& event) {
+        EventDispatcher dispatcher(event);
+        dispatcher.Dispatch<WindowClosedEvent>(BIND_EVENT_FN(Application::OnWindowClosed));
+        
+        
+        PT_CORE_TRACE("EVENT: {0}", event.ToString());
     }
 
     void Application::LoadGameObjects() {
         // Flat Vase
         {
-            std::shared_ptr model = Model::CreateModelFromFile(m_Device, "../assets/models/flat_vase.obj");
+            std::shared_ptr model = Model::CreateModelFromFile(*m_Device, "../assets/models/flat_vase.obj");
 
             GameObject& obj = m_Ecs.CreateGameObject();
 
@@ -145,7 +162,7 @@ namespace PalmTree {
 
         // Smooth Vase
         {
-            std::shared_ptr model = Model::CreateModelFromFile(m_Device, "../assets/models/smooth_vase.obj");
+            std::shared_ptr model = Model::CreateModelFromFile(*m_Device, "../assets/models/smooth_vase.obj");
 
             GameObject& obj = m_Ecs.CreateGameObject();
             obj.AddComponent(ModelComponent{glm::vec3(1), model});
@@ -155,7 +172,7 @@ namespace PalmTree {
 
         // Floor
         {
-            std::shared_ptr model = Model::CreateModelFromFile(m_Device, "../assets/models/quad.obj");
+            std::shared_ptr model = Model::CreateModelFromFile(*m_Device, "../assets/models/quad.obj");
 
             GameObject& obj = m_Ecs.CreateGameObject();
             obj.AddComponent<ModelComponent>(ModelComponent{glm::vec3(1), model});
@@ -185,5 +202,11 @@ namespace PalmTree {
             light.GetTransform().Translation = glm::vec3(rotateLight * glm::vec4(-1.0f, -1.0f, -1.0f, 1.0f));
             light.GetTransform().Scale = glm::vec3(0.2);
         }
+    }
+
+    bool Application::OnWindowClosed(WindowClosedEvent&) {
+        m_Running = false;
+        
+        return true;
     }
 }

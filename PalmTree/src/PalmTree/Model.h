@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Buffer.h"
-#include "Device.h"
+#include "Platform/Vulkan/Buffer.h"
+#include "Platform/Vulkan/Device.h"
 
 
 #define GLM_FORCE_RADIANS

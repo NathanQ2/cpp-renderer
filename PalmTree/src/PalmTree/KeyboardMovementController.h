@@ -2,6 +2,7 @@
 
 #include "EntityComponentSystem/EntityComponentSystem.h"
 #include "Window.h"
+#include "EventSystem/KeyEvents.h"
 
 namespace PalmTree {
     class KeyboardMovementController {
@@ -17,6 +18,8 @@ namespace PalmTree {
             int LookRight = GLFW_KEY_RIGHT;
             int LookUp = GLFW_KEY_UP;
             int LookDown = GLFW_KEY_DOWN;
+            int Escape = GLFW_KEY_ESCAPE;
+            int LeftButton = GLFW_MOUSE_BUTTON_LEFT;
         };
 
         explicit KeyboardMovementController(const glm::f64vec2 initialCursorPos) : m_PreviousCursorPosition(
@@ -32,5 +35,7 @@ namespace PalmTree {
         float m_MouseLookSpeed = 0.015f;
 
         glm::f64vec2 m_PreviousCursorPosition;
+        
+        bool m_Enabled = false;
     };
 }

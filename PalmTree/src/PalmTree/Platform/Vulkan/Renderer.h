@@ -1,15 +1,15 @@
 #pragma once
 
-#include "Log.h"
-#include "Model.h"
+#include "../../Log.h"
+#include "../../Model.h"
 #include "SwapChain.h"
-#include "Window.h"
+#include "../../Window.h"
 
 
 namespace PalmTree {
     class Renderer {
     public:
-        Renderer(Window& window, Device& device);
+        Renderer(const std::shared_ptr<Window>& window, const std::shared_ptr<Device>& device);
         ~Renderer();
 
         Renderer(const Renderer&) = delete;
@@ -40,8 +40,8 @@ namespace PalmTree {
         void FreeCommandBuffers();
         void RecreateSwapChain();
 
-        Window& m_Window;
-        Device& m_Device;
+        std::shared_ptr<Window> m_Window;
+        std::shared_ptr<Device> m_Device;
         std::unique_ptr<SwapChain> m_SwapChain = std::make_unique<SwapChain>(m_Window, m_Device);
         std::vector<VkCommandBuffer> m_CommandBuffers;
 

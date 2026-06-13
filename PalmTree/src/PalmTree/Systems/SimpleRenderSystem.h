@@ -1,8 +1,8 @@
 #pragma once
 
 #include "../EntityComponentSystem/System.h"
-#include "../FrameInfo.h"
-#include "../Pipeline.h"
+#include "../Platform/Vulkan/FrameInfo.h"
+#include "../Platform/Vulkan/Pipeline.h"
 
 
 namespace PalmTree {

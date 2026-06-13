@@ -7,7 +7,7 @@
 #include <set>
 #include <unordered_set>
 
-#include "Log.h"
+#include "../../Log.h"
 
 namespace PalmTree {
     // local callback functions
@@ -55,7 +55,7 @@ namespace PalmTree {
     }
 
     // class member functions
-    Device::Device(Window& window) : m_Window{window} {
+    Device::Device(const std::shared_ptr<Window>& window) : m_Window{window} {
         CreateInstance();
         SetupDebugMessenger();
         CreateSurface();
@@ -297,7 +297,7 @@ namespace PalmTree {
         }
     }
 
-    void Device::CreateSurface() { m_Window.CreateWindowSurface(m_Instance, &m_Surface); }
+    void Device::CreateSurface() { m_Window->CreateWindowSurface(m_Instance, &m_Surface); }
 
     void Device::PickPhysicalDevice() {
         uint32_t deviceCount = 0;

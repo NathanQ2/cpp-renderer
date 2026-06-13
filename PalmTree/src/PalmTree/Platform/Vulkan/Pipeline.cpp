@@ -1,13 +1,13 @@
 #include "ptpch.h"
 #include "Pipeline.h"
 
-#include "Model.h"
+#include "../../Model.h"
 
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
 
-#include "Log.h"
+#include "../../Log.h"
 
 namespace PalmTree {
     Pipeline::Pipeline(

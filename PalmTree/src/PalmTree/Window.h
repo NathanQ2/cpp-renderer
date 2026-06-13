@@ -4,42 +4,40 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
+#include "EventSystem/Event.h"
+
 namespace PalmTree {
+    struct WindowProps {
+        int Width = 1280;
+        int Height = 720;
+        std::string Title = "PalmTree Window";
+    };
+    
     class Window {
     public:
-        Window(int width, int height, const std::string& title);
-        ~Window();
+        using EventCallbackFn = std::function<void(Event&)>;
+        
+        static Window* Create(WindowProps props = WindowProps());
+        
+        virtual ~Window() {};
 
-        Window(const Window&) = delete;
-        Window& operator=(const Window&) = delete;
+        // Window(const Window&) = delete;
+        // Window& operator=(const Window&) = delete;
 
-        void Init();
+        virtual void OnUpdate() = 0;
 
-        [[nodiscard]] bool ShouldClose() const { return glfwWindowShouldClose(m_WindowHandle); }
+        [[nodiscard]] virtual bool ShouldClose() = 0;
 
-        void CreateWindowSurface(VkInstance instance, VkSurfaceKHR* surface);
+        virtual void CreateWindowSurface(VkInstance instance, VkSurfaceKHR* surface) = 0;
 
-        [[nodiscard]] VkExtent2D GetExtent() const {
-            return {static_cast<uint32_t>(m_Width), static_cast<uint32_t>(m_Height)};
-        }
+        [[nodiscard]] virtual VkExtent2D GetExtent() = 0;
+        // {
+        //     return {static_cast<uint32_t>(m_Width), static_cast<uint32_t>(m_Height)};
+        // }
 
-        [[nodiscard]] int GetWidth() const { return m_Width; }
-        [[nodiscard]] int GetHeight() const { return m_Height; }
-        [[nodiscard]] bool WasWindowResized() const { return m_FrameBufferResized; }
-        void ResetWindowResizedFlag() { m_FrameBufferResized = false; }
-
-        [[nodiscard]] GLFWwindow* GetGLFWWindow() const { return m_WindowHandle; }
-
-    private:
-        static void FrameBufferResizeCallback(GLFWwindow* windowHandle, int width, int height);
-
-        bool m_Running = false;
-
-        int m_Width;
-        int m_Height;
-        bool m_FrameBufferResized = false;
-        const std::string m_Title;
-
-        GLFWwindow* m_WindowHandle = nullptr;
+        [[nodiscard]] virtual int GetWidth() = 0;
+        [[nodiscard]] virtual int GetHeight() = 0;
+        
+        virtual void SetEventCallback(EventCallbackFn callback) = 0;
     };
 }

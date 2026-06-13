@@ -1,11 +1,12 @@
 #pragma once
 
 #include "Core.h"
-#include "Descriptors.h"
+#include "Platform/Vulkan/Descriptors.h"
 #include "EntityComponentSystem/EntityComponentSystem.h"
 #include "Model.h"
-#include "Renderer.h"
+#include "Platform/Vulkan/Renderer.h"
 #include "Window.h"
+#include "EventSystem/ApplicationEvents.h"
 
 
 namespace PalmTree {
@@ -19,21 +20,22 @@ namespace PalmTree {
 
         void Run();
 
+        void OnEvent(Event& event);
     private:
         void LoadGameObjects();
+        
+        bool OnWindowClosed(WindowClosedEvent& event);
 
-        const int m_Width = 800;
-        const int m_Height = 600;
-        const std::string m_Title = "PalmTree Window";
+        std::shared_ptr<Window> m_Window;
+        std::shared_ptr<Device> m_Device;
+        std::unique_ptr<Renderer> m_Renderer;
 
-        Window m_Window = Window(m_Width, m_Height, m_Title);
-        Device m_Device = Device(m_Window);
-        Renderer m_Renderer = Renderer(m_Window, m_Device);
-
-        // NOTE: Must be declared after PtDevice
-        std::unique_ptr<DescriptorPool> m_GlobalPool{};
+        // NOTE: Must be initialized after Device
+        std::unique_ptr<DescriptorPool> m_GlobalPool;
 
         EntityComponentSystem m_Ecs{};
+        
+        bool m_Running = true;
     };
 
     Application* CreateApplication();

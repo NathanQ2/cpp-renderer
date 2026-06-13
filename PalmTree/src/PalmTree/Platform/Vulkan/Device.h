@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Window.h"
+#include "../../Window.h"
 
 
 namespace PalmTree {
@@ -26,7 +26,7 @@ namespace PalmTree {
         const bool EnableValidationLayers = true;
 #endif
 
-        Device(Window& window);
+        Device(const std::shared_ptr<Window>& window);
         ~Device();
 
         // Not copyable or movable
@@ -99,7 +99,7 @@ namespace PalmTree {
         VkInstance m_Instance;
         VkDebugUtilsMessengerEXT m_DebugMessenger;
         VkPhysicalDevice m_PhysicalDevice = VK_NULL_HANDLE;
-        Window& m_Window;
+        std::shared_ptr<Window> m_Window;
         VkCommandPool m_CommandPool;
 
         VkDevice m_Device;

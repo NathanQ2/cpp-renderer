@@ -16,7 +16,7 @@ namespace PalmTree {
         EVENT_CLASS_IMPL_TYPE (EventType::MouseMoved)
 
         std::string ToString() const override {
-            return std::format("MouseMovedEvent: MousePosition=(%d, %d)", m_MouseX, m_MouseY);
+            return std::format("MouseMovedEvent: MousePosition=({}, {})", m_MouseX, m_MouseY);
         }
 
         float GetMouseX() const { return m_MouseX; }
