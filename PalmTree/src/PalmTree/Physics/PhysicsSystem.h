@@ -46,7 +46,7 @@ namespace PalmTree {
         
         uint64_t m_StepCount = 0;
         
-        bool m_Paused = false;
+        bool m_Paused = true;
 
         void Step(float dt);
     };

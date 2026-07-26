@@ -7,7 +7,8 @@
 #include <glm/gtx/euler_angles.hpp>
 #include <glm/gtx/string_cast.hpp>
 
-#include "implot.h"
+#include <implot.h>
+
 #include "KeyboardMovementController.h"
 #include "PalmTree/Renderer/SceneRenderer3D.h"
 
@@ -152,24 +153,24 @@ public:
         // }
         
         // Smooth Vase
-        {
-            m_Model = Model::CreateModelFromFile("../../Sandbox/assets/models/smooth_vase.obj");
+        // {
+        //     m_Model = Model::CreateModelFromFile("../../Sandbox/assets/models/smooth_vase.obj");
 
-            GameObject& obj = m_Ecs.CreateGameObject();
-            obj.AddComponent(ModelComponent{glm::vec3(1), m_Model});
-            obj.GetTransform().Translation = glm::vec3(0.5f, 0.0f, 0.0f);
-            obj.GetTransform().Scale = glm::vec3(3, 1.5, 3);
-        }
+        //     GameObject& obj = m_Ecs.CreateGameObject();
+        //     obj.AddComponent(ModelComponent{glm::vec3(1), m_Model});
+        //     obj.GetTransform().Translation = glm::vec3(0.5f, 0.0f, 0.0f);
+        //     obj.GetTransform().Scale = glm::vec3(3, 1.5, 3);
+        // }
         
         // Flat Vase
-        {
-            std::shared_ptr model = Model::CreateModelFromFile("../../Sandbox/assets/models/flat_vase.obj");
+        // {
+        //     std::shared_ptr model = Model::CreateModelFromFile("../../Sandbox/assets/models/flat_vase.obj");
 
-            GameObject& obj = m_Ecs.CreateGameObject();
-            obj.AddComponent<ModelComponent>(ModelComponent{glm::vec3(1), model});
-            obj.GetTransform().Translation = glm::vec3(-0.5, 0.0, 0.0f);
-            obj.GetTransform().Scale = glm::vec3(3, 1.5, 3);
-        }
+        //     GameObject& obj = m_Ecs.CreateGameObject();
+        //     obj.AddComponent<ModelComponent>(ModelComponent{glm::vec3(1), model});
+        //     obj.GetTransform().Translation = glm::vec3(-0.5, 0.0, 0.0f);
+        //     obj.GetTransform().Scale = glm::vec3(3, 1.5, 3);
+        // }
 
         // Floor
         // {
@@ -209,6 +210,24 @@ public:
         //     );
         // }
         
+        if (true) {
+            std::shared_ptr model = Model::CreateModelFromFile("../../Sandbox/assets/models/cube.obj");
+            
+            GameObject& obj = m_Ecs.CreateGameObject();
+            obj.AddComponent<ModelComponent>(ModelComponent{glm::vec3(1.0f), model});
+            obj.GetTransform().Translation = glm::vec3{0.0f, -0.5f, 0.0f};
+            obj.GetTransform().Scale = glm::vec3{0.25f};
+            obj.GetTransform().SetEuler(glm::radians(glm::vec3(45.0f, 45.0f, 45.0f)));
+            
+            obj.AddComponent<ColliderComponent>(ColliderComponent{
+                .Shape = ColliderComponent::Box{glm::vec3{0.5f}}
+            });
+            obj.AddComponent<RigidBodyComponent>(RigidBodyComponent{
+                .Mass = 1.0f,
+                .EnableGravity = false
+            });
+        }
+        
         // Spheres
         {
             std::shared_ptr model = Model::CreateModelFromFile("../../Sandbox/assets/models/sphere.obj");
@@ -227,43 +246,44 @@ public:
             obj.AddComponent<ColliderComponent>(ColliderComponent{.Shape = ColliderComponent::Sphere{.Radius = 0.5f}});
         }
         
-        // {
-        //     std::shared_ptr model = Model::CreateModelFromFile("../../Sandbox/assets/models/sphere.obj");
-
-        //     GameObject& obj = m_Ecs.CreateGameObject();
-        //     obj.AddComponent<ModelComponent>(ModelComponent{glm::vec3(1), model});
-        //     obj.GetTransform().Translation = glm::vec3(-2.5f, -1.2, 0.0f);
-        //     obj.GetTransform().Scale = glm::vec3(1);
-        //     
-        //     obj.AddComponent<RigidBodyComponent>(RigidBodyComponent{.EnableGravity = true});
-        //     
-        //     obj.AddComponent<ColliderComponent>(ColliderComponent{.Shape = ColliderComponent::Sphere{.Radius = 1.0f}});
-        // }
-        // 
-        // {
-        //     std::shared_ptr model = Model::CreateModelFromFile("../../Sandbox/assets/models/sphere.obj");
-
-        //     GameObject& obj = m_Ecs.CreateGameObject();
-        //     obj.AddComponent<ModelComponent>(ModelComponent{glm::vec3(1), model});
-        //     obj.GetTransform().Translation = glm::vec3(-5.0f, -1.2, 0.0f);
-        //     obj.GetTransform().Scale = glm::vec3(0.5f);
-        //     
-        //     // obj.AddComponent<RigidBodyComponent>(RigidBodyComponent{.Mass = 0.5f});
-        //     
-        //     obj.AddComponent<ColliderComponent>(ColliderComponent{.Shape = ColliderComponent::Sphere{.Radius = 0.5f}});
-        // }
-        
-        // New Floor
         {
             std::shared_ptr model = Model::CreateModelFromFile("../../Sandbox/assets/models/sphere.obj");
 
             GameObject& obj = m_Ecs.CreateGameObject();
             obj.AddComponent<ModelComponent>(ModelComponent{glm::vec3(1), model});
-            obj.GetTransform().Translation = glm::vec3(0.0f, 1000.0f, 0.0f);
-            obj.GetTransform().Scale = glm::vec3(1000.0f);
+            obj.GetTransform().Translation = glm::vec3(0.10f, -3.0f, 0.0f);
+            obj.GetTransform().Scale = glm::vec3(0.5);
             
-            obj.AddComponent<ColliderComponent>(ColliderComponent{.Shape = ColliderComponent::Sphere{.Radius = 1000.0f}});
+            obj.AddComponent<RigidBodyComponent>(RigidBodyComponent{
+                .Velocity = glm::vec3(0.0f, 0.5f, 0.0f),
+                .Mass = 1.0f,
+                .EnableGravity = true
+            });
+            
+            obj.AddComponent<ColliderComponent>(ColliderComponent{.Shape = ColliderComponent::Sphere{.Radius = 0.5f}});
         }
+        
+        // New Floor
+        {
+            std::shared_ptr model = Model::CreateModelFromFile("../../Sandbox/assets/models/cube.obj");
+
+            GameObject& obj = m_Ecs.CreateGameObject();
+            obj.AddComponent<ModelComponent>(ModelComponent{glm::vec3(1), model});
+            obj.GetTransform().Translation = glm::vec3(0.0f, 0.1f, 0.0f);
+            obj.GetTransform().Scale = glm::vec3(1000.0f, 0.1f, 1000.0f);
+            
+            obj.AddComponent<ColliderComponent>(ColliderComponent{.Shape = ColliderComponent::Box{.Dimensions = glm::vec3{2000.0f, 0.2f, 2000.0f}}});
+        }
+        // {
+        //     std::shared_ptr model = Model::CreateModelFromFile("../../Sandbox/assets/models/sphere.obj");
+
+        //     GameObject& obj = m_Ecs.CreateGameObject();
+        //     obj.AddComponent<ModelComponent>(ModelComponent{glm::vec3(1), model});
+        //     obj.GetTransform().Translation = glm::vec3(0.0f, 1000.0f, 0.0f);
+        //     obj.GetTransform().Scale = glm::vec3(1000.0f);
+        //     
+        //     obj.AddComponent<ColliderComponent>(ColliderComponent{.Shape = ColliderComponent::Sphere{.Radius = 1000.0f}});
+        // }
 
         std::vector<glm::vec3> lightColors{
             {1.f, .1f, .1f},

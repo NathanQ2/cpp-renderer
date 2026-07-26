@@ -51,6 +51,9 @@ namespace PalmTree {
 
     void PhysicsSystem::OnImGuiRender() {
         #ifdef PT_DEBUG
+        
+        ImPlot::ShowDemoWindow();
+        
         ImGui::Begin("PhysicsDebug");
         if (ImGui::Button(m_Paused ? "Resume" : "Pause")) {
             m_Paused = !m_Paused;
@@ -60,10 +63,28 @@ namespace PalmTree {
             Step(STEP_SIZE);
         }
         
-        ImGui::DragFloat("Timescale", &m_TimeScale, 0.1, 0, 2);
+        ImGui::DragFloat("Timescale", &m_TimeScale, 0.05, 0, 2);
         
         ImGui::Text("Step: %llu", m_StepCount);
         ImGui::Text("Time: %lfs", m_StepCount * (double)STEP_SIZE);
+        
+        ImGui::Separator();
+        
+        float totalKineticEnergy = 0.0f;
+        float totalPotentialEnergy = 0.0f;
+        for (Id id : m_Ids) {
+            TransformComponent& t = m_Ecs->GetComponent<TransformComponent>(id);
+            RigidBodyComponent& rb = m_Ecs->GetComponent<RigidBodyComponent>(id);
+            totalKineticEnergy += 0.5f * rb.Mass * glm::length(rb.Velocity);
+            
+            if (rb.EnableGravity) totalPotentialEnergy += rb.Mass * t.Translation.y * -1;
+        }
+        float totalEnergy = totalKineticEnergy + totalPotentialEnergy;
+        ImGui::Text("Total Kinetic Energy: %f", totalKineticEnergy);
+        ImGui::Text("Total Potential Energy: %f", totalPotentialEnergy);
+        ImGui::Text("Total Energy: %f", totalEnergy);
+        
+        ImGui::Separator();
         
         ImGui::Text("Object Info");
         int i = 0;
@@ -127,7 +148,6 @@ namespace PalmTree {
                     }
                     ImGui::TreePop();
                 }
-                kv.second.Forces.clear();
             
                 if (ImGui::TreeNodeEx("Impulses")) {
                     for (int i2 = 0; i2 < kv.second.Impulses.size(); i2++) {
@@ -141,7 +161,6 @@ namespace PalmTree {
                     }
                     ImGui::TreePop();
                 }
-                kv.second.Impulses.clear();
                 
                 ImGui::TreePop();
             }
@@ -157,9 +176,13 @@ namespace PalmTree {
     void PhysicsSystem::Step(float dt) {
         if (dt == 0.0f) return;
         
-        m_CollisionSystem->Update(dt);
+        m_CollisionSystem->Update();
         
         for (Id id : m_Ids) {
+            #ifdef PT_DEBUG
+            m_DebugInfo[id].Forces.clear();
+            m_DebugInfo[id].Impulses.clear();
+            #endif
             TransformComponent& transform = m_Ecs->GetComponent<TransformComponent>(id);
             RigidBodyComponent& rb = m_Ecs->GetComponent<RigidBodyComponent>(id);
             
@@ -170,7 +193,12 @@ namespace PalmTree {
             std::vector<CollisionSystem::CollisionInfo>& infos = m_CollisionSystem->GetCollisionInfos(id);
             for (auto& info : infos) {
                 TransformComponent& t2 = m_Ecs->GetComponent<TransformComponent>(info.OtherId);
+                bool rb2Exists = m_Ecs->HasComponent<RigidBodyComponent>(info.OtherId);
                 RigidBodyComponent& rb2 = m_Ecs->GetComponent<RigidBodyComponent>(info.OtherId);
+                
+                glm::vec3 displacement = -info.CollisionNormal * info.Overlap;
+                if (rb2Exists) displacement /= 2.0f;
+                transform.Translation += displacement;
                 
                 // Compute impulse on current object 
                 
@@ -179,15 +207,15 @@ namespace PalmTree {
                 // e = 1 -> perfectly elastic
                 // e = 0 -> perfectly inelastic
                 // 0 < e < 1 -> inelastic
-                float e = 0.5f;
+                float e = 1.0f;
                 
                 float m1 = rb.Mass;
                 glm::vec3 v1_i = rb.Velocity; 
                 
-                float m2 = rb2.Mass;
-                glm::vec3 v2_i = rb2.Velocity;
+                float m2 = rb2Exists ? rb2.Mass : std::numeric_limits<float>::max();
+                glm::vec3 v2_i = rb2Exists ? rb2.Velocity : glm::vec3(0.0f);
                 
-                float impulseMag = ((m1 * m2) / (m1 + m2)) * (1.0f + e) * glm::length(v2_i - v1_i);
+                float impulseMag = ((m1 * m2) / (m1 + m2)) * (1.0f + e) * glm::dot(v2_i - v1_i, -info.CollisionNormal);
                 glm::vec3 direction = glm::normalize(transform.Translation - info.CollisionPoint);
                 glm::vec3 impulse = impulseMag * direction;
                 
