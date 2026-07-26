@@ -9,6 +9,8 @@
 #include <chrono>
 #include <ostream>
 
+#include "Logging/DataLogger.h"
+#include "Logging/DataLoggerUi.h"
 #include "Platform/Mac/MacWindow.h"
 
 namespace PalmTree {
@@ -17,6 +19,8 @@ namespace PalmTree {
     Application::Application() {
         PT_CORE_ASSERT(s_Instance == nullptr, "Application already exists!");
         s_Instance = this;
+        
+        DataLogger::Init();
 
         m_Window = std::unique_ptr<Window>(Window::Create());
         m_Window->SetEventCallback(PT_BIND_EVENT_FN(Application::OnEvent));
@@ -24,6 +28,7 @@ namespace PalmTree {
         RendererBackend::Init(RendererBackend::API::VULKAN);
 
         m_ImGuiLayer = PushOverlay<ImGuiLayer>(dynamic_cast<MacWindow&>(*m_Window));
+        PushOverlay<DataLoggerUI>();
         
         m_CollisionSystem = std::make_shared<CollisionSystem>();
         m_Ecs.RegisterSystem(m_CollisionSystem, SignatureBuilder<TransformComponent, ColliderComponent>(m_Ecs.GetComponentManager()).Build());
@@ -51,9 +56,10 @@ namespace PalmTree {
         while (m_Running) {
             m_Window->OnUpdate();
 
-            auto newTime = std::chrono::high_resolution_clock::now();
+            auto newTime = std::chrono::steady_clock::now();
             float frameTime = std::chrono::duration<float>(newTime - currentTime).count();
             currentTime = newTime;
+            DataLogger::SetTimestamp(currentTime);
 
             if (RendererBackend::BeginFrame()) {
                 // Update

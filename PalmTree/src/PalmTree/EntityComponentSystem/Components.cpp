@@ -7,7 +7,7 @@
 #include <glm/gtx/euler_angles.hpp>
 #include <glm/gtx/string_cast.hpp>
 
-#include "PalmTree/Log.h"
+#include "../Logging/Log.h"
 
 namespace PalmTree {
     void TransformComponent::SetEuler(glm::vec3 euler) {

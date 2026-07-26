@@ -5,6 +5,7 @@
 #include "CollisionSystem.h"
 #include "PalmTree/EntityComponentSystem/System.h"
 #include "PalmTree/EntityComponentSystem/GameObject.h"
+#include "PalmTree/Logging/DataLogger.h"
 
 namespace PalmTree {
     class PhysicsSystem : public System {
@@ -37,6 +38,8 @@ namespace PalmTree {
         std::unordered_map<Id, ObjectDebugInfo> m_DebugInfo;
         #endif
         
+        DataLogger m_Logger{"/PhysicsSystem"};
+        
         const float SIMULATION_FREQUENCY = 1000.0f;
         const float STEP_SIZE = 1.0f / SIMULATION_FREQUENCY;
         float m_TimeAccum = 0.0f;
@@ -47,7 +50,15 @@ namespace PalmTree {
         uint64_t m_StepCount = 0;
         
         bool m_Paused = true;
+        
+        static LogPath ObjectLogPath(Id id) {
+            return LogPath("RigidBodies") / LogPath(fmt::format("{}", id));
+        }
 
         void Step(float dt);
+        
+        void LogTransform(Id id, const TransformComponent& transform);
+        void LogRigidbody(Id id, const RigidBodyComponent& rb);
+        void LogCollider(Id id, const ColliderComponent& col);
     };
 }

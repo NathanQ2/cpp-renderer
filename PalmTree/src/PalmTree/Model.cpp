@@ -8,7 +8,7 @@
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader.h>
 
-#include "Log.h"
+#include "Logging/Log.h"
 
 #include "PalmTree/Renderer/Buffer.h"
 

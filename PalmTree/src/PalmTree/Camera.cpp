@@ -3,7 +3,7 @@
 
 #include <limits>
 
-#include "Log.h"
+#include "Logging/Log.h"
 
 namespace PalmTree {
     void Camera::SetOrthographicProjection(
