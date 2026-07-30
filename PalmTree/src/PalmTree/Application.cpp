@@ -10,7 +10,7 @@
 #include <ostream>
 
 #include "Logging/DataLogger.h"
-#include "Logging/DataLoggerUi.h"
+#include "Logging/DataLoggerUI.h"
 #include "Platform/Mac/MacWindow.h"
 
 namespace PalmTree {
@@ -28,7 +28,6 @@ namespace PalmTree {
         RendererBackend::Init(RendererBackend::API::VULKAN);
 
         m_ImGuiLayer = PushOverlay<ImGuiLayer>(dynamic_cast<MacWindow&>(*m_Window));
-        PushOverlay<DataLoggerUI>();
         
         m_CollisionSystem = std::make_shared<CollisionSystem>();
         m_Ecs.RegisterSystem(m_CollisionSystem, SignatureBuilder<TransformComponent, ColliderComponent>(m_Ecs.GetComponentManager()).Build());
@@ -46,6 +45,9 @@ namespace PalmTree {
 
     void Application::Run() {
         auto currentTime = std::chrono::high_resolution_clock::now();
+        m_ApplicationStartTime = currentTime;
+        
+        PushOverlay<DataLoggerUI>(m_ApplicationStartTime);
 
         for (auto it = m_LayerStack.Begin(); it != m_LayerStack.End(); ++it) {
             Layer* layer = *it;
@@ -58,6 +60,7 @@ namespace PalmTree {
 
             auto newTime = std::chrono::steady_clock::now();
             float frameTime = std::chrono::duration<float>(newTime - currentTime).count();
+            m_Logger.Record("FrameTime", frameTime);
             currentTime = newTime;
             DataLogger::SetTimestamp(currentTime);
 
@@ -111,8 +114,6 @@ namespace PalmTree {
                 if (handled) break;
             }
         }
-
-        // PT_CORE_TRACE("EVENT: {0}", event.ToString());
     }
 
     bool Application::OnWindowClosed(WindowClosedEvent&) {

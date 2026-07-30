@@ -40,6 +40,8 @@ namespace PalmTree {
         Window& GetWindow() const { return *m_Window; }
         EntityComponentSystem& GetEntityComponentSystem() { return m_Ecs; }
         Camera& GetCamera() { return m_Camera; }
+        
+        std::chrono::steady_clock::time_point GetStartTime() const { return m_ApplicationStartTime; }
     protected:
         bool OnWindowClosed(WindowClosedEvent& event);
 
@@ -55,6 +57,10 @@ namespace PalmTree {
 
         std::shared_ptr<CollisionSystem> m_CollisionSystem;
         std::shared_ptr<PhysicsSystem> m_PhysicsSystem;
+        
+        std::chrono::steady_clock::time_point m_ApplicationStartTime;
+        
+        DataLogger m_Logger{"/Application"};
 
         bool m_Running = true;
     private:

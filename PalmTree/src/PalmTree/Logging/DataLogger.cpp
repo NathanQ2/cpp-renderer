@@ -28,6 +28,12 @@ namespace PalmTree {
     }
 
     std::optional<Loggable> RootDataLogger::Get(const LogPath& path) { return Get(path, m_Timestamp); }
+    
+    std::optional<LoggableDataType> RootDataLogger::GetDataType(const LogPath& path) {
+        if (m_Data[path].empty()) return std::nullopt;
+        
+        return static_cast<LoggableDataType>(m_Data[path][0].Data.index());
+    }
 
     void DataLogger::Init() {
         PT_CORE_ASSERT(!s_Root, "DataLogger has already been initialized!");

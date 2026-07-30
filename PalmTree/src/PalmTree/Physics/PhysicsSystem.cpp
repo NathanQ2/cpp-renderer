@@ -50,8 +50,6 @@ namespace PalmTree {
     }
 
     void PhysicsSystem::OnImGuiRender() {
-        #ifdef PT_DEBUG
-        
         ImPlot::ShowDemoWindow();
         
         ImGui::Begin("PhysicsDebug");
@@ -85,6 +83,8 @@ namespace PalmTree {
         ImGui::Text("Total Energy: %f", totalEnergy);
         
         ImGui::Separator();
+        
+        #ifdef PT_DEBUG
         
         ImGui::Text("Object Info");
         int i = 0;
@@ -169,8 +169,8 @@ namespace PalmTree {
             i++;
         }
         
-        ImGui::End();
         #endif
+        ImGui::End();
     }
 
     void PhysicsSystem::Step(float dt) {
@@ -284,6 +284,7 @@ namespace PalmTree {
         m_Logger.Record(path / "AngularMomentum", rb.AngularMomentum);
         m_Logger.Record(path / "Mass", rb.Mass);
         m_Logger.Record(path / "EnableGravity", rb.EnableGravity);
+        m_Logger.Record(path / "Speed", rb.Speed());
     }
 
     void PhysicsSystem::LogCollider(Id id, const ColliderComponent& col) {

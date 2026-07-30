@@ -11,7 +11,7 @@ namespace PalmTree {
 #ifdef PT_DEBUG
         explicit Layer(const std::string& name = "Layer") : m_Name(name) {}
 #else
-        explicit Layer(const std::string&) {}
+        explicit Layer(const std::string& = "") {}
 #endif
         virtual ~Layer() = default;
 

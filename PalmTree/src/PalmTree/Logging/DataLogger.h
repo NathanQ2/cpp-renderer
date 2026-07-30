@@ -13,6 +13,15 @@ namespace PalmTree {
     using LogPath = std::filesystem::path;
     using LogTimestamp = std::chrono::steady_clock::time_point;
     
+    enum class LoggableDataType : size_t {
+        Float = Loggable(0.0f).index(),
+        Double = Loggable(0.0).index(),
+        Uint64 = Loggable((uint64_t)0).index(),
+        Bool = Loggable(false).index(),
+        String = Loggable("").index(),
+        Vec3 = Loggable(glm::vec3()).index()
+    };
+    
     struct LogDataEntry {
         LogTimestamp Timestamp;
         Loggable Data;
@@ -32,6 +41,8 @@ namespace PalmTree {
         void SetTimestamp(LogTimestamp timestamp) { m_Timestamp = timestamp; }
         
         LogTimestamp GetTimestamp() const { return m_Timestamp; }
+        
+        std::optional<LoggableDataType> GetDataType(const LogPath& path);
     private:
         LogTimestamp m_Timestamp;
         
