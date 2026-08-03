@@ -4,8 +4,6 @@ project(PalmTree)
 set(CMAKE_CXX_STANDARD 23)
 
 find_package(Vulkan REQUIRED)
-find_package(glfw3 REQUIRED)
-find_package(glm REQUIRED)
 
 file(GLOB_RECURSE SOURCES src/**.cpp src/**.h)
 
@@ -31,19 +29,27 @@ file(GLOB IMPLOT_SOURCES
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 add_library(PalmTree SHARED ${SOURCES} ${IMGUI_SOURCES} ${IMPLOT_SOURCES})
 
-target_link_libraries(${PROJECT_NAME} glfw ${GLFW_LIBRARIES} Vulkan::Vulkan glm::glm)
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+set(GLFW_INSTALL OFF CACHE BOOL "" FORCE)
+add_subdirectory(vendor/glfw)
 
-target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>)
-target_include_directories(${PROJECT_NAME} PRIVATE vendor/tinyobjloader)
-target_include_directories(${PROJECT_NAME} PUBLIC vendor/spdlog/include)
-target_include_directories(${PROJECT_NAME} PUBLIC vendor/imgui/ vendor/imgui/backends)
-target_include_directories(${PROJECT_NAME} PUBLIC vendor/implot)
+target_link_libraries(PalmTree glfw ${GLFW_LIBRARIES} Vulkan::Vulkan)
+
+target_include_directories(PalmTree PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>)
+target_include_directories(PalmTree PRIVATE vendor/tinyobjloader)
+target_include_directories(PalmTree PUBLIC vendor/spdlog/include)
+target_include_directories(PalmTree PUBLIC vendor/imgui/ vendor/imgui/backends)
+target_include_directories(PalmTree PUBLIC vendor/implot)
+target_include_directories(PalmTree PUBLIC vendor/glm)
 
 target_compile_definitions(PalmTree PUBLIC $<$<CONFIG:Debug>:PT_ENABLE_ASSERTS>)
 target_compile_definitions(PalmTree PUBLIC $<$<CONFIG:Debug>:PT_DEBUG>)
 target_compile_definitions(PalmTree PUBLIC $<$<CONFIG:Release>:PT_RELEASE>)
 target_compile_definitions(PalmTree PUBLIC VK_ENABLE_BETA_EXTENSIONS)
 target_compile_definitions(PalmTree PUBLIC IMGUI_USER_CONFIG="PalmTree/ImGui/ImGuiUserConfig.h")
+target_compile_definitions(PalmTree PUBLIC GLM_ENABLE_EXPERIMENTAL)
 
 target_precompile_headers(PalmTree PUBLIC src/ptpch.h)
 
@@ -61,4 +67,4 @@ foreach (SHADER IN LISTS shaders)
 endforeach ()
 
 add_custom_target(CompileShaders ALL DEPENDS ${SPV_SHADERS})
-add_dependencies(${PROJECT_NAME} CompileShaders)
+add_dependencies(PalmTree CompileShaders)

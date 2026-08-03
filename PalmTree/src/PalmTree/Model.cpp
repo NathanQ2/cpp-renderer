@@ -2,7 +2,6 @@
 #include "Model.h"
 
 #include "Utils.h"
-#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/hash.hpp>
 
 #define TINYOBJLOADER_IMPLEMENTATION

@@ -1,7 +1,6 @@
 #include "KeyboardMovementController.h"
 
 #include <glm/gtc/constants.hpp>
-#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/euler_angles.hpp>
 
 namespace Sandbox {
