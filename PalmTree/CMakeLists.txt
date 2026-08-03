@@ -5,6 +5,12 @@ set(CMAKE_CXX_STANDARD 23)
 
 find_package(Vulkan REQUIRED)
 
+# For spdlog on windows
+if(MSVC)
+    add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
+    add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
+endif()
+
 file(GLOB_RECURSE SOURCES src/**.cpp src/**.h)
 
 # ImGui
@@ -27,7 +33,7 @@ file(GLOB IMPLOT_SOURCES
 )
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
-add_library(PalmTree SHARED ${SOURCES} ${IMGUI_SOURCES} ${IMPLOT_SOURCES})
+add_library(PalmTree STATIC ${SOURCES} ${IMGUI_SOURCES} ${IMPLOT_SOURCES})
 
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)

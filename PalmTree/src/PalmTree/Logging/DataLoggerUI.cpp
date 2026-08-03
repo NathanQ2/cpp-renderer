@@ -46,12 +46,14 @@ namespace PalmTree {
                 ImGui::PushID(row);
                 ImGui::TableNextRow();
                 ImGui::TableSetColumnIndex(0);
-                ImGui::Selectable(path.c_str(), false, ImGuiSelectableFlags_SpanAllColumns);
+                std::string pathStr = path.string();
+                ImGui::Selectable(pathStr.c_str(), false, ImGuiSelectableFlags_SpanAllColumns);
+                // ImGui::Selectable(path.c_str(), false, ImGuiSelectableFlags_SpanAllColumns);
                 
                 if (ImGui::BeginDragDropSource()) {
-                    std::string pathStr = path;
-                    ImGui::SetDragDropPayload("DATALOG_PATH_TYPE", pathStr.c_str(), sizeof(char) * pathStr.size());
-                    ImGui::Text("%s", path.c_str());
+                    std::string pathStr = path.string();
+                    ImGui::SetDragDropPayload("DATALOG_PATH_TYPE", pathStr.c_str(), sizeof(char) * (pathStr.size() + 1));
+                    ImGui::Text("%s", pathStr.c_str());
                     ImGui::EndDragDropSource();
                 }
 

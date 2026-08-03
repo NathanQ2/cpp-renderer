@@ -6,6 +6,8 @@
 Sandbox/assets/
 PalmTreeEditor/assets/
 
+build/
+
 # Prerequisites
 *.d
 

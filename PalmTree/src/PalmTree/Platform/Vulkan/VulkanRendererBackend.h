@@ -70,8 +70,8 @@ namespace PalmTree {
         std::unique_ptr<VulkanDescriptorPool> m_DescriptorPool;
         std::vector<std::unique_ptr<VulkanCommandBuffer>> m_CommandBuffers;
 
-        uint32_t m_CurrentImageIndex;
-        int m_CurrentFrameIndex;
+        uint32_t m_CurrentImageIndex = 0;
+        int m_CurrentFrameIndex = 0;
         bool m_IsFrameStarted = false;
     };
 }
