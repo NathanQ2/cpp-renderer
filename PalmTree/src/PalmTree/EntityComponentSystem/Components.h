@@ -44,6 +44,8 @@ namespace PalmTree {
 
         float Mass = 1.0f;
         bool EnableGravity = false;
+        
+        float Speed() const { return glm::length(Velocity); }
     };
     
     struct ColliderComponent {

@@ -5,7 +5,7 @@
 #include <set>
 #include <stdexcept>
 
-#include "../../Log.h"
+#include "../../Logging/Log.h"
 
 #include "PalmTree/Renderer/RendererConstants.h"
 

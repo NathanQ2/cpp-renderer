@@ -7,7 +7,7 @@
 #include <set>
 #include <unordered_set>
 
-#include "../../Log.h"
+#include "../../Logging/Log.h"
 
 namespace PalmTree {
     // local callback functions

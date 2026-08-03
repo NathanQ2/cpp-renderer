@@ -11,7 +11,7 @@
 // std
 #include <cassert>
 
-#include "../../Log.h"
+#include "../../Logging/Log.h"
 
 namespace PalmTree {
     VulkanBuffer::VulkanBuffer(

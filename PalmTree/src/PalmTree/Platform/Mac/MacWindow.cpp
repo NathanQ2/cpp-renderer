@@ -3,7 +3,7 @@
 
 #include <vulkan/vulkan.h>
 
-#include "PalmTree/Log.h"
+#include "../../Logging/Log.h"
 #include "PalmTree/EventSystem/ApplicationEvents.h"
 #include "PalmTree/EventSystem/KeyEvents.h"
 #include "PalmTree/EventSystem/MouseEvents.h"

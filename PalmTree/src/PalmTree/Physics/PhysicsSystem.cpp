@@ -50,8 +50,6 @@ namespace PalmTree {
     }
 
     void PhysicsSystem::OnImGuiRender() {
-        #ifdef PT_DEBUG
-        
         ImPlot::ShowDemoWindow();
         
         ImGui::Begin("PhysicsDebug");
@@ -85,6 +83,8 @@ namespace PalmTree {
         ImGui::Text("Total Energy: %f", totalEnergy);
         
         ImGui::Separator();
+        
+        #ifdef PT_DEBUG
         
         ImGui::Text("Object Info");
         int i = 0;
@@ -169,8 +169,8 @@ namespace PalmTree {
             i++;
         }
         
-        ImGui::End();
         #endif
+        ImGui::End();
     }
 
     void PhysicsSystem::Step(float dt) {
@@ -254,10 +254,48 @@ namespace PalmTree {
                 m_DebugInfo[id].Collider = nullptr;
             }
             #endif
+            
+            LogTransform(id, transform);
+            LogRigidbody(id, rb);
+            if (m_Ecs->HasComponent<ColliderComponent>(id)) {
+                LogCollider(id, m_Ecs->GetComponent<ColliderComponent>(id));
+            }
 
             rb.Acceleration = glm::vec3(0);
         }
         
+        m_Logger.Record("Step", m_StepCount);
+        m_Logger.Record("Time", m_StepCount * (double)STEP_SIZE);
+        
         m_StepCount++;
+    }
+
+    void PhysicsSystem::LogTransform(Id id, const TransformComponent& transform) {
+        LogPath path = ObjectLogPath(id) / "Transform";
+        m_Logger.Record(path / "Translation", transform.Translation);
+        m_Logger.Record(path / "Rotation (Euler Angles)", transform.EulerAngles());
+        m_Logger.Record(path / "Scale", transform.Scale);
+    }
+
+    void PhysicsSystem::LogRigidbody(Id id, const RigidBodyComponent& rb) {
+        LogPath path = ObjectLogPath(id) / "Rigidbody";
+        m_Logger.Record(path / "Velocity", rb.Velocity);
+        m_Logger.Record(path / "Acceleration", rb.Acceleration);
+        m_Logger.Record(path / "AngularMomentum", rb.AngularMomentum);
+        m_Logger.Record(path / "Mass", rb.Mass);
+        m_Logger.Record(path / "EnableGravity", rb.EnableGravity);
+        m_Logger.Record(path / "Speed", rb.Speed());
+    }
+
+    void PhysicsSystem::LogCollider(Id id, const ColliderComponent& col) {
+        LogPath path = ObjectLogPath(id) / "Collider";
+        if (auto* box = std::get_if<ColliderComponent::Box>(&col.Shape)) {
+            m_Logger.Record(path / "Shape", "Box");
+            m_Logger.Record(path / "Box Dimensions", box->Dimensions);
+        }
+        else if (auto* sphere = std::get_if<ColliderComponent::Sphere>(&col.Shape)) {
+            m_Logger.Record(path / "Shape", "Sphere");
+            m_Logger.Record(path / "Sphere Radius", sphere->Radius);
+        }
     }
 }

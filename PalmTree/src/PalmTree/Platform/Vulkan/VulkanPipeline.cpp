@@ -7,7 +7,7 @@
 
 #include "VulkanRendererBackend.h"
 #include "VulkanVertexBuffer.h"
-#include "PalmTree/Log.h"
+#include "../../Logging/Log.h"
 #include "PalmTree/Renderer/Descriptors.h"
 
 namespace PalmTree {

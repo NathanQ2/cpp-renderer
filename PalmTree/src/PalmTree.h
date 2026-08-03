@@ -1,7 +1,7 @@
 #pragma once
 
 #include "PalmTree/Core.h"
-#include "PalmTree/Log.h"
+#include "PalmTree/Logging/Log.h"
 #include "PalmTree/ImGui/ImGuiLayer.h"
 #include "PalmTree/EntityComponentSystem/EntityComponentSystem.h"
 

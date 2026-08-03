@@ -9,6 +9,8 @@
 #include <chrono>
 #include <ostream>
 
+#include "Logging/DataLogger.h"
+#include "Logging/DataLoggerUI.h"
 #include "Platform/Mac/MacWindow.h"
 
 namespace PalmTree {
@@ -17,6 +19,8 @@ namespace PalmTree {
     Application::Application() {
         PT_CORE_ASSERT(s_Instance == nullptr, "Application already exists!");
         s_Instance = this;
+        
+        DataLogger::Init();
 
         m_Window = std::unique_ptr<Window>(Window::Create());
         m_Window->SetEventCallback(PT_BIND_EVENT_FN(Application::OnEvent));
@@ -41,6 +45,9 @@ namespace PalmTree {
 
     void Application::Run() {
         auto currentTime = std::chrono::high_resolution_clock::now();
+        m_ApplicationStartTime = currentTime;
+        
+        PushOverlay<DataLoggerUI>(m_ApplicationStartTime);
 
         for (auto it = m_LayerStack.Begin(); it != m_LayerStack.End(); ++it) {
             Layer* layer = *it;
@@ -51,9 +58,11 @@ namespace PalmTree {
         while (m_Running) {
             m_Window->OnUpdate();
 
-            auto newTime = std::chrono::high_resolution_clock::now();
+            auto newTime = std::chrono::steady_clock::now();
             float frameTime = std::chrono::duration<float>(newTime - currentTime).count();
+            m_Logger.Record("FrameTime", frameTime);
             currentTime = newTime;
+            DataLogger::SetTimestamp(currentTime);
 
             if (RendererBackend::BeginFrame()) {
                 // Update
@@ -105,8 +114,6 @@ namespace PalmTree {
                 if (handled) break;
             }
         }
-
-        // PT_CORE_TRACE("EVENT: {0}", event.ToString());
     }
 
     bool Application::OnWindowClosed(WindowClosedEvent&) {

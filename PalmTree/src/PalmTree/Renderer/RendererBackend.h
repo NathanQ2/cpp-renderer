@@ -1,6 +1,6 @@
 #pragma once
 
-#include "PalmTree/Log.h"
+#include "../Logging/Log.h"
 #include "RendererConstants.h"
 
 namespace PalmTree {

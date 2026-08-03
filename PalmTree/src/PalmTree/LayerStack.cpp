@@ -1,7 +1,7 @@
 #include "ptpch.h"
 #include "LayerStack.h"
 
-#include "Log.h"
+#include "Logging/Log.h"
 
 namespace PalmTree {
     LayerStack::LayerStack() {}

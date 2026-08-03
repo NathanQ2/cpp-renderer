@@ -4,7 +4,7 @@
 
 #include "ComponentArray.h"
 #include "Components.h"
-#include "PalmTree/Log.h"
+#include "../Logging/Log.h"
 
 namespace PalmTree {
     class ComponentManager {

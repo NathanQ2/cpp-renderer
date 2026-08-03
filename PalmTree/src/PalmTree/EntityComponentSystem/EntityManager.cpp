@@ -1,7 +1,7 @@
 #include "ptpch.h"
 #include "EntityManager.h"
 
-#include "../Log.h"
+#include "../Logging/Log.h"
 
 namespace PalmTree {
     EntityManager::EntityManager() {

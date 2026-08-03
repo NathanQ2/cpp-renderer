@@ -2,7 +2,7 @@
 
 #include "Components.h"
 #include "Types.h"
-#include "PalmTree/Log.h"
+#include "../Logging/Log.h"
 
 namespace PalmTree {
     class EntityComponentSystem;

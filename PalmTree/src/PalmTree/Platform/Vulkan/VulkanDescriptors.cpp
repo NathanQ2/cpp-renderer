@@ -1,7 +1,7 @@
 #include "ptpch.h"
 #include "VulkanDescriptors.h"
 
-#include "PalmTree/Log.h"
+#include "../../Logging/Log.h"
 #include "PalmTree/Renderer/Descriptors.h"
 
 #include <stdexcept>
