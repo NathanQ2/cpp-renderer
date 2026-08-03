@@ -43,10 +43,15 @@ namespace PalmTree {
         LogTimestamp GetTimestamp() const { return m_Timestamp; }
         
         std::optional<LoggableDataType> GetDataType(const LogPath& path);
+        
+        void SetEnabled(bool enabled) { m_Enabled = enabled; }
+        bool IsEnabled() const { return m_Enabled; }
     private:
         LogTimestamp m_Timestamp;
         
         std::unordered_map<LogPath, std::vector<LogDataEntry>> m_Data;
+        
+        bool m_Enabled = true;
     };
     
     class DataLogger {

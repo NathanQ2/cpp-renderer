@@ -21,6 +21,8 @@ namespace PalmTree {
     void DataLoggerUI::ShowDataLogTableWindow() {
         ImGui::Begin("DataLog Table");
         
+        ImGui::Checkbox("Enabled", &m_Logger->m_Enabled);
+        
         ImGui::InputInt("Number of Plots", &m_NumPlotWindows, 1, 5);
         if (ImGui::Button("Reset Plots")) {
             for (auto& [id, data ] : m_PlotWindowData) {
@@ -71,7 +73,6 @@ namespace PalmTree {
                 continue;
             
             ImGui::PushID(i);
-            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
             std::string windowName = fmt::format("Plot {}", i);
             ImGui::Begin(windowName.c_str(), &m_PlotWindowData[i].IsOpen, ImGuiWindowFlags_MenuBar);
             
@@ -90,6 +91,7 @@ namespace PalmTree {
                 ImGui::EndMenuBar();
             }
             
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
             ImVec2 avail = ImGui::GetContentRegionAvail();
             if (ImPlot::BeginPlot(windowName.c_str(), avail)) {
                 ImPlot::SetupAxes("Application Time (Seconds)", nullptr, ImPlotAxisFlags_None, ImPlotAxisFlags_None);
@@ -108,7 +110,12 @@ namespace PalmTree {
                 if (ImPlot::BeginDragDropTargetPlot()) {
                     if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("DATALOG_PATH_TYPE")) {
                         PlotWindowData::LineData& data = m_PlotWindowData[i].Data.emplace_back(static_cast<const char*>(payload->Data));
-                        if (m_Logger->GetDataType(data.Path) == LoggableDataType::Vec3) {
+                        
+                        std::optional<LoggableDataType> type = m_Logger->GetDataType(data.Path);
+                        PT_CORE_ASSERT(type.has_value(), "Attempting to plot invalid data");
+                        data.DataType = type.value();
+                        
+                        if (data.DataType == LoggableDataType::Vec3) {
                             ImGui::OpenPopup("VectorSelectAxisPopup");
                         }
                         else {
@@ -118,6 +125,8 @@ namespace PalmTree {
                 
                     ImPlot::EndDragDropTarget();
                 }
+                
+                ImGui::PopStyleVar();
                 
                 if (ImGui::BeginPopup("VectorSelectAxisPopup")) {
                     if (ImGui::MenuItem("X")) m_PlotWindowData[i].Data.back().VectorIndex = 0;
@@ -138,14 +147,25 @@ namespace PalmTree {
                     }
                     
                     PT_CORE_ASSERT(x.size() == y.size(), "Invalid plot data!");
-                    ImPlot::PlotLine(path.data(), x.data(), y.data(), x.size());
+                    switch (data.DataType) {
+                        case LoggableDataType::Bool:
+                            ImPlot::PlotDigital(path.data(), x.data(), y.data(), x.size());
+                            
+                            break;
+                        default:
+                            ImPlot::PlotLine(path.data(), x.data(), y.data(), x.size());
+                            
+                            break;
+                    }
                 }
             
                 ImPlot::EndPlot();
             }
+            else {
+                ImGui::PopStyleVar();
+            }
             
             ImGui::End();
-            ImGui::PopStyleVar();
             ImGui::PopID();
         }
     }
@@ -162,7 +182,7 @@ namespace PalmTree {
                 else if constexpr (std::is_same_v<T, uint64_t>)
                     ImGui::Text("%llu", std::get<uint64_t>(loggable));
                 else if constexpr (std::is_same_v<T, bool>)
-                    ImGui::Text("%b", std::get<bool>(loggable));
+                    ImGui::Text("%s", std::get<bool>(loggable) ? "true" : "false");
                 else if constexpr (std::is_same_v<T, std::string>)
                     ImGui::Text("%s", std::get<std::string>(loggable).c_str());
                 else if constexpr (std::is_same_v<T, glm::vec3>) {
@@ -188,16 +208,16 @@ namespace PalmTree {
             float time = TimestampToFloat(timestamp);
             
             // Check if this entry is already in the vector
-            if (x.back() > time) continue;
+            if (!x.empty() && x.back() > time) continue;
             
             x.emplace_back(time);
-            float val = std::visit([data](auto&& arg) {
+            float val = std::visit([&data](auto&& arg) {
                 using T = std::decay_t<decltype(arg)>;
                                 
                 if constexpr (std::is_same_v<T, float>) return static_cast<float>(arg);
                 if constexpr (std::is_same_v<T, double>) return static_cast<float>(arg);
                 if constexpr (std::is_same_v<T, uint64_t>) return static_cast<float>(arg);
-                if constexpr (std::is_same_v<T, bool>) PT_CORE_ASSERT(false, "Bool data cannot be displayed in plot.");
+                if constexpr (std::is_same_v<T, bool>) return static_cast<float>(static_cast<bool>(arg));
                 if constexpr (std::is_same_v<T, std::string>) PT_CORE_ASSERT(false, "String data cannot be displayed in plot.");
                 if constexpr (std::is_same_v<T, glm::vec3>) return static_cast<float>(arg[data.VectorIndex]);
                                 

@@ -8,6 +8,8 @@ namespace PalmTree {
     RootDataLogger* DataLogger::s_Root = nullptr;
 
     void RootDataLogger::Record(const LogPath& path, const Loggable& value, LogTimestamp timestamp) {
+        if (!m_Enabled) return;
+        
         if (!m_Data[path].empty()) {
             PT_CORE_ASSERT(value.index() == m_Data[path][0].Data.index(), "Logged value data type must always remain the same");
         }
