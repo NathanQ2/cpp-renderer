@@ -29,14 +29,14 @@ namespace PalmTreeEditor {
 
             // Make sure rotate is nonzero 
             if (glm::dot(mouseRotate, mouseRotate) > std::numeric_limits<float>::epsilon()) {
-                gameObject.GetTransform().Rotation += m_MouseLookSpeed * dt * mouseRotate;
+                gameObject.GetTransform()->Rotation += m_MouseLookSpeed * dt * mouseRotate;
             }
             
-            gameObject.GetTransform().Rotation.x = glm::clamp(gameObject.GetTransform().Rotation.x, -1.5f, 1.5f);
-            gameObject.GetTransform().Rotation.y = glm::mod(gameObject.GetTransform().Rotation.y, glm::two_pi<float>());
+            gameObject.GetTransform()->Rotation.x = glm::clamp(gameObject.GetTransform()->Rotation.x, -1.5f, 1.5f);
+            gameObject.GetTransform()->Rotation.y = glm::mod(gameObject.GetTransform()->Rotation.y, glm::two_pi<float>());
 
-            float yaw = gameObject.GetTransform().Rotation.y;
-            float pitch = gameObject.GetTransform().Rotation.x;
+            float yaw = gameObject.GetTransform()->Rotation.y;
+            float pitch = gameObject.GetTransform()->Rotation.x;
             
             const glm::vec3 forwardDir = glm::vec3(sin(yaw) * cos(pitch), -sin(pitch), cos(yaw) * cos(pitch));
             const glm::vec3 rightDir = glm::vec3(forwardDir.z, 0.0f, -forwardDir.x);
@@ -57,7 +57,7 @@ namespace PalmTreeEditor {
             else m_MoveSpeed = m_DefaultMoveSpeed;
 
             if (glm::dot(moveDir, moveDir) > std::numeric_limits<float>::epsilon()) {
-                gameObject.GetTransform().Translation += m_MoveSpeed * dt * glm::normalize(moveDir);
+                gameObject.GetTransform()->Translation += m_MoveSpeed * dt * glm::normalize(moveDir);
             }
         }
     }

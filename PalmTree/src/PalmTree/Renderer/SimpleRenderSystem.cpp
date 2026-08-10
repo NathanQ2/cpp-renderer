@@ -40,12 +40,14 @@ namespace PalmTree {
             auto& obj = m_Ecs->GetObject(id);
 
             SimplePushConstantData push{};
-            push.ModelMatrix = obj.GetTransform().TransformationMatrix();
-            push.NormalMatrix = obj.GetTransform().NormalMatrix();
+            push.ModelMatrix = obj.GetTransform()->TransformationMatrix();
+            push.NormalMatrix = obj.GetTransform()->NormalMatrix();
 
             cmds.PushConstants(0, sizeof(SimplePushConstantData), &push);
 
-            std::shared_ptr model = obj.GetComponent<ModelComponent>().Model;
+            ModelComponent* modelComponent = obj.GetComponent<ModelComponent>();
+            PT_CORE_ASSERT(modelComponent, "Object must have ModelComponent");
+            std::shared_ptr model = modelComponent->Model;
 
             // Bind
             cmds.BindVertexBuffer(model->GetVertexBuffer());

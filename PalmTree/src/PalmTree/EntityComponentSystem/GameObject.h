@@ -55,7 +55,7 @@ namespace PalmTree {
 
         // Implemented in EntityComponentSystem.h
         template<typename T>
-        T& GetComponent();
+        T* GetComponent();
 
         // Implemented in EntityComponentSystem.h
         template<typename T>
@@ -65,7 +65,7 @@ namespace PalmTree {
         bool HasComponent();
 
         // Implemented in EntityComponentSystem.h
-        TransformComponent& GetTransform();
+        TransformComponent* GetTransform();
         
         bool IsValid() const { return m_IsValid; }
     private:

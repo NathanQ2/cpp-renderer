@@ -31,9 +31,9 @@ namespace Sandbox {
 
             // Make sure rotate is nonzero 
             if (glm::dot(mouseRotate, mouseRotate) > std::numeric_limits<float>::epsilon()) {
-                glm::vec3 newEuler = gameObject.GetTransform().EulerAngles() + m_MouseLookSpeed * dt * mouseRotate;
+                glm::vec3 newEuler = gameObject.GetTransform()->EulerAngles() + m_MouseLookSpeed * dt * mouseRotate;
                 
-                gameObject.GetTransform().SetEuler(newEuler);
+                gameObject.GetTransform()->SetEuler(newEuler);
             }
         }
 
@@ -47,18 +47,18 @@ namespace Sandbox {
 
         // Make sure rotate is nonzero 
         if (glm::dot(keyboardRotate, keyboardRotate) > std::numeric_limits<float>::epsilon()) {
-            glm::vec3 newEuler = gameObject.GetTransform().EulerAngles() += m_KeyboardLookSpeed * dt * glm::normalize(keyboardRotate);
+            glm::vec3 newEuler = gameObject.GetTransform()->EulerAngles() += m_KeyboardLookSpeed * dt * glm::normalize(keyboardRotate);
             
-            gameObject.GetTransform().SetEuler(newEuler);
+            gameObject.GetTransform()->SetEuler(newEuler);
         }
 
-        gameObject.GetTransform().SetEuler({
-            glm::clamp(gameObject.GetTransform().EulerAngles().x, -1.5f, 1.5f),
-            glm::mod(gameObject.GetTransform().EulerAngles().y, glm::two_pi<float>()),
-            gameObject.GetTransform().EulerAngles().z
+        gameObject.GetTransform()->SetEuler({
+            glm::clamp(gameObject.GetTransform()->EulerAngles().x, -1.5f, 1.5f),
+            glm::mod(gameObject.GetTransform()->EulerAngles().y, glm::two_pi<float>()),
+            gameObject.GetTransform()->EulerAngles().z
         });
 
-        float yaw = gameObject.GetTransform().EulerAngles().y;
+        float yaw = gameObject.GetTransform()->EulerAngles().y;
         const glm::vec3 forwardDir = glm::vec3(sin(yaw), 0.0f, cos(yaw));
         const glm::vec3 rightDir = glm::vec3(forwardDir.z, 0.0f, -forwardDir.x);
         const glm::vec3 upDir = glm::vec3(0.0f, -1.0f, 0.0f);
@@ -75,7 +75,7 @@ namespace Sandbox {
         if (PalmTree::Input::IsKeyDown(m_Keys.MoveDown)) moveDir -= upDir;
 
         if (glm::dot(moveDir, moveDir) > std::numeric_limits<float>::epsilon()) {
-            gameObject.GetTransform().Translation += m_MoveSpeed * dt * glm::normalize(moveDir);
+            gameObject.GetTransform()->Translation += m_MoveSpeed * dt * glm::normalize(moveDir);
         }
     }
 }

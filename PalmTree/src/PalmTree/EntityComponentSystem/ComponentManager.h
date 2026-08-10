@@ -34,7 +34,7 @@ namespace PalmTree {
         }
 
         template<typename T>
-        T& GetComponent(Id id) {
+        T* GetComponent(Id id) {
             return GetComponentArray<T>()->GetComponent(id);
         }
 

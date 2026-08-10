@@ -27,7 +27,7 @@ public:
 
         GameObject& viewer = m_Ecs.CreateGameObject();
         m_ViewerObjectId = viewer.GetId();
-        viewer.GetTransform().Translation.z = -2.5f;
+        viewer.GetTransform()->Translation.z = -2.5f;
 
         m_Renderer = std::make_unique<SceneRenderer3D>(
             m_Window,
@@ -56,7 +56,7 @@ public:
         GameObject& viewerObject = m_Ecs.GetObject(m_ViewerObjectId);
         
         m_CameraController.MoveInPlaneXZ(dt, viewerObject);
-        m_Camera.SetViewYXZ(viewerObject.GetTransform().Translation, viewerObject.GetTransform().EulerAngles());
+        m_Camera.SetViewYXZ(viewerObject.GetTransform()->Translation, viewerObject.GetTransform()->EulerAngles());
 
         float aspect = RendererBackend::GetAspectRatio();
         m_Camera.SetPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 100.0f);
@@ -74,9 +74,9 @@ public:
         
         int i = 0;
         for (auto& obj : objs) {
-            glm::vec3& translation = obj.GetTransform().Translation;
-            // glm::vec3& rotation = obj.GetTransform().EulerAngles();
-            glm::vec3& scale = obj.GetTransform().Scale;
+            glm::vec3& translation = obj.GetTransform()->Translation;
+            // glm::vec3& rotation = obj.GetTransform()->EulerAngles();
+            glm::vec3& scale = obj.GetTransform()->Scale;
             ImGui::PushID(i);
             
             ImGui::Text("ID: %i", obj.GetId());
@@ -117,11 +117,11 @@ public:
         GameObject& viewerObject = m_Ecs.GetObject(m_ViewerObjectId);
         std::string label = fmt::format("ViewerObject (ID: {})", viewerObject.GetId());
         if (ImGui::TreeNodeEx(label.c_str())) {
-            TransformComponent& transform = viewerObject.GetTransform();
-            glm::vec3 eulerAngles = glm::degrees(transform.EulerAngles());
-            ImGui::Text("Transform.Translation: (%f, %f, %f)", transform.Translation.x, transform.Translation.y, transform.Translation.z);
+            TransformComponent* transform = viewerObject.GetTransform();
+            glm::vec3 eulerAngles = glm::degrees(transform->EulerAngles());
+            ImGui::Text("Transform.Translation: (%f, %f, %f)", transform->Translation.x, transform->Translation.y, transform->Translation.z);
             ImGui::Text("Transform.Rotation (Euler Angles): (%f, %f, %f)", eulerAngles.x, eulerAngles.y, eulerAngles.z);
-            ImGui::Text("Transform.Scale: (%f, %f, %f)", transform.Scale.x, transform.Scale.y, transform.Scale.z);
+            ImGui::Text("Transform.Scale: (%f, %f, %f)", transform->Scale.x, transform->Scale.y, transform->Scale.z);
             
             ImGui::TreePop();
         }
@@ -138,8 +138,8 @@ public:
 
         //     GameObject& obj = m_Ecs.CreateGameObject();
         //     obj.AddComponent<ModelComponent>(ModelComponent{glm::vec3(1), model});
-        //     obj.GetTransform().Translation = glm::vec3(1.0f, -1.0f, 0.0f);
-        //     obj.GetTransform().Scale = glm::vec3(0.25f);
+        //     obj.GetTransform()->Translation = glm::vec3(1.0f, -1.0f, 0.0f);
+        //     obj.GetTransform()->Scale = glm::vec3(0.25f);
         // }
         // 
         // {
@@ -147,8 +147,8 @@ public:
 
         //     GameObject& obj = m_Ecs.CreateGameObject();
         //     obj.AddComponent<ModelComponent>(ModelComponent{glm::vec3(1), model});
-        //     obj.GetTransform().Translation = glm::vec3(0.0f, -1.0f, 0.0f);
-        //     obj.GetTransform().Scale = glm::vec3(0.25f);
+        //     obj.GetTransform()->Translation = glm::vec3(0.0f, -1.0f, 0.0f);
+        //     obj.GetTransform()->Scale = glm::vec3(0.25f);
         // }
         
         // Smooth Vase
@@ -157,8 +157,8 @@ public:
 
         //     GameObject& obj = m_Ecs.CreateGameObject();
         //     obj.AddComponent(ModelComponent{glm::vec3(1), m_Model});
-        //     obj.GetTransform().Translation = glm::vec3(0.5f, 0.0f, 0.0f);
-        //     obj.GetTransform().Scale = glm::vec3(3, 1.5, 3);
+        //     obj.GetTransform()->Translation = glm::vec3(0.5f, 0.0f, 0.0f);
+        //     obj.GetTransform()->Scale = glm::vec3(3, 1.5, 3);
         // }
         
         // Flat Vase
@@ -167,8 +167,8 @@ public:
 
         //     GameObject& obj = m_Ecs.CreateGameObject();
         //     obj.AddComponent<ModelComponent>(ModelComponent{glm::vec3(1), model});
-        //     obj.GetTransform().Translation = glm::vec3(-0.5, 0.0, 0.0f);
-        //     obj.GetTransform().Scale = glm::vec3(3, 1.5, 3);
+        //     obj.GetTransform()->Translation = glm::vec3(-0.5, 0.0, 0.0f);
+        //     obj.GetTransform()->Scale = glm::vec3(3, 1.5, 3);
         // }
 
         // Floor
@@ -177,8 +177,8 @@ public:
 
         //     GameObject& obj = m_Ecs.CreateGameObject();
         //     obj.AddComponent<ModelComponent>(ModelComponent{glm::vec3(1), model});
-        //     obj.GetTransform().Translation = glm::vec3(0.0f, 0.0f, 0.0f);
-        //     obj.GetTransform().Scale = glm::vec3(5);
+        //     obj.GetTransform()->Translation = glm::vec3(0.0f, 0.0f, 0.0f);
+        //     obj.GetTransform()->Scale = glm::vec3(5);
         // }
         
         // Slab
@@ -187,8 +187,8 @@ public:
         //     
         //     GameObject& obj = m_Ecs.CreateGameObject();
         //     obj.AddComponent<ModelComponent>(ModelComponent{glm::vec3(1), model});
-        //     obj.GetTransform().Translation = glm::vec3(0.0f, -2.0f, 0.0f);
-        //     obj.GetTransform().Scale = glm::vec3(1.0f, 0.1f, 2.0f);
+        //     obj.GetTransform()->Translation = glm::vec3(0.0f, -2.0f, 0.0f);
+        //     obj.GetTransform()->Scale = glm::vec3(1.0f, 0.1f, 2.0f);
         //     
         //     glm::vec3 invI0{};
         //     {
@@ -214,9 +214,9 @@ public:
             
             GameObject& obj = m_Ecs.CreateGameObject();
             obj.AddComponent<ModelComponent>(ModelComponent{glm::vec3(1.0f), model});
-            obj.GetTransform().Translation = glm::vec3{0.0f, -0.5f, 0.0f};
-            obj.GetTransform().Scale = glm::vec3{0.25f};
-            obj.GetTransform().SetEuler(glm::radians(glm::vec3(45.0f, 45.0f, 45.0f)));
+            obj.GetTransform()->Translation = glm::vec3{0.0f, -0.5f, 0.0f};
+            obj.GetTransform()->Scale = glm::vec3{0.25f};
+            obj.GetTransform()->SetEuler(glm::radians(glm::vec3(45.0f, 45.0f, 45.0f)));
             
             obj.AddComponent<ColliderComponent>(ColliderComponent{
                 .Shape = ColliderComponent::Box{glm::vec3{0.5f}}
@@ -233,8 +233,8 @@ public:
 
             GameObject& obj = m_Ecs.CreateGameObject();
             obj.AddComponent<ModelComponent>(ModelComponent{glm::vec3(1), model});
-            obj.GetTransform().Translation = glm::vec3(0.05f, -2, 0.0f);
-            obj.GetTransform().Scale = glm::vec3(0.5);
+            obj.GetTransform()->Translation = glm::vec3(0.05f, -2, 0.0f);
+            obj.GetTransform()->Scale = glm::vec3(0.5);
             
             obj.AddComponent<RigidBodyComponent>(RigidBodyComponent{
                 .Velocity = glm::vec3(0.0f, 0.0f, 0.0f),
@@ -250,8 +250,8 @@ public:
 
             GameObject& obj = m_Ecs.CreateGameObject();
             obj.AddComponent<ModelComponent>(ModelComponent{glm::vec3(1), model});
-            obj.GetTransform().Translation = glm::vec3(0.10f, -3.0f, 0.0f);
-            obj.GetTransform().Scale = glm::vec3(0.5);
+            obj.GetTransform()->Translation = glm::vec3(0.10f, -3.0f, 0.0f);
+            obj.GetTransform()->Scale = glm::vec3(0.5);
             
             obj.AddComponent<RigidBodyComponent>(RigidBodyComponent{
                 .Velocity = glm::vec3(0.0f, 0.5f, 0.0f),
@@ -268,8 +268,8 @@ public:
 
             GameObject& obj = m_Ecs.CreateGameObject();
             obj.AddComponent<ModelComponent>(ModelComponent{glm::vec3(1), model});
-            obj.GetTransform().Translation = glm::vec3(0.0f, 0.1f, 0.0f);
-            obj.GetTransform().Scale = glm::vec3(1000.0f, 0.1f, 1000.0f);
+            obj.GetTransform()->Translation = glm::vec3(0.0f, 0.1f, 0.0f);
+            obj.GetTransform()->Scale = glm::vec3(1000.0f, 0.1f, 1000.0f);
             
             obj.AddComponent<ColliderComponent>(ColliderComponent{.Shape = ColliderComponent::Box{.Dimensions = glm::vec3{2000.0f, 0.2f, 2000.0f}}});
         }
@@ -278,8 +278,8 @@ public:
 
         //     GameObject& obj = m_Ecs.CreateGameObject();
         //     obj.AddComponent<ModelComponent>(ModelComponent{glm::vec3(1), model});
-        //     obj.GetTransform().Translation = glm::vec3(0.0f, 1000.0f, 0.0f);
-        //     obj.GetTransform().Scale = glm::vec3(1000.0f);
+        //     obj.GetTransform()->Translation = glm::vec3(0.0f, 1000.0f, 0.0f);
+        //     obj.GetTransform()->Scale = glm::vec3(1000.0f);
         //     
         //     obj.AddComponent<ColliderComponent>(ColliderComponent{.Shape = ColliderComponent::Sphere{.Radius = 1000.0f}});
         // }
@@ -303,8 +303,8 @@ public:
                 {0.0f, -1.0f, 0.0f}
             );
 
-            light.GetTransform().Translation = glm::vec3(rotateLight * glm::vec4(-1.0f, -1.0f, -1.0f, 1.0f));
-            light.GetTransform().Scale = glm::vec3(0.2);
+            light.GetTransform()->Translation = glm::vec3(rotateLight * glm::vec4(-1.0f, -1.0f, -1.0f, 1.0f));
+            light.GetTransform()->Scale = glm::vec3(0.2);
         }
     }
 private:

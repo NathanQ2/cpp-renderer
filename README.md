@@ -17,7 +17,7 @@ A game engine inspired by these tutorials
 - [ ] Physics
     - [x] Sphere collider support
     - [ ] Box collider support
-    - [ ] Make ECS.GetComponent<>() return a pointer because the value is optional
+    - [x] Make ECS.GetComponent<>() return a pointer because the value is optional
 - [ ] Better API
 - [ ] Better logging / profiling
 - [ ] Windows support

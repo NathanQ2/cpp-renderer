@@ -35,8 +35,8 @@ namespace PalmTree {
         }
 
         template<typename T>
-        T& GetComponent(Id id) {
-            return m_ComponentManager.GetComponent<T>(id);
+        T* GetComponent(Id id) {
+            return HasComponent<T>(id) ? m_ComponentManager.GetComponent<T>(id) : nullptr;
         }
 
         template<typename T>
@@ -76,7 +76,7 @@ namespace PalmTree {
     };
 
     template<typename T>
-    T& GameObject::GetComponent() {
+    T* GameObject::GetComponent() {
         PT_CORE_ASSERT(m_IsValid, "GameObject is not valid");
         return m_Ecs->GetComponent<T>(m_Id);
     }
@@ -93,7 +93,7 @@ namespace PalmTree {
         return m_Ecs->HasComponent<T>(m_Id);
     }
 
-    inline TransformComponent& GameObject::GetTransform() {
+    inline TransformComponent* GameObject::GetTransform() {
         return GetComponent<TransformComponent>();
     }
 }

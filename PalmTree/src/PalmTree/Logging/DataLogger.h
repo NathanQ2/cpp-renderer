@@ -51,7 +51,7 @@ namespace PalmTree {
         
         std::unordered_map<LogPath, std::vector<LogDataEntry>> m_Data;
         
-        bool m_Enabled = true;
+        bool m_Enabled = false;
     };
     
     class DataLogger {

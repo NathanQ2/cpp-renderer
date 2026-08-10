@@ -10,6 +10,8 @@
 namespace PalmTree {
     class PhysicsSystem : public System {
     public:
+        const float GRAVITATIONAL_ACCELERATION = 9.80665f;
+        
         void OnRegistered() override;
         
         void Update(float dt);
@@ -21,23 +23,6 @@ namespace PalmTree {
         
         void OnImGuiRender();
     private:
-        #ifdef PT_DEBUG
-        struct ObjectDebugInfo {
-            Id Id;
-            uint64_t Step;
-            double Time;
-            
-            std::shared_ptr<TransformComponent> Transform = nullptr;
-            std::shared_ptr<RigidBodyComponent> RigidBody = nullptr;
-            std::shared_ptr<ColliderComponent> Collider = nullptr;
-            
-            std::vector<std::pair<glm::vec3, glm::vec3>> Forces;
-            std::vector<glm::vec3> Impulses;
-        };
-        
-        std::unordered_map<Id, ObjectDebugInfo> m_DebugInfo;
-        #endif
-        
         DataLogger m_Logger{"/PhysicsSystem"};
         
         const float SIMULATION_FREQUENCY = 1000.0f;
@@ -57,8 +42,8 @@ namespace PalmTree {
 
         void Step(float dt);
         
-        void LogTransform(Id id, const TransformComponent& transform);
-        void LogRigidbody(Id id, const RigidBodyComponent& rb);
-        void LogCollider(Id id, const ColliderComponent& col);
+        void LogTransform(Id id, const TransformComponent* transform);
+        void LogRigidbody(Id id, const RigidBodyComponent* rb);
+        void LogCollider(Id id, const ColliderComponent* col);
     };
 }

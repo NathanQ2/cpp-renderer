@@ -43,11 +43,12 @@ namespace PalmTree {
 
             GameObject& obj = m_Ecs->GetObject(id);
 
-            obj.GetTransform().Translation = glm::vec3(rotateLight * glm::vec4(obj.GetTransform().Translation, 1.0f));
+            obj.GetTransform()->Translation = glm::vec3(rotateLight * glm::vec4(obj.GetTransform()->Translation, 1.0f));
 
-            frameInfo.GlobalUBO.PointLights[lightIndex].Position = glm::vec4(obj.GetTransform().Translation, 1.0f);
-            PointLightComponent& light = obj.GetComponent<PointLightComponent>();
-            frameInfo.GlobalUBO.PointLights[lightIndex].Color = glm::vec4(light.Color, light.LightIntensity);
+            frameInfo.GlobalUBO.PointLights[lightIndex].Position = glm::vec4(obj.GetTransform()->Translation, 1.0f);
+            PointLightComponent* light = obj.GetComponent<PointLightComponent>();
+            PT_CORE_ASSERT(light, "Object must have PointLightComponent");
+            frameInfo.GlobalUBO.PointLights[lightIndex].Color = glm::vec4(light->Color, light->LightIntensity);
 
             lightIndex++;
         }
@@ -61,7 +62,7 @@ namespace PalmTree {
         for (Id id : m_Ids) {
             GameObject& obj = m_Ecs->GetObject(id);
 
-            auto offset = frameInfo.Camera.GetPosition() - obj.GetTransform().Translation;
+            auto offset = frameInfo.Camera.GetPosition() - obj.GetTransform()->Translation;
             float distSquared = glm::dot(offset, offset);
             sorted[distSquared] = obj.GetId();
         }
@@ -74,10 +75,11 @@ namespace PalmTree {
             auto& obj = m_Ecs->GetObject(it->second);
 
             PointLightPushConstants push{};
-            push.Position = glm::vec4(obj.GetTransform().Translation, 1.0f);
-            PointLightComponent& light = obj.GetComponent<PointLightComponent>();
-            push.Color = glm::vec4(light.Color, light.LightIntensity);
-            push.Radius = obj.GetTransform().Scale.x;
+            push.Position = glm::vec4(obj.GetTransform()->Translation, 1.0f);
+            PointLightComponent* light = obj.GetComponent<PointLightComponent>();
+            PT_CORE_ASSERT(light, "Object must have PointLightComponent");
+            push.Color = glm::vec4(light->Color, light->LightIntensity);
+            push.Radius = obj.GetTransform()->Scale.x;
 
             cmds.PushConstants(0, sizeof(PointLightPushConstants), &push);
 
