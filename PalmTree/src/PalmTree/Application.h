@@ -58,6 +58,8 @@ namespace PalmTree {
         std::shared_ptr<CollisionSystem> m_CollisionSystem;
         std::shared_ptr<PhysicsSystem> m_PhysicsSystem;
         
+        // std::shared_ptr<FrameBuffer> m_FrameBuffer;
+        
         std::chrono::steady_clock::time_point m_ApplicationStartTime;
         
         DataLogger m_Logger{"/Application"};

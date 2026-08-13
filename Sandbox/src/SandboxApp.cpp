@@ -58,7 +58,7 @@ public:
         m_CameraController.MoveInPlaneXZ(dt, viewerObject);
         m_Camera.SetViewYXZ(viewerObject.GetTransform()->Translation, viewerObject.GetTransform()->EulerAngles());
 
-        float aspect = RendererBackend::GetAspectRatio();
+        float aspect = RendererBackend::GetSwapChainAspectRatio();
         m_Camera.SetPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 100.0f);
 
         m_Renderer->Update(dt);

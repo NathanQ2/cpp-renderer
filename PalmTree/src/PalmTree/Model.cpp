@@ -32,7 +32,7 @@ namespace PalmTree {
         std::string warn, error;
 
         if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &error, path.c_str())) {
-            throw std::runtime_error(warn + error);
+            PT_CORE_VERIFY(false, warn + error);
         }
 
         Vertices.clear();

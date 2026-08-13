@@ -16,7 +16,6 @@ namespace PalmTree {
 
     VulkanRendererBackend::VulkanRendererBackend(Window& window) : m_Window(window) {
         m_Device = std::make_unique<VulkanDevice>(m_Window);
-        PT_CORE_TRACE("INIT DEVICE");
         m_SwapChain = std::make_unique<VulkanSwapChain>(m_Window, *m_Device);
 
         RecreateSwapChain();
@@ -29,13 +28,14 @@ namespace PalmTree {
     }
 
     VulkanRendererBackend::~VulkanRendererBackend() {
-        FreeCommandBuffers();
+        FreeCommandBuffer();
+        
     }
 
     bool VulkanRendererBackend::BeginFrameImpl() {
         PT_CORE_ASSERT(!m_IsFrameStarted, "Can't call begin frame while already in progress!");
 
-        auto result = m_SwapChain->AcquireNextImage(&m_CurrentImageIndex);
+        auto result = m_SwapChain->AcquireNextImage(&m_SwapChainCurrentImageIndex);
 
         if (result == VK_ERROR_OUT_OF_DATE_KHR) {
             RecreateSwapChain();
@@ -75,8 +75,19 @@ namespace PalmTree {
 
             return;
         }
-
-        auto result = m_SwapChain->SubmitCommandBuffers(&commandBuffer, &m_CurrentImageIndex);
+        
+        // if (m_InFlightFence != VK_NULL_HANDLE) {
+        //     vkWaitForFences(m_Device->GetDevice(), 1, &m_InFlightFence, VK_TRUE, UINT64_MAX);
+        //     
+        //     vkResetFences(m_Device->GetDevice(), 1, &m_InFlightFence);
+        // }
+        // 
+        // VkSubmitInfo submitInfo{ .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO };
+        // if (vkQueueSubmit(m_Device->GraphicsQueue(), 1, &submitInfo, m_InFlightFence) != VK_SUCCESS) {
+        //     PT_CORE_VERIFY(false, "Failed to submit draw command buffer!");
+        // }
+        
+        auto result = m_SwapChain->SubmitCommandBuffers(&commandBuffer, &m_SwapChainCurrentImageIndex);
 
         // TODO: Recreate swap chain when window resized
         // if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || m_Window.WasWindowResized()) {
@@ -91,30 +102,54 @@ namespace PalmTree {
         }
 
         m_IsFrameStarted = false;
-        m_CurrentFrameIndex = (m_CurrentFrameIndex + 1) % RendererConstants::MAX_FRAMES_IN_FLIGHT;
+        m_SwapChainCurrentFrameIndex = (m_SwapChainCurrentFrameIndex + 1) % RendererConstants::MAX_FRAMES_IN_FLIGHT;
     }
 
-    void VulkanRendererBackend::BeginRenderPassImpl() {
+    void VulkanRendererBackend::BeginSwapChainRenderPassImpl() {
         PT_CORE_ASSERT(m_IsFrameStarted, "Can't call BeginSwapChainRenderPass if frame is not in progress!");
 
-        GetCurrentCommandBufferImpl().BeginRenderPass(m_CurrentFrameIndex);
+        dynamic_cast<VulkanCommandBuffer&>(GetCurrentCommandBufferImpl()).BeginRenderPass(*m_SwapChain, m_SwapChainCurrentImageIndex);
+    }
+    
+    void VulkanRendererBackend::EndSwapChainRenderPassImpl() {
+        PT_CORE_ASSERT(m_IsFrameStarted, "Can't call EndSwapChainRenderPass if frame is not in progress!");
+
+        GetCurrentCommandBufferImpl().EndRenderPass();
+    }
+
+    void VulkanRendererBackend::BeginRenderPassImpl(std::shared_ptr<FrameBuffer> frameBuffer) {
+        PT_CORE_ASSERT(m_IsFrameStarted, "Can't call BeginSwapChainRenderPass if frame is not in progress!");
+
+        m_CurrentFrameBuffer = std::dynamic_pointer_cast<VulkanFrameBuffer>(frameBuffer);
+        GetCurrentCommandBufferImpl().BeginRenderPass(frameBuffer);
     }
 
     void VulkanRendererBackend::EndRenderPassImpl() {
         PT_CORE_ASSERT(m_IsFrameStarted, "Can't call EndSwapChainRenderPass if frame is not in progress!");
 
         GetCurrentCommandBufferImpl().EndRenderPass();
+        m_CurrentFrameBuffer = nullptr;
     }
 
     void VulkanRendererBackend::CreateCommandBuffers() {
-        m_CommandBuffers.reserve(RendererConstants::MAX_FRAMES_IN_FLIGHT);
+        m_CommandBuffer = std::make_unique<VulkanCommandBuffer>(*m_Device);
+        
+        m_SwapChainCommandBuffers.reserve(RendererConstants::MAX_FRAMES_IN_FLIGHT);
         for (int i = 0; i < RendererConstants::MAX_FRAMES_IN_FLIGHT; i++) {
-            m_CommandBuffers.emplace_back(std::make_unique<VulkanCommandBuffer>(*m_Device, *m_SwapChain));
+            m_SwapChainCommandBuffers.emplace_back(std::make_unique<VulkanCommandBuffer>(*m_Device));
         }
     }
 
-    void VulkanRendererBackend::FreeCommandBuffers() {
-        m_CommandBuffers.clear();
+    void VulkanRendererBackend::FreeCommandBuffer() {
+        m_CommandBuffer = nullptr;
+    }
+
+    void VulkanRendererBackend::FreeFences() {
+        vkDestroyFence(m_Device->GetDevice(), m_InFlightFence, nullptr);
+    }
+    
+    void VulkanRendererBackend::FreeSwapChainCommandBuffers() {
+        m_SwapChainCommandBuffers.clear();
     }
 
     void VulkanRendererBackend::RecreateSwapChain() {
@@ -127,10 +162,10 @@ namespace PalmTree {
         // vkDeviceWaitIdle(m_Device->device());
         // m_SwapChain = std::make_unique<SwapChain>(m_Window, m_Device);
         m_SwapChain->RecreateSwapChain();
-        if (m_SwapChain->GetImageCount() != m_CommandBuffers.size()) {
+        if (m_SwapChain->GetImageCount() != m_SwapChainCommandBuffers.size()) {
             // Vulkan will complain if we free 0 command buffers
-            if (!m_CommandBuffers.empty())
-                FreeCommandBuffers();
+            if (!m_SwapChainCommandBuffers.empty())
+                FreeSwapChainCommandBuffers();
             CreateCommandBuffers();
         }
     }

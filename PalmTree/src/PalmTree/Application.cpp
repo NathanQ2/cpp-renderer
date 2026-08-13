@@ -12,6 +12,7 @@
 #include "Logging/DataLogger.h"
 #include "Logging/DataLoggerUI.h"
 #include "Platform/Mac/MacWindow.h"
+#include "Renderer/FrameBuffer.h"
 
 namespace PalmTree {
     Application* Application::s_Instance = nullptr;
@@ -37,6 +38,13 @@ namespace PalmTree {
             m_PhysicsSystem,
             SignatureBuilder<TransformComponent, RigidBodyComponent>(m_Ecs.GetComponentManager()).Build()
         );
+        
+        {
+            // FrameBufferSpecification spec;
+            // spec.Width = 1280;
+            // spec.Height = 720;
+            // m_FrameBuffer = std::shared_ptr<FrameBuffer>(FrameBuffer::Create(spec));
+        }
     }
 
     Application::~Application() {
@@ -74,7 +82,7 @@ namespace PalmTree {
                 m_PhysicsSystem->Update(frameTime);
 
                 // Render
-                RendererBackend::BeginRenderPass();
+                RendererBackend::BeginSwapChainRenderPass();
 
                 for (auto it = m_LayerStack.Begin(); it != m_LayerStack.End(); ++it) {
                     Layer* layer = *it;
@@ -91,7 +99,7 @@ namespace PalmTree {
                 }
                 m_ImGuiLayer->End();
 
-                RendererBackend::EndRenderPass();
+                RendererBackend::EndSwapChainRenderPass();
                 RendererBackend::EndFrame();
             }
         }
