@@ -30,16 +30,20 @@ namespace PalmTree {
         VkFramebuffer GetVkFrameBuffer() const { return m_FrameBuffer; }
         
         const FrameBufferSpecification& GetSpec() const override { return m_Spec; }
+        
+        ImTextureID CreateImTextureID() override;
     private:
         void CreateRenderPass();
         void CreateFrameBuffer();
         void CreateImage();
         void CreateDepthImage();
+        void CreateSampler();
         
         void CleanupRenderPass();
         void CleanupFrameBuffer();
         void CleanupImage();
         void CleanupDepthImage();
+        void CleanupSampler();
         
         FrameBufferSpecification m_Spec;
         
@@ -56,5 +60,7 @@ namespace PalmTree {
         VkDeviceMemory m_DepthImageMemory;
         VkImageView m_DepthImageView;
         VkFormat m_DepthImageFormat;
+        
+        VkSampler m_Sampler;
     };
 }

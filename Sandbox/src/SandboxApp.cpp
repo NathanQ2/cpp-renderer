@@ -14,9 +14,9 @@
 using namespace PalmTree;
 using namespace Sandbox;
 
-class GameLayer : public Layer {
+class EditorLayer : public Layer {
 public:
-    GameLayer(Window& window, EntityComponentSystem& ecs, Camera& camera, PhysicsSystem& physics) :
+    EditorLayer(Window& window, EntityComponentSystem& ecs, Camera& camera, PhysicsSystem& physics) :
         Layer("GameLayer"), m_Window(window), m_Ecs(ecs),
         m_Camera(camera), m_PhysicsSystem(physics), m_CameraController([]() { return !ImGui::GetIO().WantCaptureMouse; }) {}
 
@@ -40,6 +40,8 @@ public:
             spec.Width = 1280;
             spec.Height = 720;
             m_FrameBuffer = std::shared_ptr<FrameBuffer>(FrameBuffer::Create(spec));
+            
+            m_ViewportTextureID = m_FrameBuffer->CreateImTextureID();
         }
     }
 
@@ -135,6 +137,16 @@ public:
             ImGui::TreePop();
         }
         ImGui::End();
+        
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2 {0.0f, 0.0f});
+        ImGui::Begin("Viewport");
+        
+        ImVec2 avail = ImGui::GetContentRegionAvail();
+        ImGui::Image(m_ViewportTextureID, avail);
+        
+        ImGui::End();
+        ImGui::PopStyleVar();
+        
     }
 
     bool OnEvent(Event& event) override {
@@ -332,6 +344,8 @@ private:
     
     std::shared_ptr<FrameBuffer> m_FrameBuffer;
     
+    ImTextureID m_ViewportTextureID;
+    
     float m_DeltaTime = 0.0f;
     float m_Fps = 0.0f;
     std::queue<float> m_FrameTimes;
@@ -340,7 +354,7 @@ private:
 class SandboxApp : public Application {
 public:
     SandboxApp() {
-        PushLayer<GameLayer>(*m_Window, m_Ecs, m_Camera, *m_PhysicsSystem);
+        PushLayer<EditorLayer>(*m_Window, m_Ecs, m_Camera, *m_PhysicsSystem);
     }
 };
 

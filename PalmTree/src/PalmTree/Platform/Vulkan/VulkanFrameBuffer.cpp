@@ -20,11 +20,13 @@ namespace PalmTree {
         CleanupImage();
         CleanupDepthImage();
         CleanupFrameBuffer();
+        CleanupSampler();
         
         CreateRenderPass();
         CreateImage();
         CreateDepthImage();
         CreateFrameBuffer();
+        CreateSampler();
     }
     
     void VulkanFrameBuffer::Resize(uint32_t width, uint32_t height) {
@@ -47,6 +49,10 @@ namespace PalmTree {
             VK_IMAGE_TILING_OPTIMAL,
             VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT
         );
+    }
+
+    ImTextureID VulkanFrameBuffer::CreateImTextureID() {
+        return reinterpret_cast<ImTextureID>(ImGui_ImplVulkan_AddTexture(m_Sampler, m_ImageView, VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL));
     }
 
     void VulkanFrameBuffer::CreateRenderPass() {
@@ -145,7 +151,7 @@ namespace PalmTree {
         i.mipLevels = 1;
         i.arrayLayers = 1;
         i.tiling = VK_IMAGE_TILING_OPTIMAL;
-        i.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+        i.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
         i.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
         i.samples = VK_SAMPLE_COUNT_1_BIT;
         
@@ -228,7 +234,28 @@ namespace PalmTree {
         VkDevice device = m_Device.GetDevice();
         PT_CORE_VERIFY(vkCreateImageView(device, &iv, nullptr, &m_DepthImageView) == VK_SUCCESS, "Failed to create image view");
     }
+
+    void VulkanFrameBuffer::CreateSampler() {
+        VkSamplerCreateInfo s{};
+        s.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+        s.magFilter = VK_FILTER_LINEAR;
+        s.minFilter = VK_FILTER_LINEAR;
+        s.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+        s.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+        s.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+        s.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+        s.anisotropyEnable = VK_FALSE;
+        s.compareEnable = VK_FALSE;
+        
+        vkCreateSampler(m_Device.GetDevice(), &s, nullptr, &m_Sampler);
+    }
     
+    void VulkanFrameBuffer::CleanupSampler() {
+        vkDestroySampler(m_Device.GetDevice(), m_Sampler, nullptr);
+        
+        m_Sampler = VK_NULL_HANDLE;
+    }
+
     void VulkanFrameBuffer::CleanupImage() {
         vkDestroyImageView(m_Device.GetDevice(), m_ImageView, nullptr);
         vkDestroyImage(m_Device.GetDevice(), m_Image, nullptr);

@@ -2,6 +2,8 @@
 
 #include <cstdint>
 
+#include <imgui.h>
+
 namespace PalmTree {
     struct FrameBufferSpecification {
         uint32_t Width;
@@ -20,6 +22,8 @@ namespace PalmTree {
         virtual void Resize(uint32_t width, uint32_t height) = 0;
         
         virtual const FrameBufferSpecification& GetSpec() const = 0;
+        
+        virtual ImTextureID CreateImTextureID() = 0;
         
         const uint32_t GetWidth() const { return GetSpec().Width; }
         const uint32_t GetHeight() const { return GetSpec().Height; }

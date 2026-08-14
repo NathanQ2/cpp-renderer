@@ -4,15 +4,14 @@
 
 namespace PalmTreeEditor {
     void ViewportMovementController::MoveInPlaneXZ(float dt, PalmTree::GameObject& gameObject) {
-        bool shouldCaptureMouse = m_ShouldCaptureMouse();
-        if (!m_Enabled && PalmTree::Input::IsMouseButtonDown(m_Keys.RightButton) && shouldCaptureMouse) {
+        if (!m_Enabled && PalmTree::Input::IsMouseButtonDown(m_Keys.RightButton) && m_ShouldCaptureMouse) {
             PalmTree::Input::SetCursorEnabled(false);
 
             m_Enabled = true;
 
             m_PreviousMousePosition = PalmTree::Input::GetMousePosition();
         }
-        else if (m_Enabled && !PalmTree::Input::IsMouseButtonDown(m_Keys.RightButton) && shouldCaptureMouse) {
+        else if (m_Enabled && !PalmTree::Input::IsMouseButtonDown(m_Keys.RightButton) && m_ShouldCaptureMouse) {
             m_Enabled = false;
             PalmTree::Input::SetCursorEnabled(true);
         }
@@ -28,15 +27,18 @@ namespace PalmTreeEditor {
             mouseRotate.y -= cursorDelta.x;
 
             // Make sure rotate is nonzero 
+            glm::vec3 newEuler = gameObject.GetTransform()->EulerAngles();
             if (glm::dot(mouseRotate, mouseRotate) > std::numeric_limits<float>::epsilon()) {
-                gameObject.GetTransform()->Rotation += m_MouseLookSpeed * dt * mouseRotate;
+                newEuler += m_MouseLookSpeed * dt * mouseRotate;
             }
             
-            gameObject.GetTransform()->Rotation.x = glm::clamp(gameObject.GetTransform()->Rotation.x, -1.5f, 1.5f);
-            gameObject.GetTransform()->Rotation.y = glm::mod(gameObject.GetTransform()->Rotation.y, glm::two_pi<float>());
+            newEuler.x = glm::clamp(newEuler.x, -glm::half_pi<float>(), glm::half_pi<float>());
+            newEuler.y = glm::mod(newEuler.y, glm::two_pi<float>());
 
-            float yaw = gameObject.GetTransform()->Rotation.y;
-            float pitch = gameObject.GetTransform()->Rotation.x;
+            gameObject.GetTransform()->SetEuler(newEuler);
+            
+            float yaw = gameObject.GetTransform()->EulerAngles().y;
+            float pitch = gameObject.GetTransform()->EulerAngles().x;
             
             const glm::vec3 forwardDir = glm::vec3(sin(yaw) * cos(pitch), -sin(pitch), cos(yaw) * cos(pitch));
             const glm::vec3 rightDir = glm::vec3(forwardDir.z, 0.0f, -forwardDir.x);
