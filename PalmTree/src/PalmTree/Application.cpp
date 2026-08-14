@@ -39,12 +39,6 @@ namespace PalmTree {
             SignatureBuilder<TransformComponent, RigidBodyComponent>(m_Ecs.GetComponentManager()).Build()
         );
         
-        {
-            // FrameBufferSpecification spec;
-            // spec.Width = 1280;
-            // spec.Height = 720;
-            // m_FrameBuffer = std::shared_ptr<FrameBuffer>(FrameBuffer::Create(spec));
-        }
     }
 
     Application::~Application() {

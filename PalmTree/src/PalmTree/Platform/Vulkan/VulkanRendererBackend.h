@@ -32,7 +32,8 @@ namespace PalmTree {
 
         CommandBuffer& GetCurrentCommandBufferImpl() override {
             PT_CORE_ASSERT(m_IsFrameStarted, "Cannot get command buffer when frame not in progress");
-            return *m_CommandBuffer;
+            // return *m_CommandBuffer;
+            return *m_SwapChainCommandBuffers[m_SwapChainCurrentFrameIndex];
         }
 
         API GetAPIImpl() override { return API::VULKAN; }

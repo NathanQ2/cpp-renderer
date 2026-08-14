@@ -44,6 +44,7 @@ namespace PalmTree {
         VkFramebuffer m_FrameBuffer;
         VkRenderPass m_RenderPass;
         VkImage m_Image;
+        VkDeviceMemory m_ImageMemory;
         VkImageView m_ImageView;
         
         VkFormat m_ColorFormat;

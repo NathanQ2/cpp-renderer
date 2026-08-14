@@ -107,7 +107,7 @@ namespace PalmTree {
 
     void VulkanRendererBackend::BeginSwapChainRenderPassImpl() {
         PT_CORE_ASSERT(m_IsFrameStarted, "Can't call BeginSwapChainRenderPass if frame is not in progress!");
-
+        
         dynamic_cast<VulkanCommandBuffer&>(GetCurrentCommandBufferImpl()).BeginRenderPass(*m_SwapChain, m_SwapChainCurrentImageIndex);
     }
     

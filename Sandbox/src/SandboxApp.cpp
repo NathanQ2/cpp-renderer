@@ -34,6 +34,13 @@ public:
             m_Ecs,
             m_Camera
         );
+        
+        {
+            FrameBufferSpecification spec;
+            spec.Width = 1280;
+            spec.Height = 720;
+            m_FrameBuffer = std::shared_ptr<FrameBuffer>(FrameBuffer::Create(spec));
+        }
     }
 
     void OnEnd() override {}
@@ -62,11 +69,13 @@ public:
         m_Camera.SetPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 100.0f);
 
         m_Renderer->Update(dt);
+        
+        RendererBackend::BeginRenderPass(m_FrameBuffer);
+        m_Renderer->Render(dt);
+        RendererBackend::EndRenderPass();
     }
 
-    void OnRender(float dt) override {
-        m_Renderer->Render(dt);
-    }
+    void OnRender(float dt) override {}
 
     void OnImGuiRender() override {
         ImGui::Begin("Inspector");
@@ -321,7 +330,7 @@ private:
 
     std::unique_ptr<SceneRenderer3D> m_Renderer;
     
-    std::shared_ptr<Model> m_Model;
+    std::shared_ptr<FrameBuffer> m_FrameBuffer;
     
     float m_DeltaTime = 0.0f;
     float m_Fps = 0.0f;

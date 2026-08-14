@@ -129,16 +129,40 @@ namespace PalmTree {
         i.tiling = VK_IMAGE_TILING_OPTIMAL;
         i.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
         i.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+        i.samples = VK_SAMPLE_COUNT_1_BIT;
+        
+        // m_Device.CreateImageWithInfo(i, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, m_Image, m_ImageMemory);
         
         PT_CORE_VERIFY(vkCreateImage(m_Device.GetDevice(), &i, nullptr, &m_Image) == VK_SUCCESS, "Failed to create image");
         
+        VkMemoryRequirements mr;
+        vkGetImageMemoryRequirements(m_Device.GetDevice(), m_Image, &mr);
+        
+        VkMemoryAllocateInfo ai{};
+        ai.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+        ai.allocationSize = mr.size;
+        ai.memoryTypeIndex = m_Device.FindMemoryType(mr.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+        
+        PT_CORE_VERIFY(vkAllocateMemory(m_Device.GetDevice(), &ai, nullptr, &m_ImageMemory) == VK_SUCCESS, "Failed to allocate image memory");
+        PT_CORE_VERIFY(vkBindImageMemory(m_Device.GetDevice(), m_Image, m_ImageMemory, 0) == VK_SUCCESS, "Failed to bind image memory");
+        
+        VkImageSubresourceRange isr{};
+        isr.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        isr.baseArrayLayer = 0;
+        isr.layerCount = 1;
+        isr.baseMipLevel = 0;
+        isr.levelCount = 1;
+        
         VkImageViewCreateInfo iv{};
         iv.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+        iv.pNext = nullptr;
         iv.image = m_Image;
         iv.viewType = VK_IMAGE_VIEW_TYPE_2D;
         iv.format = m_ColorFormat;
+        iv.subresourceRange = isr;
         
-        PT_CORE_VERIFY(vkCreateImageView(m_Device.GetDevice(), &iv, nullptr, &m_ImageView) == VK_SUCCESS, "Failed to create image view");
+        VkDevice device = m_Device.GetDevice();
+        PT_CORE_VERIFY(vkCreateImageView(device, &iv, nullptr, &m_ImageView) == VK_SUCCESS, "Failed to create image view");
         
         VkFramebufferCreateInfo fb{};
         fb.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
