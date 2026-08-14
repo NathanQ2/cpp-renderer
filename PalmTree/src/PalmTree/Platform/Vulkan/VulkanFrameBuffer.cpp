@@ -171,6 +171,7 @@ namespace PalmTree {
         fb.height = m_Spec.Height;
         fb.attachmentCount = 1;
         fb.pAttachments = &m_ImageView;
+        fb.layers = 1;
         
         PT_CORE_VERIFY(vkCreateFramebuffer(m_Device.GetDevice(), &fb, nullptr, &m_FrameBuffer) == VK_SUCCESS, "Failed to create frame buffer");
     }
