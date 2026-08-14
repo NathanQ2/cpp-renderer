@@ -33,9 +33,13 @@ namespace PalmTree {
     private:
         void CreateRenderPass();
         void CreateFrameBuffer();
+        void CreateImage();
+        void CreateDepthImage();
         
         void CleanupRenderPass();
         void CleanupFrameBuffer();
+        void CleanupImage();
+        void CleanupDepthImage();
         
         FrameBufferSpecification m_Spec;
         
@@ -46,7 +50,11 @@ namespace PalmTree {
         VkImage m_Image;
         VkDeviceMemory m_ImageMemory;
         VkImageView m_ImageView;
+        VkFormat m_ImageFormat;
         
-        VkFormat m_ColorFormat;
+        VkImage m_DepthImage;
+        VkDeviceMemory m_DepthImageMemory;
+        VkImageView m_DepthImageView;
+        VkFormat m_DepthImageFormat;
     };
 }

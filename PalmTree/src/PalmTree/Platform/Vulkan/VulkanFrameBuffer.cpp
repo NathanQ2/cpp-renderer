@@ -17,9 +17,13 @@ namespace PalmTree {
     void VulkanFrameBuffer::Invalidate() {
         // TODO: Recreate RenderPass necessary?
         CleanupRenderPass();
+        CleanupImage();
+        CleanupDepthImage();
         CleanupFrameBuffer();
         
         CreateRenderPass();
+        CreateImage();
+        CreateDepthImage();
         CreateFrameBuffer();
     }
     
@@ -46,23 +50,24 @@ namespace PalmTree {
     }
 
     void VulkanFrameBuffer::CreateRenderPass() {
-        // VkAttachmentDescription depthAttachment{};
-        // depthAttachment.format = FindDepthFormat();
-        // depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-        // depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-        // depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        // depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-        // depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        // depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        // depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+        VkAttachmentDescription depthAttachment{};
+        m_DepthImageFormat = FindDepthFormat();
+        depthAttachment.format = m_DepthImageFormat; 
+        depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+        depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
-        // VkAttachmentReference depthAttachmentRef{};
-        // depthAttachmentRef.attachment = 1;
-        // depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+        VkAttachmentReference depthAttachmentRef{};
+        depthAttachmentRef.attachment = 1;
+        depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
         VkAttachmentDescription colorAttachment = {};
-        m_ColorFormat = FindColorFormat();
-        colorAttachment.format = m_ColorFormat;
+        m_ImageFormat = FindColorFormat();
+        colorAttachment.format = m_ImageFormat;
         colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
         colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
         colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -79,7 +84,7 @@ namespace PalmTree {
         subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
         subpass.colorAttachmentCount = 1;
         subpass.pColorAttachments = &colorAttachmentRef;
-        // subpass.pDepthStencilAttachment = &depthAttachmentRef;
+        subpass.pDepthStencilAttachment = &depthAttachmentRef;
 
         VkSubpassDependency dependency = {};
 
@@ -101,8 +106,7 @@ namespace PalmTree {
         // i.e this means we can't write to our color attachment until after the previous render pass has
         // finished with its color attachment stage
 
-        // std::array<VkAttachmentDescription, 2> attachments = {colorAttachment, depthAttachment};
-        std::array<VkAttachmentDescription, 1> attachments = {colorAttachment};
+        std::array<VkAttachmentDescription, 2> attachments = {colorAttachment, depthAttachment};
         VkRenderPassCreateInfo renderPassInfo = {};
         renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
         renderPassInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
@@ -118,10 +122,24 @@ namespace PalmTree {
     }
     
     void VulkanFrameBuffer::CreateFrameBuffer() {
+        VkFramebufferCreateInfo fb{};
+        fb.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+        fb.renderPass = m_RenderPass;
+        fb.width = m_Spec.Width;
+        fb.height = m_Spec.Height;
+        fb.attachmentCount = 2;
+        std::array<VkImageView, 2> attachments{ m_ImageView, m_DepthImageView };
+        fb.pAttachments = attachments.data();
+        fb.layers = 1;
+        
+        PT_CORE_VERIFY(vkCreateFramebuffer(m_Device.GetDevice(), &fb, nullptr, &m_FrameBuffer) == VK_SUCCESS, "Failed to create frame buffer");
+    }
+
+    void VulkanFrameBuffer::CreateImage() {
         VkImageCreateInfo i{};
         i.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
         i.imageType = VK_IMAGE_TYPE_2D;
-        i.format = m_ColorFormat;
+        i.format = m_ImageFormat;
         i.extent = VkExtent3D { .width = m_Spec.Width, .height = m_Spec.Height };
         i.extent.depth = 1;
         i.mipLevels = 1;
@@ -158,22 +176,73 @@ namespace PalmTree {
         iv.pNext = nullptr;
         iv.image = m_Image;
         iv.viewType = VK_IMAGE_VIEW_TYPE_2D;
-        iv.format = m_ColorFormat;
+        iv.format = m_ImageFormat;
         iv.subresourceRange = isr;
         
         VkDevice device = m_Device.GetDevice();
         PT_CORE_VERIFY(vkCreateImageView(device, &iv, nullptr, &m_ImageView) == VK_SUCCESS, "Failed to create image view");
+    }
+    
+    void VulkanFrameBuffer::CreateDepthImage() {
+        VkImageCreateInfo i{};
+        i.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+        i.imageType = VK_IMAGE_TYPE_2D;
+        i.format = m_DepthImageFormat;
+        i.extent = VkExtent3D { .width = m_Spec.Width, .height = m_Spec.Height };
+        i.extent.depth = 1;
+        i.mipLevels = 1;
+        i.arrayLayers = 1;
+        i.tiling = VK_IMAGE_TILING_OPTIMAL;
+        i.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+        i.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+        i.samples = VK_SAMPLE_COUNT_1_BIT;
         
-        VkFramebufferCreateInfo fb{};
-        fb.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-        fb.renderPass = m_RenderPass;
-        fb.width = m_Spec.Width;
-        fb.height = m_Spec.Height;
-        fb.attachmentCount = 1;
-        fb.pAttachments = &m_ImageView;
-        fb.layers = 1;
+        PT_CORE_VERIFY(vkCreateImage(m_Device.GetDevice(), &i, nullptr, &m_DepthImage) == VK_SUCCESS, "Failed to create image");
         
-        PT_CORE_VERIFY(vkCreateFramebuffer(m_Device.GetDevice(), &fb, nullptr, &m_FrameBuffer) == VK_SUCCESS, "Failed to create frame buffer");
+        VkMemoryRequirements mr;
+        vkGetImageMemoryRequirements(m_Device.GetDevice(), m_DepthImage, &mr);
+        
+        VkMemoryAllocateInfo ai{};
+        ai.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+        ai.allocationSize = mr.size;
+        ai.memoryTypeIndex = m_Device.FindMemoryType(mr.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+        
+        PT_CORE_VERIFY(vkAllocateMemory(m_Device.GetDevice(), &ai, nullptr, &m_DepthImageMemory) == VK_SUCCESS, "Failed to allocate image memory");
+        PT_CORE_VERIFY(vkBindImageMemory(m_Device.GetDevice(), m_DepthImage, m_DepthImageMemory, 0) == VK_SUCCESS, "Failed to bind image memory");
+        
+        VkImageSubresourceRange isr{};
+        isr.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+        isr.baseArrayLayer = 0;
+        isr.layerCount = 1;
+        isr.baseMipLevel = 0;
+        isr.levelCount = 1;
+        
+        VkImageViewCreateInfo iv{};
+        iv.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+        iv.pNext = nullptr;
+        iv.image = m_DepthImage;
+        iv.viewType = VK_IMAGE_VIEW_TYPE_2D;
+        iv.format = m_DepthImageFormat;
+        iv.subresourceRange = isr;
+        
+        VkDevice device = m_Device.GetDevice();
+        PT_CORE_VERIFY(vkCreateImageView(device, &iv, nullptr, &m_DepthImageView) == VK_SUCCESS, "Failed to create image view");
+    }
+    
+    void VulkanFrameBuffer::CleanupImage() {
+        vkDestroyImageView(m_Device.GetDevice(), m_ImageView, nullptr);
+        vkDestroyImage(m_Device.GetDevice(), m_Image, nullptr);
+        
+        m_ImageView = VK_NULL_HANDLE;
+        m_Image = VK_NULL_HANDLE;
+    }
+    
+    void VulkanFrameBuffer::CleanupDepthImage() {
+        vkDestroyImageView(m_Device.GetDevice(), m_DepthImageView, nullptr);
+        vkDestroyImage(m_Device.GetDevice(), m_DepthImage, nullptr);
+        
+        m_DepthImageView = VK_NULL_HANDLE;
+        m_DepthImage = VK_NULL_HANDLE;
     }
 
     void VulkanFrameBuffer::CleanupRenderPass() {
@@ -184,11 +253,7 @@ namespace PalmTree {
     
     void VulkanFrameBuffer::CleanupFrameBuffer() {
         vkDestroyFramebuffer(m_Device.GetDevice(), m_FrameBuffer, nullptr);
-        vkDestroyImageView(m_Device.GetDevice(), m_ImageView, nullptr);
-        vkDestroyImage(m_Device.GetDevice(), m_Image, nullptr);
         
         m_FrameBuffer = VK_NULL_HANDLE;
-        m_ImageView = VK_NULL_HANDLE;
-        m_Image = VK_NULL_HANDLE;
     }
 } 
