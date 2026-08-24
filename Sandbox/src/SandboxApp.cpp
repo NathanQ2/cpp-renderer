@@ -14,9 +14,9 @@
 using namespace PalmTree;
 using namespace Sandbox;
 
-class EditorLayer : public Layer {
+class GameLayer : public Layer {
 public:
-    EditorLayer(Window& window, EntityComponentSystem& ecs, Camera& camera, PhysicsSystem& physics) :
+    GameLayer(Window& window, EntityComponentSystem& ecs, Camera& camera, PhysicsSystem& physics) :
         Layer("GameLayer"), m_Window(window), m_Ecs(ecs),
         m_Camera(camera), m_PhysicsSystem(physics), m_CameraController([]() { return !ImGui::GetIO().WantCaptureMouse; }) {}
 
@@ -34,15 +34,6 @@ public:
             m_Ecs,
             m_Camera
         );
-        
-        {
-            FrameBufferSpecification spec;
-            spec.Width = 1280;
-            spec.Height = 720;
-            m_FrameBuffer = std::shared_ptr<FrameBuffer>(FrameBuffer::Create(spec));
-            
-            m_ViewportTextureID = m_FrameBuffer->CreateImTextureID();
-        }
     }
 
     void OnEnd() override {}
@@ -71,13 +62,11 @@ public:
         m_Camera.SetPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 100.0f);
 
         m_Renderer->Update(dt);
-        
-        RendererBackend::BeginRenderPass(m_FrameBuffer);
-        m_Renderer->Render(dt);
-        RendererBackend::EndRenderPass();
     }
 
-    void OnRender(float dt) override {}
+    void OnRender(float dt) override {
+        m_Renderer->Render(dt);
+    }
 
     void OnImGuiRender() override {
         ImGui::Begin("Inspector");
@@ -137,16 +126,6 @@ public:
             ImGui::TreePop();
         }
         ImGui::End();
-        
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2 {0.0f, 0.0f});
-        ImGui::Begin("Viewport");
-        
-        ImVec2 avail = ImGui::GetContentRegionAvail();
-        ImGui::Image(m_ViewportTextureID, avail);
-        
-        ImGui::End();
-        ImGui::PopStyleVar();
-        
     }
 
     bool OnEvent(Event& event) override {
@@ -342,10 +321,6 @@ private:
 
     std::unique_ptr<SceneRenderer3D> m_Renderer;
     
-    std::shared_ptr<FrameBuffer> m_FrameBuffer;
-    
-    ImTextureID m_ViewportTextureID;
-    
     float m_DeltaTime = 0.0f;
     float m_Fps = 0.0f;
     std::queue<float> m_FrameTimes;
@@ -354,7 +329,7 @@ private:
 class SandboxApp : public Application {
 public:
     SandboxApp() {
-        PushLayer<EditorLayer>(*m_Window, m_Ecs, m_Camera, *m_PhysicsSystem);
+        PushLayer<GameLayer>(*m_Window, m_Ecs, m_Camera, *m_PhysicsSystem);
     }
 };
 
