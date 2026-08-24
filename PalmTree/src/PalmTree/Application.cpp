@@ -12,6 +12,7 @@
 #include "Logging/DataLogger.h"
 #include "Logging/DataLoggerUI.h"
 #include "Platform/Mac/MacWindow.h"
+#include "Renderer/FrameBuffer.h"
 
 namespace PalmTree {
     Application* Application::s_Instance = nullptr;
@@ -37,6 +38,7 @@ namespace PalmTree {
             m_PhysicsSystem,
             SignatureBuilder<TransformComponent, RigidBodyComponent>(m_Ecs.GetComponentManager()).Build()
         );
+        
     }
 
     Application::~Application() {
@@ -48,12 +50,8 @@ namespace PalmTree {
         m_ApplicationStartTime = currentTime;
         
         PushOverlay<DataLoggerUI>(m_ApplicationStartTime);
-
-        for (auto it = m_LayerStack.Begin(); it != m_LayerStack.End(); ++it) {
-            Layer* layer = *it;
-            if (layer->IsEnabled())
-                layer->OnStart();
-        }
+        
+        LoopEnabledLayers([](Layer* layer) { layer->OnStart(); });
 
         while (m_Running) {
             m_Window->OnUpdate();
@@ -66,41 +64,25 @@ namespace PalmTree {
 
             if (RendererBackend::BeginFrame()) {
                 // Update
-                for (auto it = m_LayerStack.Begin(); it != m_LayerStack.End(); ++it) {
-                    Layer* layer = *it;
-                    if (layer->IsEnabled())
-                        layer->OnUpdate(frameTime);
-                }
+                LoopEnabledLayers([frameTime](Layer* layer) { layer->OnUpdate(frameTime); });
                 m_PhysicsSystem->Update(frameTime);
 
                 // Render
-                RendererBackend::BeginRenderPass();
-
-                for (auto it = m_LayerStack.Begin(); it != m_LayerStack.End(); ++it) {
-                    Layer* layer = *it;
-                    if (layer->IsEnabled())
-                        layer->OnRender(frameTime);
-                }
+                RendererBackend::BeginSwapChainRenderPass();
+                
+                LoopEnabledLayers([frameTime](Layer* layer) { layer->OnRender(frameTime); });
 
                 m_ImGuiLayer->Begin();
                 m_PhysicsSystem->OnImGuiRender();
-                for (auto it = m_LayerStack.Begin(); it != m_LayerStack.End(); ++it) {
-                    Layer* layer = *it;
-                    if (layer->IsEnabled())
-                        layer->OnImGuiRender();
-                }
+                LoopEnabledLayers([](Layer* layer) { layer->OnImGuiRender(); });
                 m_ImGuiLayer->End();
 
-                RendererBackend::EndRenderPass();
+                RendererBackend::EndSwapChainRenderPass();
                 RendererBackend::EndFrame();
             }
         }
-
-        for (auto it = m_LayerStack.Begin(); it != m_LayerStack.End(); ++it) {
-            Layer* layer = *it;
-            if (layer->IsEnabled())
-                layer->OnEnd();
-        }
+        
+        LoopEnabledLayers([](Layer* layer) { layer->OnEnd(); });
     }
 
     void Application::OnEvent(Event& event) {
@@ -120,5 +102,13 @@ namespace PalmTree {
         m_Running = false;
 
         return true;
+    }
+    
+    void Application::LoopEnabledLayers(std::function<void(Layer*)> func) {
+        for (auto it = m_LayerStack.End(); it != m_LayerStack.Begin();) {
+            Layer* layer = *--it;
+            
+            if (layer->IsEnabled()) func(layer);
+        }
     }
 }

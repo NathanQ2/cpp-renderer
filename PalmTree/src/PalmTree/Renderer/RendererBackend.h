@@ -7,6 +7,7 @@ namespace PalmTree {
     class VulkanRendererBackend;
     class Model;
     class CommandBuffer;
+    class FrameBuffer;
 
     class RendererBackend {
     public:
@@ -15,47 +16,28 @@ namespace PalmTree {
             VULKAN = 1
         };
 
-        static void Init(API api) {
-            PT_CORE_ASSERT(s_Instance == nullptr, "Renderer backend has already been initialized!");
+        static void Init(API api);
 
-            switch (api) {
-                case API::VULKAN:
-                    InitVulkan();
+        static void Shutdown();
 
-                    break;
-                case API::NONE:
-                    PT_CORE_ERROR("No renderer backend selected!");
-
-                    break;
-            }
-        }
-
-        static void Shutdown() {
-            PT_CORE_ASSERT(s_Instance != nullptr, "RendererBackend has not been initialized!");
-
-            delete s_Instance;
-            s_Instance = nullptr;
-        }
-
-        static RendererBackend* Get() {
-            PT_CORE_ASSERT(s_Instance != nullptr, "RendererBackend has not been initialized!");
-
-            return s_Instance;
-        }
+        static RendererBackend* Get();
 
         static API GetAPI() { return Get()->GetAPIImpl(); }
 
         static bool BeginFrame() { return Get()->BeginFrameImpl(); }
         static void EndFrame() { return Get()->EndFrameImpl(); }
+        
+        static void BeginSwapChainRenderPass() { return Get()->BeginSwapChainRenderPassImpl(); }
+        static void EndSwapChainRenderPass() { return Get()->EndSwapChainRenderPassImpl(); }
 
-        static void BeginRenderPass() { return Get()->BeginRenderPassImpl(); }
+        static void BeginRenderPass(const std::shared_ptr<FrameBuffer>& frameBuffer) { return Get()->BeginRenderPassImpl(frameBuffer); }
         static void EndRenderPass() { return Get()->EndRenderPassImpl(); }
 
         static CommandBuffer& GetCurrentCommandBuffer() { return Get()->GetCurrentCommandBufferImpl(); }
 
-        static int GetFrameIndex() { return Get()->GetFrameIndexImpl(); }
+        static int GetSwapChainFrameIndex() { return Get()->GetSwapChainFrameIndexImpl(); }
 
-        static float GetAspectRatio() { return Get()->GetAspectRatioImpl(); }
+        static float GetSwapChainAspectRatio() { return Get()->GetSwapChainAspectRatioImpl(); }
 
         virtual ~RendererBackend() = default;
 
@@ -63,15 +45,18 @@ namespace PalmTree {
 
         virtual bool BeginFrameImpl() = 0;
         virtual void EndFrameImpl() = 0;
+        
+        virtual void BeginSwapChainRenderPassImpl() = 0;
+        virtual void EndSwapChainRenderPassImpl() = 0;
 
-        virtual void BeginRenderPassImpl() = 0;
+        virtual void BeginRenderPassImpl(std::shared_ptr<FrameBuffer> frameBuffer) = 0;
         virtual void EndRenderPassImpl() = 0;
 
         virtual CommandBuffer& GetCurrentCommandBufferImpl() = 0;
 
-        virtual int GetFrameIndexImpl() const = 0;
+        virtual int GetSwapChainFrameIndexImpl() const = 0;
 
-        virtual float GetAspectRatioImpl() const = 0;
+        virtual float GetSwapChainAspectRatioImpl() const = 0;
     private:
         static void InitVulkan();
 

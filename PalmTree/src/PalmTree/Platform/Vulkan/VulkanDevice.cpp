@@ -87,7 +87,7 @@ namespace PalmTree {
             }
         }
 
-        throw std::runtime_error("failed to find suitable memory type!");
+        PT_CORE_VERIFY(false, "failed to find suitable memory type!");
     }
 
     VkFormat VulkanDevice::FindSupportedFormat(

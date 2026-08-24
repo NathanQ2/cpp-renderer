@@ -22,13 +22,13 @@ namespace PalmTreeEditor {
             int SpeedMode = PT_KEY_LEFT_SHIFT;
         };
 
-        explicit ViewportMovementController(std::function<bool()> shouldCaptureMouse) : m_ShouldCaptureMouse(
-            shouldCaptureMouse
-        ) {
+        explicit ViewportMovementController() {
             m_PreviousMousePosition = PalmTree::Input::GetMousePosition();
         }
 
         void MoveInPlaneXZ(float dt, PalmTree::GameObject& gameObject);
+        
+        void SetShouldCaptureMouse(bool capture) { m_ShouldCaptureMouse = capture; }
     private:
         KeyMappings m_Keys{};
         float m_DefaultMoveSpeed = 3.0f;
@@ -38,7 +38,7 @@ namespace PalmTreeEditor {
 
         glm::vec2 m_PreviousMousePosition;
 
-        std::function<bool()> m_ShouldCaptureMouse;
+        bool m_ShouldCaptureMouse;
 
         bool m_Enabled = false;
     };

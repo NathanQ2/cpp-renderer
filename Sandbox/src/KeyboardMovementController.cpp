@@ -47,7 +47,7 @@ namespace Sandbox {
 
         // Make sure rotate is nonzero 
         if (glm::dot(keyboardRotate, keyboardRotate) > std::numeric_limits<float>::epsilon()) {
-            glm::vec3 newEuler = gameObject.GetTransform()->EulerAngles() += m_KeyboardLookSpeed * dt * glm::normalize(keyboardRotate);
+            glm::vec3 newEuler = gameObject.GetTransform()->EulerAngles() + m_KeyboardLookSpeed * dt * glm::normalize(keyboardRotate);
             
             gameObject.GetTransform()->SetEuler(newEuler);
         }

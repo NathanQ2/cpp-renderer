@@ -1,5 +1,7 @@
 #pragma once
 
+#include <functional>
+
 #include "Camera.h"
 #include "LayerStack.h"
 #include "EntityComponentSystem/EntityComponentSystem.h"
@@ -65,6 +67,8 @@ namespace PalmTree {
         bool m_Running = true;
     private:
         static Application* s_Instance;
+        
+        void LoopEnabledLayers(std::function<void(Layer*)> func);
     };
 
     Application* CreateApplication();
