@@ -16,21 +16,17 @@
 ImGuiKey ImGui_ImplGlfw_KeyToImGuiKey(int keycode, int scancode);
 
 namespace PalmTree {
-    ImGuiLayer::ImGuiLayer(const MacWindow& window) : Layer("ImGui"),
-                                                      m_Window(window) {
+    ImGuiLayer::ImGuiLayer(const MacWindow& window) : Layer("ImGui"), m_Window(window) {
         PT_CORE_ASSERT(
             RendererBackend::GetAPI() == RendererBackend::API::VULKAN,
             "ImGuiLayer requires the vulkan rendering backend!"
         );
+
         m_Renderer = VulkanRendererBackend::Get();
     }
 
     ImGuiLayer::~ImGuiLayer() {
         ShutdownImGui();
-    }
-
-    void ImGuiLayer::OnStart() {
-        InitImGui();
     }
 
     void ImGuiLayer::Begin() {
@@ -102,6 +98,8 @@ namespace PalmTree {
             .AddPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, IMGUI_IMPL_VULKAN_MINIMUM_IMAGE_SAMPLER_POOL_SIZE)
             .Build();
 
+        VulkanSwapChain& swapChain = dynamic_cast<VulkanSwapChain&>(m_Renderer->GetSwapChain());
+
         ImGui_ImplVulkan_InitInfo initInfo{};
         initInfo.ApiVersion = VK_HEADER_VERSION_COMPLETE;
         initInfo.Instance = device.GetInstance();
@@ -109,11 +107,11 @@ namespace PalmTree {
         initInfo.Device = device.GetDevice();
         initInfo.Queue = device.GraphicsQueue();
         initInfo.DescriptorPool = m_DescriptorPool->GetDescriptorPool();
-        initInfo.MinImageCount = m_Renderer->GetImageCount();
+        initInfo.MinImageCount = swapChain.GetImageCount();
         initInfo.ImageCount = RendererConstants::MAX_FRAMES_IN_FLIGHT;
         // initInfo.PipelineCache = VK_NULL_HANDLE;
         // initInfo.Allocator = VK_NULL_HANDLE;
-        initInfo.RenderPass = m_Renderer->GetSwapChainRenderPass();
+        initInfo.RenderPass = swapChain.GetRenderPass();
         initInfo.Subpass = 0;
         initInfo.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
         // initInfo.CheckVkResultFn = check_vk_result;

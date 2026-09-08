@@ -2,6 +2,7 @@
 #include "FrameBuffer.h"
 
 #include "RendererBackend.h"
+#include "PalmTree/Logging/Log.h"
 
 namespace PalmTree {
     FrameBuffer* FrameBuffer::Create(const FrameBufferSpecification& spec) {

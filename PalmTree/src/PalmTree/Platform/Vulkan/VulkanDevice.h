@@ -20,13 +20,13 @@ namespace PalmTree {
 
     class VulkanDevice {
     public:
-#ifdef NDEBUG
-        const bool EnableValidationLayers = false;
-#else
+#ifdef PT_DEBUG
         const bool EnableValidationLayers = true;
+#else
+        const bool EnableValidationLayers = false;
 #endif
 
-        VulkanDevice(Window& window);
+        VulkanDevice();
         ~VulkanDevice();
 
         // Not copyable or movable
@@ -101,7 +101,6 @@ namespace PalmTree {
         VkInstance m_Instance;
         VkDebugUtilsMessengerEXT m_DebugMessenger;
         VkPhysicalDevice m_PhysicalDevice = VK_NULL_HANDLE;
-        Window& m_Window;
         VkCommandPool m_CommandPool;
 
         VkDevice m_Device;

@@ -3,7 +3,7 @@
 
 #include <vulkan/vulkan.h>
 
-#include "../../Logging/Log.h"
+#include "PalmTree/Logging/Log.h"
 #include "PalmTree/EventSystem/ApplicationEvents.h"
 #include "PalmTree/EventSystem/KeyEvents.h"
 #include "PalmTree/EventSystem/MouseEvents.h"
@@ -165,20 +165,13 @@ namespace PalmTree {
     }
 
     void MacWindow::CreateWindowSurface(VkInstance instance, VkSurfaceKHR* surface) {
-        if (glfwCreateWindowSurface(instance, m_WindowHandle, nullptr, surface) != VK_SUCCESS) {
-            throw std::runtime_error("Failed to create window surface!");
-        }
+        PT_CORE_VERIFY(
+            glfwCreateWindowSurface(instance, m_WindowHandle, nullptr, surface) == VK_SUCCESS,
+            "Failed to create window surfac!"
+        )
     }
 
     void MacWindow::SetEventCallback(EventCallbackFn callback) {
         m_Data.EventCallback = callback;
     }
-
-    // void Window::FrameBufferResizeCallback(GLFWwindow* windowHandle, int width, int height) {
-    //     auto* window = reinterpret_cast<Window*>(glfwGetWindowUserPointer(windowHandle));
-
-    //     window->m_FrameBufferResized = true;
-    //     window->m_Width = width,
-    //     window->m_Height = height;
-    // }
 }

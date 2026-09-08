@@ -1,8 +1,10 @@
 #include "RendererBackend.h"
 
+#include "PalmTree/Logging/Log.h"
+
 namespace PalmTree {
     RendererBackend* RendererBackend::s_Instance = nullptr;
-    
+
     void RendererBackend::Init(API api) {
         PT_CORE_ASSERT(s_Instance == nullptr, "Renderer backend has already been initialized!");
 

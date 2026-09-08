@@ -14,12 +14,11 @@ namespace PalmTree {
         ImGuiLayer(const MacWindow& window);
         ~ImGuiLayer() override;
 
-        void OnStart() override;
+        void InitImGui();
 
         void Begin();
         void End();
     private:
-        void InitImGui();
         void InitImGuiVulkan();
 
         void ShutdownImGui();

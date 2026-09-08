@@ -1,6 +1,8 @@
 #include "ptpch.h"
 #include "Pipeline.h"
 
+#include "PalmTree/Logging/Log.h"
+
 namespace PalmTree {
     Pipeline* Pipeline::Create(CreateInfo& createInfo) {
         switch (RendererBackend::GetAPI()) {

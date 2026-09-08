@@ -1,7 +1,9 @@
 #pragma once
+
 #include <glm/glm.hpp>
 
 #include "RendererBackend.h"
+#include "PalmTree/Logging/Log.h"
 
 namespace PalmTree {
     struct Vertex {

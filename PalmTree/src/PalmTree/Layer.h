@@ -22,7 +22,6 @@ namespace PalmTree {
         virtual void OnEnd() {}
 
         virtual void OnUpdate(float dt) {}
-        virtual void OnRender(float dt) {}
 
         virtual bool OnEvent(Event& event) { return false; }
 

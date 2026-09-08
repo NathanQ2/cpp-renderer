@@ -24,7 +24,7 @@ namespace PalmTree {
         virtual bool IsKeyPressedImpl(int keycode) = 0;
 
         virtual bool IsMouseButtonDownImpl(int button) = 0;
-        
+
         virtual glm::vec2 GetMousePositionImpl() = 0;
         virtual float GetMousePositionXImpl() = 0;
         virtual float GetMousePositionYImpl() = 0;

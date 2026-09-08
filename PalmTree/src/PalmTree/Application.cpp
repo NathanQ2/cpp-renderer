@@ -2,25 +2,19 @@
 
 #include "EntityComponentSystem/EntityComponentSystem.h"
 
-#define GLM_FORCE_RADIANS
-#define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#include <glm/glm.hpp>
-
 #include <chrono>
-#include <ostream>
 
 #include "Logging/DataLogger.h"
 #include "Logging/DataLoggerUI.h"
 #include "Platform/Mac/MacWindow.h"
-#include "Renderer/FrameBuffer.h"
 
 namespace PalmTree {
     Application* Application::s_Instance = nullptr;
 
     Application::Application() {
-        PT_CORE_ASSERT(s_Instance == nullptr, "Application already exists!");
+        PT_CORE_VERIFY(s_Instance == nullptr, "Application already exists!");
         s_Instance = this;
-        
+
         DataLogger::Init();
 
         m_Window = std::unique_ptr<Window>(Window::Create());
@@ -29,16 +23,18 @@ namespace PalmTree {
         RendererBackend::Init(RendererBackend::API::VULKAN);
 
         m_ImGuiLayer = PushOverlay<ImGuiLayer>(dynamic_cast<MacWindow&>(*m_Window));
-        
+
         m_CollisionSystem = std::make_shared<CollisionSystem>();
-        m_Ecs.RegisterSystem(m_CollisionSystem, SignatureBuilder<TransformComponent, ColliderComponent>(m_Ecs.GetComponentManager()).Build());
+        m_Ecs.RegisterSystem(
+            m_CollisionSystem,
+            SignatureBuilder<TransformComponent, ColliderComponent>(m_Ecs.GetComponentManager()).Build()
+        );
 
         m_PhysicsSystem = std::make_shared<PhysicsSystem>();
         m_Ecs.RegisterSystem(
             m_PhysicsSystem,
             SignatureBuilder<TransformComponent, RigidBodyComponent>(m_Ecs.GetComponentManager()).Build()
         );
-        
     }
 
     Application::~Application() {
@@ -48,9 +44,11 @@ namespace PalmTree {
     void Application::Run() {
         auto currentTime = std::chrono::high_resolution_clock::now();
         m_ApplicationStartTime = currentTime;
-        
+
         PushOverlay<DataLoggerUI>(m_ApplicationStartTime);
-        
+
+        m_ImGuiLayer->InitImGui();
+
         LoopEnabledLayers([](Layer* layer) { layer->OnStart(); });
 
         while (m_Running) {
@@ -62,26 +60,9 @@ namespace PalmTree {
             currentTime = newTime;
             DataLogger::SetTimestamp(currentTime);
 
-            if (RendererBackend::BeginFrame()) {
-                // Update
-                LoopEnabledLayers([frameTime](Layer* layer) { layer->OnUpdate(frameTime); });
-                m_PhysicsSystem->Update(frameTime);
-
-                // Render
-                RendererBackend::BeginSwapChainRenderPass();
-                
-                LoopEnabledLayers([frameTime](Layer* layer) { layer->OnRender(frameTime); });
-
-                m_ImGuiLayer->Begin();
-                m_PhysicsSystem->OnImGuiRender();
-                LoopEnabledLayers([](Layer* layer) { layer->OnImGuiRender(); });
-                m_ImGuiLayer->End();
-
-                RendererBackend::EndSwapChainRenderPass();
-                RendererBackend::EndFrame();
-            }
+            OnUpdate(frameTime);
         }
-        
+
         LoopEnabledLayers([](Layer* layer) { layer->OnEnd(); });
     }
 
@@ -103,11 +84,11 @@ namespace PalmTree {
 
         return true;
     }
-    
+
     void Application::LoopEnabledLayers(std::function<void(Layer*)> func) {
-        for (auto it = m_LayerStack.End(); it != m_LayerStack.Begin();) {
-            Layer* layer = *--it;
-            
+        for (auto it = m_LayerStack.Begin(); it != m_LayerStack.End(); ++it) {
+            Layer* layer = *it;
+
             if (layer->IsEnabled()) func(layer);
         }
     }

@@ -58,14 +58,14 @@ public:
         m_CameraController.MoveInPlaneXZ(dt, viewerObject);
         m_Camera.SetViewYXZ(viewerObject.GetTransform()->Translation, viewerObject.GetTransform()->EulerAngles());
 
-        float aspect = RendererBackend::GetSwapChainAspectRatio();
+        float aspect = RendererBackend::GetSwapChain().GetAspectRatio();
         m_Camera.SetPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 100.0f);
 
         m_Renderer->Update(dt);
-    }
-
-    void OnRender(float dt) override {
+        
+        // RendererBackend::BeginSwapChainRenderPass();
         m_Renderer->Render(dt);
+        // RendererBackend::EndSwapChainRenderPass();
     }
 
     void OnImGuiRender() override {
@@ -330,6 +330,22 @@ class SandboxApp : public Application {
 public:
     SandboxApp() {
         PushLayer<GameLayer>(*m_Window, m_Ecs, m_Camera, *m_PhysicsSystem);
+    }
+    
+    void OnUpdate(float frameTime) override {
+        if (RendererBackend::BeginFrame()) {
+            RendererBackend::BeginSwapChainRenderPass();
+            LoopEnabledLayers([frameTime](Layer* layer) { layer->OnUpdate(frameTime); });
+            m_PhysicsSystem->Update(frameTime);
+
+            m_ImGuiLayer->Begin();
+            m_PhysicsSystem->OnImGuiRender();
+            LoopEnabledLayers([](Layer* layer) { layer->OnImGuiRender(); });
+            m_ImGuiLayer->End();
+            RendererBackend::EndSwapChainRenderPass();
+
+            RendererBackend::EndFrame();
+        }
     }
 };
 

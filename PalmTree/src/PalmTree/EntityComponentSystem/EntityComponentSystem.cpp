@@ -26,7 +26,7 @@ namespace PalmTree {
 
     std::vector<GameObject> EntityComponentSystem::GetGameObjects() {
         std::vector<GameObject> objs;
-        
+
         // TDOO: Consider reserving only valid game objects
         objs.reserve(m_GameObjects.size());
 
@@ -34,7 +34,7 @@ namespace PalmTree {
             if (obj.IsValid())
                 objs.emplace_back(obj);
         }
-        
+
         return objs;
     }
 }

@@ -2,7 +2,7 @@
 #include "Descriptors.h"
 
 #include "RendererBackend.h"
-#include "PalmTree/Platform/Vulkan/VulkanDescriptors.h"
+#include "PalmTree/Logging/Log.h"
 
 namespace PalmTree {
     DescriptorSetLayout::Builder& DescriptorSetLayout::Builder::AddBinding(DescriptorSetBinding binding) {

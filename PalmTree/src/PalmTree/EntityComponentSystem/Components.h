@@ -44,19 +44,19 @@ namespace PalmTree {
 
         float Mass = 1.0f;
         bool EnableGravity = false;
-        
+
         float Speed() const { return glm::length(Velocity); }
     };
-    
+
     struct ColliderComponent {
         struct Box {
             glm::vec3 Dimensions{1.0f};
         };
-        
+
         struct Sphere {
             float Radius = 1.0f;
         };
-        
+
         std::variant<Box, Sphere> Shape;
     };
 }

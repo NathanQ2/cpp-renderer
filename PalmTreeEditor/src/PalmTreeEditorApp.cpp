@@ -67,17 +67,15 @@ public:
         m_CameraController.MoveInPlaneXZ(dt, viewerObject);
         m_Camera.SetViewYXZ(viewerObject.GetTransform()->Translation, viewerObject.GetTransform()->EulerAngles());
 
-        float aspect = RendererBackend::GetSwapChainAspectRatio();
+        float aspect = RendererBackend::GetSwapChain().GetAspectRatio();
         m_Camera.SetPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 100.0f);
 
         m_Renderer->Update(dt);
         
-        RendererBackend::BeginRenderPass(m_FrameBuffer);
+        RendererBackend::BeginRenderPass(*m_FrameBuffer);
         m_Renderer->Render(dt);
         RendererBackend::EndRenderPass();
     }
-
-    void OnRender(float dt) override {}
 
     void OnImGuiRender() override {
         ImGui::Begin("Inspector");
@@ -360,6 +358,22 @@ class PalmTreeEditorApp : public Application {
 public:
     PalmTreeEditorApp() {
         PushLayer<EditorLayer>(*m_Window, m_Ecs, m_Camera, *m_PhysicsSystem);
+    }
+
+    void OnUpdate(float frameTime) override {
+        if (RendererBackend::BeginFrame()) {
+            LoopEnabledLayers([frameTime](Layer* layer) { layer ->OnUpdate(frameTime); });
+            m_PhysicsSystem->Update(frameTime);
+            
+            RendererBackend::BeginSwapChainRenderPass();
+            m_ImGuiLayer->Begin();
+            m_PhysicsSystem->OnImGuiRender();
+            LoopEnabledLayers([](Layer* layer) { layer->OnImGuiRender(); });
+            m_ImGuiLayer->End();
+            RendererBackend::EndSwapChainRenderPass();
+            
+            RendererBackend::EndFrame();
+        }
     }
 };
 

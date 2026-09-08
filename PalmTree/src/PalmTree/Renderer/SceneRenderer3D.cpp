@@ -42,7 +42,7 @@ namespace PalmTree {
     }
 
     void SceneRenderer3D::Update(float frameTime) {
-        int frameIndex = RendererBackend::GetSwapChainFrameIndex();
+        int frameIndex = RendererBackend::GetInFlightFrameIndex();
 
         // Delete old frame info
         delete m_FrameInfo;

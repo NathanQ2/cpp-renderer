@@ -10,6 +10,15 @@
 #include "PalmTree/Renderer/RendererConstants.h"
 
 namespace PalmTree {
+    VulkanSwapChain::VulkanSwapChain(Window& window, VulkanDevice& device) : m_Window{window}, m_Device{device} {
+        Init();
+    }
+
+    VulkanSwapChain::~VulkanSwapChain() {
+        CleanupSwapChain();
+        CleanupSyncObjects();
+    }
+
     void VulkanSwapChain::RecreateSwapChain() {
         while (m_Window.GetWidth() == 0 || m_Window.GetHeight() == 0) {
             glfwWaitEvents();
@@ -61,7 +70,7 @@ namespace PalmTree {
         );
     }
 
-    VkResult VulkanSwapChain::AcquireNextImage(uint32_t* imageIndex) {
+    VkResult VulkanSwapChain::AcquireNextImage() {
         vkWaitForFences(
             m_Device.GetDevice(),
             1,
@@ -77,17 +86,17 @@ namespace PalmTree {
             m_ImageAvailableSemaphores[m_CurrentFrame],
             // must be a not signaled semaphore
             VK_NULL_HANDLE,
-            imageIndex
+            &m_CurrentImageIndex
         );
 
         return result;
     }
 
-    VkResult VulkanSwapChain::SubmitCommandBuffers(const VkCommandBuffer* buffers, uint32_t* imageIndex) {
-        if (m_ImagesInFlight[*imageIndex] != VK_NULL_HANDLE) {
-            vkWaitForFences(m_Device.GetDevice(), 1, &m_ImagesInFlight[*imageIndex], VK_TRUE, UINT64_MAX);
+    VkResult VulkanSwapChain::SubmitCommandBuffers(const VkCommandBuffer* buffers) {
+        if (m_ImagesInFlight[m_CurrentImageIndex] != VK_NULL_HANDLE) {
+            vkWaitForFences(m_Device.GetDevice(), 1, &m_ImagesInFlight[m_CurrentImageIndex], VK_TRUE, UINT64_MAX);
         }
-        m_ImagesInFlight[*imageIndex] = m_InFlightFences[m_CurrentFrame];
+        m_ImagesInFlight[m_CurrentImageIndex] = m_InFlightFences[m_CurrentFrame];
 
         VkSubmitInfo submitInfo = {};
         submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -121,7 +130,7 @@ namespace PalmTree {
         presentInfo.swapchainCount = 1;
         presentInfo.pSwapchains = swapChains;
 
-        presentInfo.pImageIndices = imageIndex;
+        presentInfo.pImageIndices = &m_CurrentImageIndex;
 
         auto result = vkQueuePresentKHR(m_Device.PresentQueue(), &presentInfo);
 

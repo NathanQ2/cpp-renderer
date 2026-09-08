@@ -17,12 +17,13 @@ namespace PalmTree {
         static Application& Get() { return *s_Instance; }
 
         Application();
-        ~Application();
+        virtual ~Application();
 
         Application(const Application&) = delete;
         Application& operator=(const Application&) = delete;
 
         void Run();
+        virtual void OnUpdate(float frameTime) = 0;
 
         void OnEvent(Event& event);
 
@@ -42,10 +43,12 @@ namespace PalmTree {
         Window& GetWindow() const { return *m_Window; }
         EntityComponentSystem& GetEntityComponentSystem() { return m_Ecs; }
         Camera& GetCamera() { return m_Camera; }
-        
+
         std::chrono::steady_clock::time_point GetStartTime() const { return m_ApplicationStartTime; }
     protected:
         bool OnWindowClosed(WindowClosedEvent& event);
+
+        void LoopEnabledLayers(std::function<void(Layer*)> func);
 
         std::unique_ptr<Window> m_Window;
 
@@ -59,16 +62,14 @@ namespace PalmTree {
 
         std::shared_ptr<CollisionSystem> m_CollisionSystem;
         std::shared_ptr<PhysicsSystem> m_PhysicsSystem;
-        
+
         std::chrono::steady_clock::time_point m_ApplicationStartTime;
-        
+
         DataLogger m_Logger{"/Application"};
 
         bool m_Running = true;
     private:
         static Application* s_Instance;
-        
-        void LoopEnabledLayers(std::function<void(Layer*)> func);
     };
 
     Application* CreateApplication();

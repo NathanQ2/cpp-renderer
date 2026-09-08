@@ -23,11 +23,10 @@ namespace PalmTree {
         void PushConstants(uint32_t offset, uint32_t size, void* data) override;
         void BindVertexBuffer(const VertexBuffer& vertex) override;
         void BindIndexBuffer(const IndexBuffer& index) override;
-        
-        void BeginRenderPass(std::shared_ptr<FrameBuffer> frameBuffer) override;
-        void BeginRenderPass(const VulkanSwapChain& swapChain, int imageIndex);
+
+        void BeginRenderPass(RenderTarget& target) override;
         void EndRenderPass() override;
-        
+
         void DrawIndexed(uint32_t indexCount) override;
         void Draw(uint32_t vertexCount) override;
 

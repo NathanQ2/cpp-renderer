@@ -1,35 +1,34 @@
 #pragma once
 
 #include "VulkanDevice.h"
-#include "../../Window.h"
+#include "VulkanRenderTarget.h"
+#include "PalmTree/Window.h"
+#include "PalmTree/Renderer/SwapChain.h"
 
 
 namespace PalmTree {
-    class VulkanSwapChain {
+    class VulkanSwapChain : public SwapChain, public VulkanRenderTarget {
     public:
         VulkanSwapChain(
             Window& window,
             VulkanDevice& device
-        ) : m_Window{window}, m_Device{device} { Init(); }
+        );
 
-        ~VulkanSwapChain() {
-            CleanupSwapChain();
-            CleanupSyncObjects();
-        }
+        ~VulkanSwapChain();
 
         VulkanSwapChain(const VulkanSwapChain&) = delete;
         VulkanSwapChain& operator=(const VulkanSwapChain&) = delete;
 
-        VkFramebuffer GetFrameBuffer(int index) const { return m_SwapChainFramebuffers[index]; }
-        VkRenderPass GetRenderPass() const { return m_RenderPass; }
+        VkFramebuffer GetFrameBuffer() override { return m_SwapChainFramebuffers[m_CurrentImageIndex]; }
+        VkRenderPass GetRenderPass() override { return m_RenderPass; }
         VkImageView GetImageView(int index) const { return m_SwapChainImageViews[index]; }
         void RecreateSwapChain();
         void CleanupSwapChain();
         size_t GetImageCount() const { return m_SwapChainImages.size(); }
         VkFormat GetSwapChainImageFormat() const { return m_SwapChainImageFormat; }
         VkExtent2D GetSwapChainExtent() const { return m_SwapChainExtent; }
-        uint32_t GetWidth() const { return m_SwapChainExtent.width; }
-        uint32_t GetHeight() const { return m_SwapChainExtent.height; }
+        uint32_t GetWidth() const override { return m_SwapChainExtent.width; }
+        uint32_t GetHeight() const override { return m_SwapChainExtent.height; }
 
         float ExtentAspectRatio() {
             return static_cast<float>(m_SwapChainExtent.width) / static_cast<float>(m_SwapChainExtent.height);
@@ -37,8 +36,8 @@ namespace PalmTree {
 
         VkFormat FindDepthFormat();
 
-        VkResult AcquireNextImage(uint32_t* imageIndex);
-        VkResult SubmitCommandBuffers(const VkCommandBuffer* buffers, uint32_t* imageIndex);
+        VkResult AcquireNextImage();
+        VkResult SubmitCommandBuffers(const VkCommandBuffer* buffers);
 
         bool CompareSwapFormats(VkFormat otherDepthFormat, VkFormat otherImageFormat) const {
             return otherDepthFormat == m_SwapChainDepthFormat && otherImageFormat == m_SwapChainImageFormat;
@@ -85,5 +84,7 @@ namespace PalmTree {
         std::vector<VkFence> m_InFlightFences;
         std::vector<VkFence> m_ImagesInFlight;
         size_t m_CurrentFrame = 0;
+
+        uint32_t m_CurrentImageIndex = 0;
     };
 }

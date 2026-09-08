@@ -11,7 +11,7 @@ namespace PalmTree {
     VulkanCommandBuffer::VulkanCommandBuffer(
         const VulkanDevice& device
     ) : m_Device(device) {
-        const VkCommandBufferAllocateInfo info {
+        const VkCommandBufferAllocateInfo info{
             .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
             .commandPool = device.GetCommandPool(),
             .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
@@ -96,72 +96,51 @@ namespace PalmTree {
 
         vkCmdBindIndexBuffer(m_CommandBuffer, buffer, 0, VK_INDEX_TYPE_UINT32);
     }
-    
-    void VulkanCommandBuffer::BeginRenderPass(std::shared_ptr<FrameBuffer> frameBuffer) {
-        std::shared_ptr<VulkanFrameBuffer> vulkFrameBuffer = std::dynamic_pointer_cast<VulkanFrameBuffer>(frameBuffer);
-        
+
+    void VulkanCommandBuffer::BeginRenderPass(RenderTarget& target) {
+        VulkanRenderTarget& vulkanRenderTarget = dynamic_cast<VulkanRenderTarget&>(target);
+
         VkRenderPassBeginInfo renderPassInfo{};
         renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-        renderPassInfo.renderPass = vulkFrameBuffer->GetVkRenderPass();
-        renderPassInfo.framebuffer = vulkFrameBuffer->GetVkFrameBuffer();
-        
-        uint32_t width = frameBuffer->GetWidth();
-        uint32_t height = frameBuffer->GetHeight();
-        VkExtent2D extent = VkExtent2D {
+        renderPassInfo.renderPass = vulkanRenderTarget.GetRenderPass();
+        renderPassInfo.framebuffer = vulkanRenderTarget.GetFrameBuffer();
+
+        uint32_t width = target.GetWidth();
+        uint32_t height = target.GetHeight();
+
+        VkOffset2D offset = {0, 0};
+        VkExtent2D extent = VkExtent2D{
             .width = width,
             .height = height
         };
 
-        renderPassInfo.renderArea.offset = {0, 0};
+        renderPassInfo.renderArea.offset = offset;
         renderPassInfo.renderArea.extent = extent;
 
-        std::array<VkClearValue, 2> clearValues{};
-        clearValues[0].color = {0.01f, 0.01f, 0.01f, 1.0f};
-        clearValues[1].depthStencil = {1.0f, 0};
+        std::array<VkClearValue, 2> clearValues{
+            VkClearValue{.color = VkClearColorValue{0.01f, 0.01f, 0.01f, 1.0f}},
+            VkClearValue{.depthStencil = VkClearDepthStencilValue{1.0f, 0}}
+        };
 
         renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
         renderPassInfo.pClearValues = clearValues.data();
 
         vkCmdBeginRenderPass(m_CommandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-        VkViewport viewport{};
-        viewport.x = 0.0f;
-        viewport.y = 0.0f;
-        viewport.width = static_cast<float> (width);
-        viewport.height = static_cast<float>(height);
-        viewport.minDepth = 0.0f;
-        viewport.maxDepth = 1.0f;
-        VkRect2D scissor{{0, 0}, extent};
-        vkCmdSetViewport(m_CommandBuffer, 0, 1, &viewport);
-        vkCmdSetScissor(m_CommandBuffer, 0, 1, &scissor);
-    }
+        VkViewport viewport{
+            .x = 0.0f,
+            .y = 0.0f,
+            .width = static_cast<float>(width),
+            .height = static_cast<float>(height),
+            .minDepth = 0.0f,
+            .maxDepth = 1.0f,
+        };
 
-    void VulkanCommandBuffer::BeginRenderPass(const VulkanSwapChain& swapChain, int imageIndex) {
-        VkRenderPassBeginInfo renderPassInfo{};
-        renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-        renderPassInfo.renderPass = swapChain.GetRenderPass();
-        renderPassInfo.framebuffer = swapChain.GetFrameBuffer(imageIndex);
+        VkRect2D scissor{
+            .offset = VkOffset2D{0, 0},
+            .extent = extent
+        };
 
-        renderPassInfo.renderArea.offset = {0, 0};
-        renderPassInfo.renderArea.extent = swapChain.GetSwapChainExtent();
-
-        std::array<VkClearValue, 2> clearValues{};
-        clearValues[0].color = {0.01f, 0.01f, 0.01f, 1.0f};
-        clearValues[1].depthStencil = {1.0f, 0};
-
-        renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
-        renderPassInfo.pClearValues = clearValues.data();
-
-        vkCmdBeginRenderPass(m_CommandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-
-        VkViewport viewport{};
-        viewport.x = 0.0f;
-        viewport.y = 0.0f;
-        viewport.width = static_cast<float>(swapChain.GetSwapChainExtent().width);
-        viewport.height = static_cast<float>(swapChain.GetSwapChainExtent().height);
-        viewport.minDepth = 0.0f;
-        viewport.maxDepth = 1.0f;
-        VkRect2D scissor{{0, 0}, swapChain.GetSwapChainExtent()};
         vkCmdSetViewport(m_CommandBuffer, 0, 1, &viewport);
         vkCmdSetScissor(m_CommandBuffer, 0, 1, &scissor);
     }
